@@ -108,7 +108,13 @@ const pick = document.querySelector<HTMLButtonElement>('#pick')!;
 const input = document.querySelector<HTMLInputElement>('#image-file')!;
 const note = document.querySelector<HTMLParagraphElement>('#note')!;
 let revealNotice = (): void => {};
-const showNote = (text: string): void => { note.textContent = text; if (text) revealNotice(); };
+let inputNotice = '';
+let demoNotice = '';
+function refreshNote(): void {
+  note.textContent = [inputNotice, demoNotice].filter(Boolean).join('\n');
+  if (note.textContent) revealNotice();
+}
+const showNote = (text: string): void => { inputNotice = text; refreshNote(); };
 const earlyInput = new AbortController();
 // Prevent an early drop from navigating away while the initial image warms up.
 // This applies in both preview and deterministic PG mode (§4.1).
@@ -148,8 +154,13 @@ async function boot(): Promise<void> {
   const demos = await loadDemoImages(document.baseURI, cap);
   stage.setDemoImages(demos);
   stage.setFit(demoFit(initialDevice));
-  const demo = stage.getImage()!;
-  if (demo.downscaled) showNote(`Demo resized to ${demo.width} × ${demo.height} (limit ${cap} px).`);
+  function syncDemoNotice(): void {
+    const image = stage.getImage();
+    const text = image?.identity === 'demo' && image.downscaled
+      ? `Demo resized to ${image.width} × ${image.height} (limit ${image.cap} px).` : '';
+    if (text !== demoNotice) { demoNotice = text; refreshNote(); }
+  }
+  syncDemoNotice();
   // Studio's existing warm-up must see this image/SDF variant in every preset.
   const studio = createStudio(renderer, stage, { msaa });
   cleanup.push(() => studio.dispose());
@@ -174,6 +185,7 @@ async function boot(): Promise<void> {
   let renderWidth = 0; let renderHeight = 0;
   function resize(): void {
     if (disposed || recoveryState !== 'ready') return;
+    syncDemoNotice();
     if (ui && window.innerWidth < 900) {
       const height = Math.min(window.innerHeight, window.visualViewport?.height ?? window.innerHeight);
       document.body.style.height = `${height}px`;
@@ -182,7 +194,7 @@ async function boot(): Promise<void> {
     const state = settings?.get();
     const background = state?.background;
     const workspace = document.querySelector<HTMLElement>('#workspace')!;
-    workspace.style.background = background?.mode === 'gradient'
+    workspace.style.background = !ui ? '' : background?.mode === 'gradient'
       ? `linear-gradient(${background.top}, ${background.bottom})`
       : background?.mode === 'solid' ? background.solid
       : background?.mode === 'transparent' ? '#e9ebee'
@@ -233,7 +245,7 @@ async function boot(): Promise<void> {
       if (hydrationFailed && value !== 'disposed') return;
       recoveryState = value; panel?.setRecovery(value);
       if (value !== 'ready') navigation?.suspend();
-      if (value === 'ready') { exporter.invalidate('The preview has been restored. You can export PNG again.'); if (note.textContent === 'Restoring the preview. Your image stays in this tab.') showNote(''); navigation?.ready(); resize(); render(); controller?.start(); }
+      if (value === 'ready') { exporter.invalidate('The preview has been restored. You can export PNG again.'); if (inputNotice === 'Restoring the preview. Your image stays in this tab.') showNote(''); navigation?.ready(); resize(); render(); controller?.start(); }
       else if (value !== 'disposed') { showNote('Restoring the preview. Your image stays in this tab.'); }
     },
   });
@@ -281,6 +293,7 @@ async function boot(): Promise<void> {
   }
   let lastPose = store.get().pose; let lastDevice = store.get().device;
   cleanup.push(store.subscribe((state, reason) => {
+    syncDemoNotice();
     const start = state.pose !== lastPose || state.device !== lastDevice;
     lastPose = state.pose; lastDevice = state.device;
     // The orbit controller (and QA step) already renders its own frame.

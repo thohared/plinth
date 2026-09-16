@@ -1,7 +1,7 @@
 # T-P9d — appropriate demos and continuous screen edges
 
 Document of record: PLINTH_SPEC §2, §4.1/P-9, §4.4/P-6/P-7,
-§4.6/P-13, §4.8/P-14, §7. Research: T-P9d-research F1–F7.
+§4.6/P-13, §4.8/P-14, §7. Research: T-P9d-research F1–F9.
 Builder: Codex (backend model identifier not exposed).
 Owner feedback expands polish beyond T-P9c's original no-screen-shader scope;
 this separate ticket/PR records that boundary, stacked on PR #27.
@@ -24,7 +24,7 @@ this separate ticket/PR records that boundary, stacked on PR #27.
 
 ## Acceptance / write set
 
-Use F1–F7's write set. Add lifecycle/demo-choice tests and a focused real-browser
+Use F1–F9's write set. Add lifecycle/demo-choice tests and a focused real-browser
 regression for image switching, upload preservation, neutral clean-white,
 matching workspace gutters and non-hashed edge shader. Extend the existing
 first-ready guard to both phone and tablet with their exact source dimensions
@@ -101,3 +101,15 @@ and image bounds/aspect within the three real screen rectangles.
   with the existing 700 kB warning (705.06 kB output). Only this ticket's
   evidence changes after that tested commit. No baseline changes or bless;
   the new published head still needs matching cloud checks and fresh review.
+
+## F8/F9 — independent review fixes
+
+Review 5218869833 on 01a9372 returned FIXUP. Restrict matching workspace
+backgrounds to editor UI so pure PG transparent captures retain clear alpha.
+Keep the active demo resize notice synchronized across device, composition,
+reset and shared-state changes, alongside existing input/recovery messages.
+Add real-browser regressions in guards/demo-edges.test.ts; first run on the
+unfixed head fails on [233,235,238,255] instead of clear RGBA and on the missing
+2048 px demo notice. This extends coverage without changing old assertions.
+The third review finding remains: owner baseline bless and acceptance of the
+stacked dependencies are outstanding. Final validation is recorded below.

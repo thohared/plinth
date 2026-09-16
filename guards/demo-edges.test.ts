@@ -69,3 +69,69 @@ it('T-P9d clean-white card actual render has a neutral white background',async()
   expect(await page.evaluate(()=>window.__plinth.getImage())).toMatchObject({originalWidth:2880,originalHeight:1800,fit:'contain'});
  } finally{await page.close();}
 });
+it('T-P9d transparent PG screenshots retain clear alpha through workspace ancestors', async () => {
+ const page = await browser.newPage({viewport:{width:1280,height:800},deviceScaleFactor:1});
+ try {
+  await page.goto(`${url}?pg=1&background=transparent`);
+  await page.waitForSelector('html[data-plinth-ready="1"]',{timeout:60000});
+  // Same preparation as pg-capture: do not clear the workspace to hide a regression.
+  await page.evaluate(() => {
+   document.querySelector<HTMLButtonElement>('#pick')!.hidden = true;
+   document.querySelector<HTMLElement>('#note')!.hidden = true;
+   document.body.style.background = 'transparent';
+   document.documentElement.style.background = 'transparent';
+  });
+  const png = PNG.sync.read(await page.locator('#stage').screenshot({omitBackground:true}));
+  expect([...png.data.subarray(0,4)], 'PG clear corner RGBA').toEqual([0,0,0,0]);
+  expect(png.data.some((value,index) => index % 4 === 3 && value > 0), 'foreground remains visible').toBe(true);
+ } finally { await page.close(); }
+});
+it('T-P9d active demo cap notices follow real device changes and preserve input errors', async () => {
+ const page = await browser.newPage({viewport:{width:1280,height:800},deviceScaleFactor:1});
+ try {
+  // Simulated lower GPU capability; decoding and UI actions remain real.
+  await page.addInitScript(() => {
+   const original = WebGL2RenderingContext.prototype.getParameter;
+   WebGL2RenderingContext.prototype.getParameter = function(parameter: number) {
+    return parameter === this.MAX_TEXTURE_SIZE ? 2048 : original.call(this, parameter);
+   };
+  });
+  await page.goto(url);
+  await page.waitForSelector('html[data-plinth-ready="1"]',{timeout:60000});
+  expect(await page.locator('#note').textContent()).toBe('');
+  await page.getByLabel('Device',{exact:true}).selectOption('tablet');
+  expect(await page.evaluate(() => window.__plinth.getImage())).toMatchObject({width:2048,height:1280,cap:2048,downscaled:true,identity:'demo'});
+  expect(await page.locator('#note').innerText()).toContain('Demo resized to 2048 × 1280 (limit 2048 px).');
+  expect(await page.locator('#note').isVisible()).toBe(true);
+  await page.getByLabel('Device',{exact:true}).selectOption('phone');
+  expect(await page.locator('#note').textContent()).toBe('');
+  await page.locator('#image-file').setInputFiles({name:'invalid.png',mimeType:'image/png',buffer:Buffer.from('invalid')});
+  await page.waitForFunction(() => document.querySelector('#note')!.textContent!.includes('Unsupported image'));
+  await page.getByLabel('Device',{exact:true}).selectOption('laptop');
+  const errorWithDemo = await page.locator('#note').innerText();
+  expect(errorWithDemo).toContain('Unsupported image');
+  expect(errorWithDemo).toContain('limit 2048 px');
+  await page.getByLabel('Device',{exact:true}).selectOption('phone');
+  expect(await page.locator('#note').innerText()).toContain('Unsupported image');
+  expect(await page.locator('#note').innerText()).not.toContain('Demo resized');
+  const source = new PNG({width:2880,height:1800}); source.data.fill(255);
+  await page.locator('#image-file').setInputFiles({name:'large-user.png',mimeType:'image/png',buffer:PNG.sync.write(source)});
+  await page.waitForFunction(() => window.__plinth.getImage()?.identity === 'user');
+  await page.getByLabel('Device',{exact:true}).selectOption('card');
+  expect(await page.locator('#note').innerText()).toBe('Image resized to 2048 × 1280 (limit 2048 px).');
+  // Wait for the actual address synchronization before loading the shared URL.
+  await page.waitForFunction(() => {
+   const value = location.hash.slice(3).replace(/-/g,'+').replace(/_/g,'/');
+   return value && JSON.parse(atob(value)).device === 'card';
+  });
+  // Fresh shared URL selects a cached demo during initial hydration.
+  await page.reload();
+  await page.waitForSelector('html[data-plinth-ready="1"]',{timeout:60000});
+  expect(await page.evaluate(() => window.__plinth.getImage())).toMatchObject({identity:'demo',cap:2048,downscaled:true});
+  expect(await page.locator('#note').innerText()).toContain('Demo resized to 2048 × 1280 (limit 2048 px).');
+  await page.evaluate(() => window.__plinth.reset());
+  expect(await page.locator('#note').textContent()).toBe('');
+  await page.evaluate(() => window.__plinth.compose('dark-laptop'));
+  expect(await page.locator('#note').innerText()).toContain('limit 2048 px');
+ } finally { await page.close(); }
+});
