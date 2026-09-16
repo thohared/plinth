@@ -113,3 +113,27 @@ unfixed head fails on [233,235,238,255] instead of clear RGBA and on the missing
 2048 px demo notice. This extends coverage without changing old assertions.
 The third review finding remains: owner baseline bless and acceptance of the
 stacked dependencies are outstanding. Final validation is recorded below.
+
+### F8/F9 validation (2026-09-16)
+
+- Both new tests fail on the unchanged pre-fix implementation: opaque clear
+  corner [233,235,238,255], and empty downscale note after selecting Tablet.
+  All five positive demo-edge guards pass after the fixes (87.51 s), including
+  input error preservation, user resize notice, reset/composition and fresh
+  shared-link hydration. The cap of 2048 is a browser capability simulation.
+- First full CI reported a failure in the existing `T-P9 recovery defers latest
+  navigation and PG ignores hash and shortcuts` test (67.205 s). The remaining
+  run was interrupted and is not counted as a pass. Without code/test changes,
+  that focused test passed (36.229 s). The cause of the first failure has not
+  been established; it is disclosed for independent review. No assertion,
+  timeout or tolerance was changed and no test was skipped in the full rerun.
+- Complete repeated `npm run ci` PASSED on
+  b549a7fca7310e585d2acf9d24991211e505746b, tree
+  108b4de7dcdc26daa63daeb4e8ce6406b889c85a: 87/87 guards in 13 files
+  (1101.20 s), TypeScript, 197/197 units in 28 files (11.30 s). Production
+  build passes with the existing 700 kB warning (705.21 kB output). Linux,
+  Node 24.19.0, Chromium 153.0.8010.12 / SwiftShader. Only this ticket's
+  evidence changes after the tested commit.
+- New-head cloud CI/PG/PNG and independent review remain required. The
+  previous review's baseline/dependency finding remains open. No local raw
+  screenshot/log evidence upload, baseline modification/bless or merge.
