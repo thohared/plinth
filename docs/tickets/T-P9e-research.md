@@ -225,3 +225,25 @@ For F14 final layout, reserve a fixed 136 px mobile footer with explicit label
 and action rows, feedback above them and safe-area padding. This reduces empty
 space and enlarges the mobile preview while remaining the same height before,
 during and after download/error feedback. Reuse unchanged PNG size invariants.
+
+## F16 — remove idle space above mobile export controls
+
+Owner feedback on head 34e6d32 asks to bring Ready-made looks closer to Export.
+Clauses: §4.6/P-13 export feedback and stable preview, §4.9/P-14 mobile layout.
+Surfaces: `src/ui/panel.css:174–186` reserves a 136 px footer whose flexible
+first row is empty before export; `src/ui/panel.ts:153–173` already groups
+live status, download and reload in `#png-feedback`. No missing spec contract.
+
+Use a compact, fixed 92 px primary footer with only label/action rows. Keep
+safe-area padding and bottom placement. Feedback should take no idle space:
+when it has a message or action, display it in a bounded, scrolling surface
+above the footer, outside layout flow so exporting cannot resize the canvas.
+With settings closed, place that surface above the separate 60 px mobile
+image/settings row, leaving both touch targets reachable. With settings open,
+it may cover the bottom of the scrolling sheet; settings remain scrollable.
+Preserve live-region semantics, DOM order, native controls and desktop layout.
+
+Write set: panel.css, additive assertions/seeds in the existing mobile review
+guard, this ticket/research. Reuse real download, recovery, small-viewport and
+canvas-size guards; inspect a fresh DPR2 mobile image. Do not rerender unchanged
+device matrices or alter 3D, PNG encoding, tests' old thresholds or fixtures.

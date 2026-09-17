@@ -190,3 +190,11 @@ The old tablet/card shadow preservation requirement is superseded by this reques
   PG 35271496337 completed captures with 20 baseline pixel differences. Those
   results do not certify this new head. Its normal complete CI/PG/PNG and fresh
   independent review remain required. No fixture bless, merge or deploy.
+
+### Additional mobile spacing correction (F16)
+
+Owner requests less idle space between Ready-made looks and Export PNG.
+Follow F16: compact stable footer, conditional feedback above it, safe-area and
+reachable mobile actions. Extend existing mobile coverage for the top gap and
+preserve actual download/recovery/canvas-size assertions. Refresh the mobile
+image only; all 3D device rendering remains unchanged. Same PR and review gate.
