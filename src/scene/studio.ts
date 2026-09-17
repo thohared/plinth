@@ -71,10 +71,12 @@ export function createStudio(renderer: WebGLRenderer, stage: Stage, opts: { msaa
     try {
       renderer.setScissorTest(false);
       shadow.setParams(contactShadowPreset(settings.scene, stage.getDevice()));
-      const bounds = stage.getWorldBounds();
       // Upright phones otherwise squeeze the blur into their 10 mm footprint.
       // Lean/top already have a wider footprint and retain their accepted shadow.
-      shadow.fit(bounds, stage.getDevice() === 'phone' ? (bounds.max.x - bounds.min.x) * 0.55 : 0);
+      if (stage.getDevice() === 'phone') {
+        const bounds = stage.getWorldBounds();
+        shadow.fit(bounds, (bounds.max.x - bounds.min.x) * 0.55);
+      } else shadow.fit(stage.getWorldBounds());
       shadow.render(renderer, stage.scene); shadowDirty = false;
     }
     finally { renderer.setViewport(viewport); renderer.setScissor(scissor); renderer.setScissorTest(scissorTest); }

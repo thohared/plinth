@@ -99,3 +99,13 @@ claim that tests, visual review, baseline acceptance or deployment have passed.
 - The subsequent complete run lost its execution session during a session
   interruption before emitting a result. It is not counted as passed. The source
   commits and delivered files remained intact; a fresh full run is required.
+- Completed full run: 87/89 guards passed in 1301.58 s. F10 diagnoses the two
+  failures: the preserved source contract for non-phone shadow fitting and a
+  2.0000000000000284 versus 2 composite-oracle cancellation error. The actual
+  non-phone call is restored; the oracle uses algebraically identical exact
+  integer-numerator arithmetic. Every case and threshold is retained. No rendered
+  pixels change in this correction. Fresh focused/seed/full evidence follows.
+- F10 focused positive: 3/3 selected guards pass in 25.64 s. Original-SMAA seed
+  still fails on 13,665 invalid premultiplied channels versus required zero
+  (33.73 s, exit 1). The corrected composite expression leaves all thresholds
+  and every one of the 40 tablet scene/tone/aspect cases intact.
