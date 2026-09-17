@@ -74,7 +74,14 @@ it('T-P9e mobile image shortcut, theme, segmented looks and export stay usable',
     await page.waitForFunction(() => window.__plinth.getImage()?.identity === 'user');
     await page.locator('#settings-open').click();
     if (process.env['PLINTH_POLISH_SEED'] === 'footer') await page.addStyleTag({ content:
-      '.editor #png-actions{align-content:start;grid-template-rows:auto auto}.editor #png-actions label{grid-row:1}.editor #png-actions #png-scale{grid-row:2}.editor #png-actions #png-export{grid-row:1 / 3}' });
+      '.editor #png-actions{height:136px;align-content:start;grid-template-rows:auto auto}.editor #png-actions label{grid-row:1}.editor #png-actions #png-scale{grid-row:2}.editor #png-actions #png-export{grid-row:1 / 3}' });
+    if (process.env['PLINTH_POLISH_SEED'] === 'spacing') await page.addStyleTag({ content:
+      '.editor #png-actions{height:136px;grid-template-rows:minmax(0,1fr) 18px 48px}.editor #png-actions label{grid-row:2}.editor #png-actions #png-scale{grid-row:3}.editor #png-actions #png-export{grid-row:2 / 4}' });
+    const idleGap = await page.locator('#png-actions').evaluate(element => {
+      const footer = element.getBoundingClientRect();
+      return element.querySelector('label')!.getBoundingClientRect().top - footer.top;
+    });
+    expect(idleGap, 'No empty feedback band above PNG size').toBeLessThanOrEqual(16);
     const exportBottom = async () => page.locator('#png-export').evaluate(element => {
       const button = element.getBoundingClientRect();
       const footer = document.querySelector('#png-actions')!.getBoundingClientRect();

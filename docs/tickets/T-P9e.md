@@ -198,3 +198,27 @@ Follow F16: compact stable footer, conditional feedback above it, safe-area and
 reachable mobile actions. Extend existing mobile coverage for the top gap and
 preserve actual download/recovery/canvas-size assertions. Refresh the mobile
 image only; all 3D device rendering remains unchanged. Same PR and review gate.
+
+- Implemented: 92 px footer at ordinary safe-area values (44 px less than F15),
+  increasing with a larger bottom safe area. Empty live feedback occupies zero
+  height; populated feedback floats above the primary actions, and above the
+  separate picker/settings row when the sheet is closed. No preview resize.
+- PASS: seven focused browser checks in 114.70 s: mobile picker/theme/looks,
+  visible PNG access at 400/1280 px, 400 px short viewport, scale/recovery access,
+  real desktop/mobile PNG download, and all five existing export failure phases.
+  Existing canvas-dimension assertions and touch-target bounds are unchanged.
+  TypeScript and production build PASS (existing 708.37 kB bundle warning).
+- Negative spacing seed restores the old reserved row and fails at 58.61 px
+  above the label versus <=16 (16.50 s). The prior footer-position seed still
+  fails at 59.61 px below Export versus <=16 (12.98 s). Seeds only affect isolated
+  test pages; production files are not mutated. Initial browser invocation used
+  a missing /tmp executable and launched no tests; the pinned installed browser
+  was then used successfully without changing any test timeout or threshold.
+- Inspected actual DPR2 mobile idle light/dark and completed-export views with
+  settings open/closed. Zero page errors; a hit-test confirms feedback does not
+  cover the closed-sheet image picker. Updated only the mobile deliverable and
+  the same nine-image ZIP. Other device images and renderer code are unchanged.
+- Prior head 34e6d32 complete CI 35281590833 PASS; its PG 35281590874 failed and
+  PNG 35281590967 was still running when inspected. These are not new-head
+  acceptance. Continue normal exact-head CI/PG/PNG and independent review;
+  no duplicate workflow dispatch, baseline bless, merge or deployment.
