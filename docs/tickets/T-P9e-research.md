@@ -132,3 +132,29 @@ The completed full run (1301.58 s) passed 87/89 guards. Two failures:
 Write set expands only to that arithmetic expression in the existing alpha guard,
 the real non-phone branch in studio.ts, and research/ticket evidence. Run focused
 positive/negative guards, then full CI/build. No shader or rendered pixels change.
+
+## F11 — restrict dense bevels to visible device surfaces
+
+The next full run hit the existing 120 s laptop alpha-pipeline timeout and was
+interrupted. The unchanged isolated laptop case passes but takes 103.53 s. Units
+then pass 199/200, with the existing 1,500-transition framing test exceeding 20 s.
+This warrants a geometry-cost measurement instead of increasing timeouts.
+
+Same Node/Vite SSR traversal, default laptop, summing submitted position vertices
+including InstancedMesh multiplicity:
+- Accepted PR #28: 463,644 total; keys 6,324 × 70.
+- F8 candidate: 1,203,948 total; keys 16,452 × 70.
+
+The global bevel increase accidentally multiplies the repeated keycap cost by
+2.6. Owner asked for device-frame edges and approved the keyboard. Retain 6/24
+sampling on visible body/frame surfaces, but use the accepted 3/16 sampling for
+the private keycap slab. This should yield 494,988 submitted vertices (about 7%
+above accepted baseline), preserving the improved external silhouette.
+Add a measured laptop vertex budget below 600,000, including all key instances;
+this fails the 1.2M candidate without restating builder constants. Keep all
+existing timing budgets. Re-run unit and actual laptop alpha checks. Refresh the
+16 laptop scene/pose views, its native PNG and thumbnail, the overview and UI
+captures. No change to accepted other-device renders is required.
+
+Write set: private slab detail options and keycap call in build.ts, additive
+build.test.ts budget, existing composition assets and ticket/evidence.
