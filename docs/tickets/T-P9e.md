@@ -144,3 +144,49 @@ with feedback above them. Keep stable canvas dimensions, accessible recovery and
 download flows, the original source images, camera poses and all existing tests.
 Refresh affected references and thumbnails; provide a small native image package.
 The old tablet/card shadow preservation requirement is superseded by this request.
+
+### Owner correction implementation and evidence (F12–F15)
+
+- F12: a rounded, hollow housing seat overlaps the screen perimeter below the
+  unchanged image plane. It borrows the frame material; the dark backing keeps
+  its original material, lifecycle and tests. No image/SDF/UV/camera change.
+  All five geometry regressions ray-test inner/outer edge and corner coverage,
+  an uncovered centre, material ownership and screen/backing depth order. An
+  isolated missing-seat mutation fails all five; the restored six seat/density
+  checks pass in 1.12 s. No violation remains in the source tree.
+- F13/F15: tablet/card use a wider blur footprint and a minimum soft blur in all
+  scenes. Bounded 1–3 alpha-density compensation keeps very thin contacts visible;
+  the output clamps alpha to [0,1]. Capture/projection share the same footprint.
+  Existing phone fitting retains its two-argument call and gain=1; laptop/browser
+  retain the one-argument call. Unexpanded top views keep density=1.
+- F14/F15: fixed 136 px mobile footer puts size/Export at the viewport bottom,
+  with scrollable feedback above and image/settings controls above the footer.
+  Empty space is reduced, enlarging the preview. Added picker contrast, dark
+  helper contrast, 6 px desktop section spacing and a vector theme icon. Native
+  selects and all previous keyboard/recovery/download interactions remain.
+- Final TypeScript PASS, 207/207 units PASS (15.95 s), build PASS (708.37 kB JS;
+  existing >700 kB warning). The initial unit attempt hit the unchanged 5 s
+  endpoint budget at 5.871 s; a later unchanged full run passed. F15 initially
+  passed an unnecessary false argument to phone fitting, which the existing spy
+  rejected; the actual two-argument call was restored. No old assertions or
+  timing budgets were changed.
+- F12/F13 focused browser set: 11 selected tests PASS in 238.78 s, including all
+  200 device/scene/tone/aspect alpha cases, full image/SDF checks and real desktop/
+  mobile downloads. F15 final affected set: 6 selected tests PASS in 111.28 s,
+  including tablet/card's 80 alpha cases, mobile bottom placement, both real UI
+  downloads and five export failure phases with unchanged preview dimensions.
+  Other tests were outside these explicit local selections, not skipped in code
+  or removed from the full CI workflow.
+- The isolated `PLINTH_POLISH_SEED=footer` violation fails on a 59.61 px bottom
+  gap versus the existing new <=16 px requirement (12.70 s). The unseeded final
+  mobile interaction test above passes. The seed changes only its test page.
+- Captures: 80 device/scene/pose views and five actual native 2× downloads;
+  after the density refinement, 32 tablet/card views and their downloads were
+  refreshed. Both capture reports record zero page errors. Product UI captures
+  now use an actual DPR2 viewport (desktop 2560×1600; phone 800×1600); deterministic
+  PG stays 1280×800/DPR1. Four real app thumbnails were regenerated. The delivered
+  ZIP contains nine selected images.
+- Prior published head 1979bde: complete CI 35271496342 and PNG 35271496362 PASS;
+  PG 35271496337 completed captures with 20 baseline pixel differences. Those
+  results do not certify this new head. Its normal complete CI/PG/PNG and fresh
+  independent review remain required. No fixture bless, merge or deploy.

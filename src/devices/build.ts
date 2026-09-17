@@ -318,6 +318,21 @@ function buildSlab(
   backplate.position.z = BUILDER_RATIOS.gap;
   parent.add(backplate);
 
+  // A solid housing ledge seats the display underneath its SDF edge. Without
+  // this overlap a subpixel strip of the dark cavity shows through as dashes.
+  // It stays behind the image; screen dimensions, UVs and masking are unchanged.
+  const seatWidth = Math.min(spec.bezel * 0.4, open.w * 0.04, open.h * 0.04);
+  const seatShape = new Shape();
+  roundedRect(open.w + 2 * bevel, open.h + 2 * bevel, open.radius + bevel, seatShape);
+  const seatHole = new Path();
+  roundedRect(open.w - 2 * seatWidth, open.h - 2 * seatWidth,
+    Math.max(0, open.radius - seatWidth), seatHole);
+  seatShape.holes.push(seatHole);
+  const seat = new Mesh(new ShapeGeometry(seatShape, BUILDER_RATIOS.curveSegments), mats.frame);
+  seat.name = 'screen-seat';
+  seat.position.z = recess - BUILDER_RATIOS.gap * 0.25;
+  parent.add(seat);
+
   let screenW = open.w;
   let screenH = open.h;
   let screenY = 0;

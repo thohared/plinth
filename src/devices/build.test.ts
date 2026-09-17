@@ -1,9 +1,41 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BufferGeometry, ExtrudeGeometry, InstancedMesh, Mesh, MeshStandardMaterial, Vector3 } from 'three';
+import { BufferGeometry, ExtrudeGeometry, InstancedMesh, Mesh, MeshStandardMaterial, Raycaster, Vector3 } from 'three';
 import { BUILDER_RATIOS, buildDevice } from './build';
 import { DEVICE_IDS, PRESETS, presetSpec } from './presets';
 
 const EPS = 1e-6;
+
+it.each(DEVICE_IDS)('F12 %s seats the entire screen perimeter without covering its centre', (id) => {
+  const spec = presetSpec(id); const rig = buildDevice(spec, id === 'browser');
+  try {
+    const seat = rig.group.getObjectByName('screen-seat') as Mesh;
+    expect(seat).toBeInstanceOf(Mesh);
+    expect(seat.material).toBe(rig.frame.material);
+    const backing = rig.group.getObjectByName('backplate') as Mesh;
+    backing.geometry.computeBoundingBox();
+    expect(seat.position.z).toBeGreaterThan(backing.position.z + backing.geometry.boundingBox!.max.z);
+    expect(seat.position.z).toBeLessThan(rig.screen.position.z);
+    // Ray-test real triangles around the analytic opening, slightly inside and
+    // outside its boundary. A seat with holes, missing corners or no overlap fails.
+    const hx = (spec.w - 2 * spec.bezel) / 2, hy = (spec.h - 2 * spec.bezel) / 2;
+    const radius = spec.cornerRadius - spec.bezel;
+    const ray = new Raycaster(); const origin = new Vector3(); const normal = new Vector3();
+    rig.group.updateMatrixWorld(true);
+    normal.set(0,0,-1).transformDirection(seat.matrixWorld);
+    const hit = (x: number, y: number) => {
+      origin.set(x,y,.001).applyMatrix4(seat.matrixWorld); ray.set(origin,normal);
+      return ray.intersectObject(seat,false).length;
+    };
+    for (const sx of [-1,1]) for (const sy of [-1,1]) for (const offset of [-spec.bezel*.05,spec.bezel*.05]) {
+      expect(hit(sx*(hx+offset),0)).toBeGreaterThan(0);
+      expect(hit(0,sy*(hy+offset))).toBeGreaterThan(0);
+      for (const angle of [Math.PI/8,Math.PI/4,3*Math.PI/8]) {
+        expect(hit(sx*(hx-radius+(radius+offset)*Math.cos(angle)),sy*(hy-radius+(radius+offset)*Math.sin(angle)))).toBeGreaterThan(0);
+      }
+    }
+    expect(hit(0,0)).toBe(0);
+  } finally { rig.dispose(); }
+});
 
 function size(rig: ReturnType<typeof buildDevice>): Vector3 {
   return rig.bounds.getSize(new Vector3());

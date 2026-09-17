@@ -1,4 +1,4 @@
-import { Color, MeshBasicMaterial, Scene, Texture } from 'three';
+import { Box3, Color, MeshBasicMaterial, Scene, Texture, Vector3 } from 'three';
 import { describe, expect, it } from 'vitest';
 import { ContactShadow } from './contactShadow';
 
@@ -7,6 +7,27 @@ type FakeRenderer = {
   getRenderTarget(): unknown; setRenderTarget(value: unknown): void; getClearAlpha(): number;
   setClearAlpha(value: number): void; clear(): void; render(): void;
 };
+
+it('F15 expanded thin contacts retain bounded density and reset for wider/default footprints', () => {
+  const shadow = new ContactShadow();
+  try {
+    const shader = { fragmentShader: '#include <alphamap_fragment>', uniforms: {} } as Parameters<MeshBasicMaterial['onBeforeCompile']>[0];
+    shadow.plane.material.onBeforeCompile(shader, null as never);
+    const density = shader.uniforms['contactDensity']!;
+    const thin = new Box3(new Vector3(-.15,0,-.0015),new Vector3(.15,.2,.0015));
+    shadow.fit(thin,.165,true);
+    expect(density.value).toBeGreaterThan(1); expect(density.value).toBeLessThanOrEqual(3);
+    const position = shadow.group.position.clone(), extent = shadow.plane.scale.clone();
+    shadow.fit(thin,.165);
+    expect(density.value).toBe(1);
+    expect(shadow.group.position).toEqual(position); expect(shadow.plane.scale).toEqual(extent);
+    shadow.fit(new Box3(new Vector3(-.15,0,-.1),new Vector3(.15,.003,.1)),.165,true);
+    expect(density.value).toBe(1);
+    shadow.fit(thin,1e6,true); expect(density.value).toBe(3);
+    shadow.fit(thin); expect(density.value).toBe(1);
+    shadow.fit(new Box3(new Vector3(),new Vector3()),0,true); expect(density.value).toBe(1);
+  } finally { shadow.dispose(); }
+});
 function fakeRenderer(): FakeRenderer {
   return {
     target: { previous: true }, alpha: 0.37, calls: [], throwDepth: false,

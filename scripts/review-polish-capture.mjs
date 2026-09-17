@@ -12,7 +12,7 @@ const report = {browser:browser.version(),captures:[],downloads:[],errors:[]};
 const devices = ['phone','tablet','laptop','browser','card'];
 const scenes = ['soft-studio','dark-glass','warm-sunset','clean-white'];
 try {
- const page = await browser.newPage({viewport:{width:1280,height:800},deviceScaleFactor:1});
+ let page = await browser.newPage({viewport:{width:1280,height:800},deviceScaleFactor:1});
  page.on('pageerror',e=>report.errors.push(String(e)));
  await page.goto(`${server.resolvedUrls.local[0]}?pg=1`);
  await page.waitForSelector('html[data-plinth-ready="1"]',{timeout:60000});
@@ -39,6 +39,11 @@ try {
   }
  }
  await writeFile(`${out}/device-scene-overview.png`,PNG.sync.write(sheet));
+ await page.close();
+ // Product UI evidence uses an actual DPR2 viewport, matching high-density
+ // phone/tablet screens. Deterministic PG views above remain fixed at DPR1.
+ page = await browser.newPage({viewport:{width:1280,height:800},deviceScaleFactor:2});
+ page.on('pageerror',e=>report.errors.push(String(e)));
  await page.goto(server.resolvedUrls.local[0]);await page.waitForSelector('html[data-plinth-ready="1"]',{timeout:60000});
  await page.screenshot({animations:"disabled",path:`${out}/ui-desktop-light.png`});
  await page.locator('#interface-theme').click();await page.screenshot({animations:"disabled",path:`${out}/ui-desktop-dark.png`});await page.locator('#interface-theme').click();

@@ -73,6 +73,16 @@ it('T-P9e mobile image shortcut, theme, segmented looks and export stay usable',
     await chooser.setFiles({ name: 'phone-upload.png', mimeType: 'image/png', buffer: PNG.sync.write(source) });
     await page.waitForFunction(() => window.__plinth.getImage()?.identity === 'user');
     await page.locator('#settings-open').click();
+    if (process.env['PLINTH_POLISH_SEED'] === 'footer') await page.addStyleTag({ content:
+      '.editor #png-actions{align-content:start;grid-template-rows:auto auto}.editor #png-actions label{grid-row:1}.editor #png-actions #png-scale{grid-row:2}.editor #png-actions #png-export{grid-row:1 / 3}' });
+    const exportBottom = async () => page.locator('#png-export').evaluate(element => {
+      const button = element.getBoundingClientRect();
+      const footer = document.querySelector('#png-actions')!.getBoundingClientRect();
+      return { bottomGap: footer.bottom - button.bottom, viewportGap: innerHeight - button.bottom, height: button.height };
+    });
+    expect((await exportBottom()).bottomGap, 'Export is in the bottom thumb zone').toBeLessThanOrEqual(16);
+    expect((await exportBottom()).viewportGap).toBeLessThanOrEqual(16);
+    expect((await exportBottom()).height).toBeGreaterThanOrEqual(44);
     const before = await page.evaluate(() => ({ settings: window.__plinth.getSettings(), image: window.__plinth.getImage(), hash: location.hash }));
     await page.getByRole('button', { name: 'Use dark interface' }).click();
     expect(await page.evaluate(() => document.body.dataset['theme'])).toBe('dark');
@@ -85,9 +95,11 @@ it('T-P9e mobile image shortcut, theme, segmented looks and export stay usable',
     expect(await page.locator('[data-composition="dark-laptop"]').getAttribute('aria-pressed')).toBe('true');
     expect(await page.evaluate(() => window.__plinth.getImage())).toMatchObject({ identity: 'user', width: 64, height: 32 });
     await page.locator('#sheet-close').click();
+    expect((await exportBottom()).viewportGap).toBeLessThanOrEqual(16);
     expect(await page.evaluate(() => document.activeElement?.id)).toBe('settings-open');
     await page.locator('#png-export').click();
     const link = page.locator('#png-download'); await link.waitFor({ timeout: 90000 });
+    expect((await exportBottom()).bottomGap).toBeLessThanOrEqual(16);
     const pending = page.waitForEvent('download'); await link.click(); const download = await pending;
     expect(await download.failure()).toBeNull();
     await page.evaluate(() => document.querySelector('#stage')!.dispatchEvent(new Event('webglcontextlost', { cancelable: true })));

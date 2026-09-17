@@ -95,5 +95,7 @@ const STUDIO_SHADOWS: Readonly<Record<DeviceId, ScenePreset['shadow']>> = {
 };
 
 export function contactShadowPreset(scene: SceneId, device: DeviceId): ScenePreset['shadow'] {
-  return scene === 'soft-studio' ? STUDIO_SHADOWS[device] : SCENE_PRESETS[scene].shadow;
+  const preset = scene === 'soft-studio' ? STUDIO_SHADOWS[device] : SCENE_PRESETS[scene].shadow;
+  return device === 'tablet' || device === 'card'
+    ? { ...preset, blur: Math.max(preset.blur, 5.5) } : preset;
 }

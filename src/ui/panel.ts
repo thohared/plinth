@@ -42,7 +42,7 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   const abort = new AbortController(); const signal = abort.signal;
   const refreshers: ((state: Settings) => void)[] = [];
   let recovery: RecoveryState = 'ready';
-  root.innerHTML = '<header><div><h1>Plinth<span class="brand-dot" aria-hidden="true">.</span></h1><p class="studio-subtitle">Screenshot studio</p></div><div class="header-actions"><button type="button" id="interface-theme" aria-label="Use dark interface" aria-pressed="false">◐</button><button type="button" id="sheet-close" aria-label="Close settings">×</button></div></header>';
+  root.innerHTML = '<header><div><h1>Plinth<span class="brand-dot" aria-hidden="true">.</span></h1><p class="studio-subtitle">Screenshot studio</p></div><div class="header-actions"><button type="button" id="interface-theme" aria-label="Use dark interface" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3a9 9 0 0 0 0 18Z" fill="currentColor"/></svg></button><button type="button" id="sheet-close" aria-label="Close settings">×</button></div></header>';
   const theme = root.querySelector<HTMLButtonElement>('#interface-theme')!;
   theme.addEventListener('click', () => {
     const dark = document.body.dataset['theme'] !== 'dark';
@@ -141,7 +141,7 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   const png = exporter ? section('Save image') : undefined;
   if (png) {
     png.id = 'png-actions'; png.setAttribute('aria-label', 'Save image');
-    root.insertAdjacentElement('afterend', png);
+    mobileActions.insertAdjacentElement('afterend', png);
   }
   let refreshExport = (): void => {};
   let exportUnsubscribe = (): void => {};
@@ -157,7 +157,9 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
     scale.addEventListener('change', () => attempt(scale, () => store.apply({pngScale:Number(scale.value) as ExportScale})), {signal});
     button.addEventListener('click', () => { if (recovery === 'ready') void exporter.run(store.get().pngScale).catch(() => {}); }, { signal });
     link.addEventListener('click', () => { status.textContent = 'Download started. Check your downloads.'; }, { signal });
-    png.append(scale, button, status, link, reload);
+    const feedback = document.createElement('div'); feedback.id = 'png-feedback';
+    feedback.append(status, link, reload);
+    png.append(scale, button, feedback);
     function display(value: DownloadState): void {
       button.disabled = value.busy || recovery !== 'ready'; scale.disabled = value.busy || recovery !== 'ready';
       button.setAttribute('aria-busy', String(value.busy));

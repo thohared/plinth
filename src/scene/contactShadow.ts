@@ -46,6 +46,7 @@ export class ContactShadow {
   private readonly blurQuad: Mesh<PlaneGeometry, ShaderMaterial>;
   private readonly blurCamera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
   private params: ContactShadowParams = { opacity: 0.5, blur: 2.5 };
+  private readonly contactDensity = { value: 1 };
 
   constructor() {
     this.group.name = 'contact-shadow';
@@ -71,6 +72,14 @@ export class ContactShadow {
       }),
     );
     this.plane.name = 'shadow-plane';
+    this.plane.material.onBeforeCompile = shader => {
+      shader.uniforms['contactDensity'] = this.contactDensity;
+      shader.fragmentShader = 'uniform float contactDensity;\n' + shader.fragmentShader.replace(
+        '#include <alphamap_fragment>',
+        '#include <alphamap_fragment>\ndiffuseColor.a = clamp(diffuseColor.a * contactDensity, 0.0, 1.0);',
+      );
+    };
+    this.plane.material.customProgramCacheKey = () => 't-p9e-contact-density';
     this.plane.rotation.x = -Math.PI / 2;
     this.plane.scale.y = -1; // the capture looks up from below; mirror it back
     this.plane.position.y = 0.0002;
@@ -91,11 +100,15 @@ export class ContactShadow {
   }
 
   /** Fit the capture footprint to the device bounds (world space, min.y = 0). */
-  fit(bounds: Box3, minimumDepth = 0): void {
+  fit(bounds: Box3, minimumDepth = 0, preserveDensity = false): void {
     const size = bounds.getSize(new Vector3());
     const centre = bounds.getCenter(new Vector3());
     const w = Math.max(size.x, 0.01) * SHADOW_EXTENT;
     const d = Math.max(size.z, minimumDepth, 0.01) * SHADOW_EXTENT;
+    // A very thin caster loses peak coverage when the penumbra is widened.
+    // Mild bounded compensation retains contact without sharpening its ends.
+    this.contactDensity.value = preserveDensity
+      ? Math.min(3, Math.pow(Math.max(size.z, minimumDepth, 0.001) / Math.max(size.z, 0.001), 0.25)) : 1;
     this.group.position.set(centre.x, 0, centre.z);
     this.plane.scale.set(w, -d, 1);
     this.camera.left = -w / 2;
