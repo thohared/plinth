@@ -206,3 +206,22 @@ describe('§4.2 device builder', () => {
     rig.dispose();
   });
 });
+
+it('T-P9e browser chrome stays inside its rounded opening, including a radius taller than the bar', () => {
+  for (const cornerRadius of [.009, .03]) {
+    const spec = { ...presetSpec('browser'), cornerRadius };
+    const rig = buildDevice(spec, true);
+    try {
+      const bar = rig.group.getObjectByName('titlebar') as Mesh;
+      const points = bar.geometry.getAttribute('position');
+      const w = spec.w - 2 * spec.bezel, h = spec.h - 2 * spec.bezel;
+      const radius = spec.cornerRadius - spec.bezel;
+      for (let i = 0; i < points.count; i++) {
+        const x = points.getX(i) + bar.position.x, y = points.getY(i) + bar.position.y;
+        const qx = Math.abs(x) - w / 2 + radius, qy = Math.abs(y) - h / 2 + radius;
+        const distance = Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - radius;
+        expect(distance, 'chrome vertex outside rounded opening').toBeLessThanOrEqual(1e-7);
+      }
+    } finally { rig.dispose(); }
+  }
+});

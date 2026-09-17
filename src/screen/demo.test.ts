@@ -30,7 +30,7 @@ describe('T-P9d demo selection and ownership',()=>{
   }
   for(const id of DEVICE_IDS){
    store.setDevice(id);expect(texture()).toBe(id==='phone'?portrait:landscape);
-   expect(stage.getImage()).toMatchObject({identity:'demo',originalWidth:id==='phone'?845:2880,fit:id==='browser'?'cover':'contain'});
+   expect(stage.getImage()).toMatchObject({identity:'demo',originalWidth:id==='phone'?845:2880,fit:'contain'});
   }
   store.compose('dark-laptop');expect(store.get()).toMatchObject({fit:'contain',composition:'dark-laptop'});
   for (const fit of ['contain','cover'] as const) {
@@ -69,10 +69,10 @@ describe('T-P9d demo selection and ownership',()=>{
   stage.dispose();store.dispose();
  });
  it('keeps the full landscape image inside tablet, laptop and card without distortion',()=>{
-  expect(demoFit('phone')).toBe('contain');expect(demoFit('browser')).toBe('cover');
+  expect(demoFit('phone')).toBe('contain');expect(demoFit('browser')).toBe('contain');
   const {stage,store}=setup();
   try {
-   for(const id of ['tablet','laptop','card'] as const){
+   for(const id of ['tablet','laptop','card','browser'] as const){
     store.setDevice(id);
     const image=stage.getImage()!;const screen=stage.getRig().screenSize;
     const fitted=fitTransform({w:image.width,h:image.height},screen,image.fit,image.pad);
@@ -83,4 +83,17 @@ describe('T-P9d demo selection and ownership',()=>{
    }
   } finally {store.dispose();stage.dispose();}
  });
+});
+
+it('T-P9e oblique sampling survives upload replacement and context recovery', () => {
+ const {stage,store,texture}=setup();
+ try {
+  expect(texture().anisotropy).toBe(8);expect(texture().generateMipmaps).toBe(true);
+  stage.setDevice('laptop');expect(texture().anisotropy).toBe(8);
+  const upload=image(301,179);stage.setImage(upload.bitmap,{...upload.meta,identity:'user'});
+  expect(texture().anisotropy).toBe(8);
+  const before=texture();stage.releaseGpuResources();stage.restoreImageTexture();
+  expect(texture()).not.toBe(before);expect(texture().anisotropy).toBe(8);
+  expect(stage.getImage()).toMatchObject({identity:'user',width:301,height:179});
+ } finally {store.dispose();stage.dispose();}
 });

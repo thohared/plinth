@@ -184,10 +184,16 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
   let image: OwnedImage | null = null;
   let demos: { portrait: OwnedImage; landscape: OwnedImage } | null = null;
   const ownedImages = (): OwnedImage[] => demos ? [demos.portrait, demos.landscape] : image ? [image] : [];
-  function makeImage(bitmap: ImageBitmap, meta: ImageMeta): OwnedImage {
+  function imageTexture(bitmap: ImageBitmap): Texture {
     const texture = new Texture(bitmap); texture.colorSpace = SRGBColorSpace;
+    // Three clamps this request to the device's actual anisotropy capability.
+    // Keep trilinear mipmaps; nearest sampling damages text at oblique angles.
+    texture.anisotropy = 8;
     texture.flipY = false; texture.needsUpdate = true;
-    return { bitmap, texture, meta: { ...meta }, released: false };
+    return texture;
+  }
+  function makeImage(bitmap: ImageBitmap, meta: ImageMeta): OwnedImage {
+    return { bitmap, texture: imageTexture(bitmap), meta: { ...meta }, released: false };
   }
   function retireImage(value: OwnedImage): void {
     if (!value.released) value.texture.dispose();
@@ -207,7 +213,7 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
 
   function bindImage(): void {
     if (demos) image = id === 'phone' ? demos.portrait : demos.landscape;
-    if (image) rig.setImage(image.texture, { w: image.meta.width, h: image.meta.height });
+    if (image) rig.setImage(image.texture, { w: image.meta.width, h: image.meta.height }, !!demos && id !== 'phone');
     rig.setImageFit(fit, pad, padColor);
   }
   function applyPreset(): void {
@@ -345,8 +351,7 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
       if (disposed) throw new Error('Stage is disposed.');
       for (const value of ownedImages()) {
         const old = value.texture;
-        const texture = new Texture(value.bitmap); texture.colorSpace = SRGBColorSpace;
-        texture.flipY = false; texture.needsUpdate = true; value.texture = texture;
+        value.texture = imageTexture(value.bitmap);
         if (!value.released) old.dispose(); value.released = false;
       }
       bindImage();

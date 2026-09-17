@@ -32,7 +32,7 @@ describe('T-P5 studio shadow lifecycle', () => {
     await studio.ready;
     const shadow = fake.shadows[0]!;
     studio.render();
-    expect(shadow.fit).toHaveBeenCalledWith(expect.objectContaining({ min: stage.getWorldBounds().min, max: stage.getWorldBounds().max }));
+    expect(shadow.fit).toHaveBeenCalledWith(expect.objectContaining({ min: stage.getWorldBounds().min, max: stage.getWorldBounds().max }), (stage.getWorldBounds().max.x - stage.getWorldBounds().min.x) * 0.55);
     expect(shadow.render).toHaveBeenCalledTimes(1);
     stage.setAspect(1); stage.orbit(0.1, 0); studio.render();
     expect(shadow.render).toHaveBeenCalledTimes(1);

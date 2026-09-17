@@ -91,11 +91,11 @@ export class ContactShadow {
   }
 
   /** Fit the capture footprint to the device bounds (world space, min.y = 0). */
-  fit(bounds: Box3): void {
+  fit(bounds: Box3, minimumDepth = 0): void {
     const size = bounds.getSize(new Vector3());
     const centre = bounds.getCenter(new Vector3());
     const w = Math.max(size.x, 0.01) * SHADOW_EXTENT;
-    const d = Math.max(size.z, 0.01) * SHADOW_EXTENT;
+    const d = Math.max(size.z, minimumDepth, 0.01) * SHADOW_EXTENT;
     this.group.position.set(centre.x, 0, centre.z);
     this.plane.scale.set(w, -d, 1);
     this.camera.left = -w / 2;

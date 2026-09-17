@@ -41,7 +41,15 @@ export function deviceEditError(spec: DeviceSpec): string | undefined {
 export function createPanel(root: HTMLElement, store: SettingsStore, layoutChanged: () => void, exporter?: DownloadController, share?: () => void) {
   const abort = new AbortController(); const signal = abort.signal;
   const refreshers: ((state: Settings) => void)[] = [];
-  root.innerHTML = '<header><div><span class="eyebrow">PLINTH</span><h1>A studio for your screenshot</h1></div><button type="button" id="sheet-close" aria-label="Close settings">×</button></header>';
+  let recovery: RecoveryState = 'ready';
+  root.innerHTML = '<header><div><h1>Plinth<span class="brand-dot" aria-hidden="true">.</span></h1><p class="studio-subtitle">Screenshot studio</p></div><div class="header-actions"><button type="button" id="interface-theme" aria-label="Use dark interface" aria-pressed="false">◐</button><button type="button" id="sheet-close" aria-label="Close settings">×</button></div></header>';
+  const theme = root.querySelector<HTMLButtonElement>('#interface-theme')!;
+  theme.addEventListener('click', () => {
+    const dark = document.body.dataset['theme'] !== 'dark';
+    document.body.dataset['theme'] = dark ? 'dark' : 'light';
+    theme.setAttribute('aria-pressed', String(dark));
+    theme.setAttribute('aria-label', dark ? 'Use light interface' : 'Use dark interface');
+  }, { signal });
   const close = root.querySelector<HTMLButtonElement>('#sheet-close')!;
   const opener = document.querySelector<HTMLButtonElement>('#settings-open')!;
   const error = document.createElement('p'); error.id = 'settings-error'; error.setAttribute('role', 'status'); error.setAttribute('aria-live', 'polite');
@@ -92,8 +100,15 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   }
   const image = section('Your image');
   const pick = document.querySelector<HTMLButtonElement>('#pick')!; pick.textContent = 'Choose image'; image.append(pick, document.querySelector('#note')!);
+  const mobileActions = document.createElement('div'); mobileActions.id = 'mobile-actions';
+  const mobilePick = document.createElement('button'); mobilePick.type = 'button'; mobilePick.id = 'mobile-pick'; mobilePick.textContent = 'Choose image';
+  mobilePick.addEventListener('click', () => { if (!mobilePick.disabled) pick.click(); }, { signal });
+  const syncMobilePick = (): void => { mobilePick.disabled = pick.disabled || recovery !== 'ready'; };
+  const pickObserver = new MutationObserver(syncMobilePick); pickObserver.observe(pick, { attributes: true, attributeFilter: ['disabled'] }); syncMobilePick();
+  mobileActions.append(mobilePick, opener); root.insertAdjacentElement('afterend', mobileActions);
   const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = 'PNG, JPG or WebP · Drop or paste an image. Everything stays in this tab.'; image.append(hint);
   const looks = section('Ready-made looks'); const grid = document.createElement('div'); grid.className = 'looks'; looks.append(grid);
+  grid.setAttribute('role', 'group'); grid.setAttribute('aria-label', 'Ready-made looks');
   for (const row of COMPOSITIONS) {
     const button = document.createElement('button'); button.type = 'button'; button.dataset.composition = row.id;
     const img = document.createElement('img'); img.src = `compositions/${row.id}.png`; img.alt = ''; img.width = 240; img.height = 150;
@@ -129,7 +144,6 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
     root.insertAdjacentElement('afterend', png);
   }
   let refreshExport = (): void => {};
-  let recovery: RecoveryState = 'ready';
   let exportUnsubscribe = (): void => {};
   if (png && exporter) {
     label(png, 'PNG size', 'png-scale');
@@ -161,8 +175,9 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   }
   let showAddressNotice = (_message: string): void => {};
   let showShare = (_value: ShareMessage): void => {};
+  const utilities = document.createElement('div'); utilities.id = 'panel-utilities';
   if (share) {
-    const area = section('Share scene'); area.id = 'share-section';
+    const area = section('Share scene', utilities); area.id = 'share-section';
     const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = 'Links include the scene settings, never your image.';
     const button = document.createElement('button'); button.type = 'button'; button.id = 'copy-link'; button.textContent = 'Copy link';
     button.addEventListener('click', share, {signal});
@@ -174,7 +189,7 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
     showAddressNotice = message => { addressStatus.textContent = message; addressStatus.hidden = !message; if (message && matchMedia('(max-width: 899px)').matches && !document.body.classList.contains('sheet-open')) setOpen(true); };
     area.append(hint,button,status,addressStatus,fallback);
     showShare = value => { if (value.message && matchMedia('(max-width: 899px)').matches && !document.body.classList.contains('sheet-open')) setOpen(true); status.textContent = value.message; fallback.hidden = !value.url; fallback.value = value.url ?? ''; if (value.url) { setOpen(true); fallback.focus(); fallback.select(); } };
-    const help = section('Keyboard shortcuts');
+    const help = section('Keyboard shortcuts', utilities);
     const toggle = document.createElement('button'); toggle.type = 'button'; toggle.id = 'shortcut-help'; toggle.textContent = 'Show keyboard shortcuts'; toggle.setAttribute('aria-expanded','false'); toggle.setAttribute('aria-controls','shortcut-keys');
     const content = document.createElement('p'); content.id = 'shortcut-keys'; content.hidden = true;
     content.textContent = '1–5: Phone, Tablet, Laptop, Browser, Card. Q/W/E/R: Front, Three-quarter, Top, Lean. Shift+E: Prepare PNG at the selected size, then choose Download PNG. Shortcuts stay inactive while typing.';
@@ -191,7 +206,7 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   select(advanced, 'tone', 'Tone mapping', ['agx', 'aces'], s => s.tone, value => store.apply({ tone: value as Settings['tone'] }));
   const msaaLabel = label(advanced, 'MSAA preview smoothing', 'control-msaa'); const msaa = document.createElement('input'); msaa.id = 'control-msaa'; msaa.type = 'checkbox'; msaaLabel.prepend(msaa);
   msaa.addEventListener('change', () => attempt(msaa, () => store.apply({ msaa: msaa.checked })), { signal }); refreshers.push(s => { msaa.checked = s.msaa; });
-  const reset = document.createElement('button'); reset.type = 'button'; reset.id = 'reset'; reset.textContent = 'Reset look'; reset.addEventListener('click', () => attempt(reset, () => store.reset()), { signal }); root.append(reset, error);
+  const reset = document.createElement('button'); reset.type = 'button'; reset.id = 'reset'; reset.textContent = 'Reset look'; reset.addEventListener('click', () => attempt(reset, () => store.reset()), { signal }); root.append(reset, error, utilities);
   const refresh = (state: Settings, reason?: string): void => {
     // A complete composition replaces pending edits, including through the QA API.
     // Unrelated successful edits leave other invalid controls and their messages intact.
@@ -219,9 +234,10 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   return { setOpen, showShare, showAddressNotice,
     setRecovery(value: RecoveryState) {
       recovery = value;
+      syncMobilePick();
       for (const element of root.children) if (element instanceof HTMLElement && element !== png && element.tagName !== 'HEADER') element.inert = value !== 'ready';
       refreshExport();
     },
-    dispose() { exportUnsubscribe(); unsubscribe(); abort.abort(); png?.remove(); }
+    dispose() { exportUnsubscribe(); unsubscribe(); abort.abort(); pickObserver.disconnect(); mobileActions.replaceWith(opener); png?.remove(); delete document.body.dataset['theme']; }
   };
 }

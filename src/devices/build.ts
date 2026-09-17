@@ -14,6 +14,7 @@ import {
   Shape,
   ShapeGeometry,
   Texture,
+  Vector2,
   Vector3,
 } from 'three';
 import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
@@ -48,8 +49,8 @@ export const BUILDER_RATIOS = {
   /** Edge rounding = min(edgeBevel × depth, edgeBevelOfBezel × bezel). */
   edgeBevel: 0.3,
   edgeBevelOfBezel: 0.35,
-  bevelSegments: 3,
-  curveSegments: 16,
+  bevelSegments: 6,
+  curveSegments: 24,
   /** Browser title bar height as a fraction of h; dots sized from the bar. */
   browserBarHeight: 0.07,
   browserDotRadius: 0.22,
@@ -94,7 +95,7 @@ export interface DeviceRig {
   /** Re-apply a spec: geometry is rebuilt only when a shape field changed. */
   update(spec: DeviceSpec): void;
   /** Borrows the Stage-owned texture; never disposes it. */
-  setImage(texture: Texture, imageSize: Size): void;
+  setImage(texture: Texture, imageSize: Size, demoEdges?: boolean): void;
   setImageFit(mode: FitMode, pad: number, padColor: string): void;
   setScreenColor(hex: string): void;
   dispose(): void;
@@ -133,6 +134,23 @@ export function roundedPlaneGeometry(w: number, h: number, r: number): ShapeGeom
   }
   uv.needsUpdate = true;
   return g;
+}
+
+/** Chrome follows the same rounded opening; its lower edge meets the screen. */
+function browserBarGeometry(w: number, openingHeight: number, h: number, radius: number): ShapeGeometry {
+  const opening = new Shape(); roundedRect(w, openingHeight, radius, opening);
+  const outline = opening.getPoints(BUILDER_RATIOS.curveSegments);
+  const floor = openingHeight / 2 - h;
+  const clipped: Vector2[] = [];
+  for (let i = 0; i < outline.length; i++) {
+    const a = outline[i]!; const b = outline[(i + 1) % outline.length]!;
+    if (a.y >= floor) clipped.push(a.clone());
+    if ((a.y >= floor) !== (b.y >= floor)) {
+      clipped.push(new Vector2(a.x + (b.x - a.x) * (floor - a.y) / (b.y - a.y), floor));
+    }
+  }
+  for (const point of clipped) point.y -= openingHeight / 2 - h / 2;
+  return new ShapeGeometry(new Shape(clipped));
 }
 
 interface SlabOpts {
@@ -306,7 +324,7 @@ function buildSlab(
     const barH = BUILDER_RATIOS.browserBarHeight * spec.h;
     screenH = open.h - barH;
     screenY = -barH / 2;
-    const bar = new Mesh(new PlaneGeometry(open.w, barH), mats.bar);
+    const bar = new Mesh(browserBarGeometry(open.w, open.h, barH, open.radius), mats.bar);
     bar.name = 'titlebar';
     bar.position.set(0, open.h / 2 - barH / 2, recess);
     parent.add(bar);
@@ -527,8 +545,8 @@ export function buildDevice(initial: DeviceSpec, browser = false, darkScreenRece
       rig.spec = spec;
       refreshScreen();
     },
-    setImage(texture, size) {
-      imageSize = picture.bind(texture, size);
+    setImage(texture, size, demoEdges = false) {
+      imageSize = picture.bind(texture, size, demoEdges);
       refreshScreen();
     },
     setImageFit(mode, value, colour) {

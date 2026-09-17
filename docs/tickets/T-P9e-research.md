@@ -82,3 +82,17 @@ browser default expectation updates in existing demo tests/guard (same assertion
 scripts/review-polish-capture.mjs and existing demo capture expectation;
 public/compositions/*.png refreshed from actual app. No spec/dependency/workflow/
 fixture edits. Local CI/build before publication; independent review remains separate.
+
+## F8 — edge inspection before the final candidate
+
+Actual before/after DPR1 captures reproduce the clipped browser header and show
+thin uneven reflected strips on frame bevels, separately from the Contain bands.
+Browser titlebar's square top corners overrun its rounded opening. Round only its
+top corners to the opening; retain the straight seam against the picture. Increase
+bevel sampling 3→6 and outline sampling 16→24 to smooth rounded silhouettes and
+reflected strips while retaining exact dimensional bounds, SDF screen mask and
+normals utility position/UV preservation. This modest tessellation change requires
+all existing geometry and bounds tests plus native image inspection. DPR1 cannot
+promise absence of every single-pixel staircase; report exports separately.
+Add a rounded-bar geometry regression (all vertices inside the opening) and
+phone minimum shadow footprint test. Write set includes their existing unit files.
