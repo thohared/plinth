@@ -109,3 +109,26 @@ bounded, independently scrolling export area (238 px desktop / 172 px mobile).
 Keep the new visual styling, actual download link and recovery controls. Re-run
 these existing guards unchanged, then full CI. Refresh only the affected UI
 captures; scene/native exports and composition thumbnails are unaffected.
+
+## F10 — source contract and exact alpha-composite arithmetic
+
+The completed full run (1301.58 s) passed 87/89 guards. Two failures:
+
+- `guards/camera-posing.test.ts:28` requires the existing literal call
+  `shadow.fit(stage.getWorldBounds())`. Keep that actual one-argument call for
+  every non-phone device; isolate the phone's minimum-depth call in its own
+  branch. This preserves both the old source contract and the accepted non-phone
+  behavior. Do not edit the camera guard or add a fake matching comment.
+- `guards/output-alpha.test.ts:99` rejects compositeMax=2.0000000000000284 against
+  the unchanged <=2 bound. Its source-over subtraction introduces floating-point
+  cancellation. For byte values v=1,p=0,a=20,pa=21,bg=255, the old expression has
+  that result while the exact difference is 2. Compute the same error as
+  `abs(255*(v-p)+bg*(pa-a))/255`: the numerator is exact bounded integer arithmetic.
+  Keep every pixel/background/device/scene/tone/aspect case and every existing
+  assertion/threshold. No epsilon, rounding, clamp, skip or case reduction.
+  This corrects an oracle precision defect, not the render tolerance. Check the
+  original-SMAA violation seed still fails the same corrected oracle.
+
+Write set expands only to that arithmetic expression in the existing alpha guard,
+the real non-phone branch in studio.ts, and research/ticket evidence. Run focused
+positive/negative guards, then full CI/build. No shader or rendered pixels change.
