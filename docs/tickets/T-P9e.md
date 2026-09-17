@@ -96,3 +96,6 @@ claim that tests, visual review, baseline acceptance or deployment have passed.
   PNG assertions and timeouts are unchanged; fresh CI/build evidence follows.
 - F9's two unchanged focused PNG guards now pass (26.16 s), including DPR3 mobile
   download and all five injected export failure phases. UI captures refreshed.
+- The subsequent complete run lost its execution session during a session
+  interruption before emitting a result. It is not counted as passed. The source
+  commits and delivered files remained intact; a fresh full run is required.
