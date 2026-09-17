@@ -160,6 +160,7 @@ interface SlabOpts {
   radius: number;
   bevel: number;
   hole?: { w: number; h: number; radius: number };
+  detail?: { bevelSegments: number; curveSegments: number };
 }
 
 /** Extruded rounded slab spanning x∈[−w/2,w/2], y∈[−h/2,h/2], z∈[0,depth]. */
@@ -178,8 +179,8 @@ function slabGeometry(o: SlabOpts): BufferGeometry {
     bevelThickness: b,
     bevelSize: b,
     bevelOffset: 0,
-    bevelSegments: BUILDER_RATIOS.bevelSegments,
-    curveSegments: BUILDER_RATIOS.curveSegments,
+    bevelSegments: o.detail?.bevelSegments ?? BUILDER_RATIOS.bevelSegments,
+    curveSegments: o.detail?.curveSegments ?? BUILDER_RATIOS.curveSegments,
     steps: 1,
   });
   g.translate(0, 0, b); // ExtrudeGeometry spans z∈[−b, depth−b]; shift to [0, depth]
@@ -399,6 +400,9 @@ function buildDeck(
       depth: keyH,
       radius: Math.min(keyW, keyD) * 0.16,
       bevel: keyH * 0.3,
+      // Keep the accepted keycaps light: this geometry is drawn 70 times.
+      // Denser bevels belong on the larger visible device frame and body.
+      detail: { bevelSegments: 3, curveSegments: 16 },
     }),
     mats.key,
     R.keyCols * R.keyRows,

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BufferGeometry, ExtrudeGeometry, Mesh, MeshStandardMaterial, Vector3 } from 'three';
+import { BufferGeometry, ExtrudeGeometry, InstancedMesh, Mesh, MeshStandardMaterial, Vector3 } from 'three';
 import { BUILDER_RATIOS, buildDevice } from './build';
 import { DEVICE_IDS, PRESETS, presetSpec } from './presets';
 
@@ -224,4 +224,17 @@ it('T-P9e browser chrome stays inside its rounded opening, including a radius ta
       }
     } finally { rig.dispose(); }
   }
+});
+
+it('T-P9e laptop keeps repeated key geometry within the measured vertex budget', () => {
+  const rig = buildDevice(presetSpec('laptop'));
+  try {
+    let submittedVertices = 0;
+    rig.group.traverse(object => {
+      if (object instanceof Mesh) submittedVertices += object.geometry.getAttribute('position').count
+        * (object instanceof InstancedMesh ? object.count : 1);
+    });
+    // Accepted reference: 463,644. Allow frame polish without tripling 70 keys.
+    expect(submittedVertices).toBeLessThan(600_000);
+  } finally { rig.dispose(); }
 });

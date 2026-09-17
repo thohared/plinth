@@ -40,8 +40,8 @@ try {
  }
  await writeFile(`${out}/device-scene-overview.png`,PNG.sync.write(sheet));
  await page.goto(server.resolvedUrls.local[0]);await page.waitForSelector('html[data-plinth-ready="1"]',{timeout:60000});
- await page.screenshot({path:`${out}/ui-desktop-light.png`});
- await page.locator('#interface-theme').click();await page.screenshot({path:`${out}/ui-desktop-dark.png`});await page.locator('#interface-theme').click();
+ await page.screenshot({animations:"disabled",path:`${out}/ui-desktop-light.png`});
+ await page.locator('#interface-theme').click();await page.screenshot({animations:"disabled",path:`${out}/ui-desktop-dark.png`});await page.locator('#interface-theme').click();
  for(const device of devices){
   await page.getByLabel('Device',{exact:true}).selectOption(device);
   await page.getByLabel('Angle',{exact:true}).selectOption(device==='phone'?'lean':'hero');
@@ -58,10 +58,10 @@ try {
   report.downloads.push({name,filename:download.suggestedFilename(),settings:await page.evaluate(()=>window.__plinth.getSettings())});
  }
  await page.setViewportSize({width:400,height:800});await page.goto(server.resolvedUrls.local[0]);await page.waitForSelector('html[data-plinth-ready="1"]',{timeout:60000});
- await page.screenshot({path:`${out}/ui-phone-light.png`});await page.locator('#settings-open').click();
- await page.screenshot({path:`${out}/ui-phone-settings.png`});await page.locator('#interface-theme').click();
- await page.screenshot({path:`${out}/ui-phone-dark.png`});
- await page.setViewportSize({width:820,height:1180});await page.screenshot({path:`${out}/ui-tablet-dark.png`});
+ await page.screenshot({animations:"disabled",path:`${out}/ui-phone-light.png`});await page.locator('#settings-open').click();
+ await page.screenshot({animations:"disabled",path:`${out}/ui-phone-settings.png`});await page.locator('#interface-theme').click();
+ await page.screenshot({animations:"disabled",path:`${out}/ui-phone-dark.png`});
+ await page.setViewportSize({width:820,height:1180});await page.screenshot({animations:"disabled",path:`${out}/ui-tablet-dark.png`});
  assert.deepEqual(report.errors,[]);report.success=true;
  console.log(`Captured ${report.captures.length} views, ${report.downloads.length} native downloads and desktop/mobile UI.`);
 } catch(error){report.success=false;report.errors.push(String(error));throw error;}

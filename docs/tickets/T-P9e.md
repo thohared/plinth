@@ -109,3 +109,26 @@ claim that tests, visual review, baseline acceptance or deployment have passed.
   still fails on 13,665 invalid premultiplied channels versus required zero
   (33.73 s, exit 1). The corrected composite expression leaves all thresholds
   and every one of the 40 tablet scene/tone/aspect cases intact.
+- F11: the subsequent full rerun hit the 120 s laptop pipeline limit and was
+  interrupted. Isolated unchanged laptop passed in 103.53 s; units then passed
+  199/200, with the existing 1,500-transition test exceeding 20 s. Measurement
+  identified 1,203,948 submitted laptop vertices versus accepted 463,644, mostly
+  from applying frame detail to 70 repeated keycaps. Keycaps now retain accepted
+  3/16 detail; exterior body/frame keeps 6/24. Result: 494,988 vertices. The new
+  <600,000 budget fails the dense candidate at 1,203,948 and passes the fix.
+- After F11: TypeScript PASS, all 201 units PASS (17.40 s), production build PASS
+  (707.20 kB JS, existing >700 kB warning). Unchanged laptop alpha pipeline PASS
+  (31.86 s total; 30.767 s test, all 40 cases, zero GL errors). No timeout changed.
+  These are Linux/SwiftShader timings, not a mobile GPU benchmark.
+- Local full-suite attempts and focused closures are disclosed above; they are
+  not represented as a complete green run on the final code. Publish a reviewable
+  draft with this evidence and use the normal exact-head GitHub CI/PG/PNG runs
+  for complete acceptance. No guard is skipped or narrowed in those workflows.
+- Final F11 capture refresh: all 16 laptop scene/pose views, its actual native
+  2× download, the dark-laptop thumbnail, the combined overview and three UI
+  screenshots were refreshed; zero page errors. The other 64 reviewed views
+  retain their rendering code. The delivered ZIP still contains exactly nine
+  selected images, separate from the complete CI evidence matrix.
+- UI capture fast-forwards finite CSS transitions so evidence records the final
+  theme border colors, rather than a transient light border during dark-mode
+  switching. Product transitions are retained.
