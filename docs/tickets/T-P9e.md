@@ -57,8 +57,8 @@ claim that tests, visual review, baseline acceptance or deployment have passed.
   thumbnail buttons, improved focus/disabled/reduced-motion states, and an
   in-memory panel theme toggle. Native selects and every advanced field remain.
   Mobile has a real image-picker shortcut next to Settings. Export stays outside
-  the scrolling sheet, now with content-sized layout instead of a large empty
-  reserved block. Share/help follow Advanced and Reset.
+  the scrolling sheet in a bounded area with stable dimensions during export.
+  Share/help follow Advanced and Reset.
 - F7: added demo-padding/upload isolation and actual mobile pick/theme/compose/
   PNG-download/recovery guards; rounded-titlebar, sampling-recovery and shadow
   unit checks. Browser default fixtures change Cover→Contain without dropping
@@ -89,3 +89,10 @@ claim that tests, visual review, baseline acceptance or deployment have passed.
   Native phone is 2160×2700, four wide devices 3840×2160. Visual inspection found
   a brief low-contrast theme transition; surface color now changes immediately,
   while border/focus transitions remain. UI screenshots were refreshed separately.
+- The first full CI candidate was stopped after two existing PNG tests failed.
+  An unchanged focused rerun reproduced both canvas-size changes. F9 records the
+  cause: a content-sized export footer grew when status/download appeared. The
+  late CSS override was removed, keeping stable reserved export space. Existing
+  PNG assertions and timeouts are unchanged; fresh CI/build evidence follows.
+- F9's two unchanged focused PNG guards now pass (26.16 s), including DPR3 mobile
+  download and all five injected export failure phases. UI captures refreshed.

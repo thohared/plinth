@@ -160,7 +160,3 @@ body.editor[data-theme=dark] {
 @media(max-width:899px) {
   .editor #mobile-actions #settings-open { grid-column:2; grid-row:1; }
 }
-.editor #png-actions { height:auto; }
-@media(max-width:899px) {
-  .editor #png-actions { min-height:92px; }
-}
