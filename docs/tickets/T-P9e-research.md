@@ -158,3 +158,50 @@ captures. No change to accepted other-device renders is required.
 
 Write set: private slab detail options and keycap call in build.ts, additive
 build.test.ts budget, existing composition assets and ticket/evidence.
+
+## F12–F14 — owner follow-up on the delivered UI and device renders
+
+Base: published PR #29 `1979bde5612275e9690dd23a86be3f5a2ea67c1c`.
+Owner retains the UI direction but rejects the phone's broken inner edge,
+tablet/card pointed shadows, and the empty space below mobile Export.
+This supersedes F4's instruction to leave tablet/card shadow fitting untouched.
+Clauses remain §4.1–4.4, §4.6/P-13, §4.9 and §7; no spec gap is required.
+
+- F12 — `src/devices/build.ts:293–352`, `src/screen/material.ts:29–34`:
+  a uniform-white phone probe reproduces the broken dark inner line. Disabling
+  depth testing does not remove it; removing alpha-test inset makes it worse.
+  Coloring the backing pink identifies the exposed recess; giving that surface
+  the shell material removes the high-contrast dotted strip. The dark recess is
+  legitimate below the image, but the screen needs a continuous physical seat
+  where its SDF edge meets the shell. Add a narrow rounded frame-material ring
+  behind the screen, above the backing, overlapping both the frame opening and
+  screen edge. Keep the dark backplate, exact screen size/UV/inset, original SDF,
+  one physical screen, default SMAA and MSAA opt-in. The seat is solid housing,
+  not a second glass or image layer. Verify finite geometry, ordering, ownership,
+  unchanged image samples and actual DPR1/DPR2/mobile pictures. No recolored
+  source image, default resolution change or weakened old backing test.
+- F13 — `src/scene/studio.ts:77–83`, `contactShadow.ts:97–111`:
+  upright tablet/card depths are only 8/3 mm; fitting blur to these depths makes
+  a sharp sliver. Apply the phone's width-based minimum depth to tablet/card too,
+  and a minimum soft blur for those two classes across all four scenes. Keep
+  their scene opacity, world centre and the real captured device silhouette;
+  wider top/lean footprints still use their actual bounds. Laptop and browser
+  keep the original call and recipes. Retain 256² targets, two blur cycles,
+  invalidation and restoration. Inspect front/hero/lean/top in every scene.
+- F14 — `src/ui/panel.css:86–94,162–165`, `panel.ts:149–162`:
+  the 172 px mobile export area intentionally preserves preview dimensions, but
+  start-aligned controls leave unused space below them. Group export feedback in
+  an independently scrolling area ABOVE the size/action row on mobile; anchor
+  the primary row to the bottom with safe-area padding. Keep fixed footer size
+  and all status/download/reload controls. Test actual export and failure paths
+  without canvas resizing. Strengthen picker border and dark helper contrast,
+  add 6 px desktop section spacing and use an inline vector theme icon. Native
+  selects retain accessible OS interaction; no new dropdown library or schema.
+
+Write set: build.ts/build.test.ts, studio.ts, scene/presets.ts and focused
+shadow coverage, panel.ts/css, additive review-polish guard, capture script and
+affected app thumbnails, this research and ticket. No fixtures, thresholds,
+dependencies, workflows, camera poses, source PNGs or spec edits. Browser CLI is
+unavailable in this environment; use the repository's existing Playwright path.
+Serialize browser work and validate this correction with focused regressions,
+typecheck/unit/build and the normal complete CI on its published head.

@@ -132,3 +132,15 @@ claim that tests, visual review, baseline acceptance or deployment have passed.
 - UI capture fast-forwards finite CSS transitions so evidence records the final
   theme border colors, rather than a transient light border during dark-mode
   switching. Product transitions are retained.
+
+### Owner follow-up scope (F12–F14)
+
+The owner accepts the UI direction but requests lower mobile Export controls,
+continuous phone frame/screen edges, and soft tablet/card shadows without pointed
+ends in every scene. Implement F12–F14 in the same PR after this research commit.
+Add a real housing seat behind the unchanged SDF screen, widen only the specified
+thin-device shadow footprints, and bottom-align mobile primary export controls
+with feedback above them. Keep stable canvas dimensions, accessible recovery and
+download flows, the original source images, camera poses and all existing tests.
+Refresh affected references and thumbnails; provide a small native image package.
+The old tablet/card shadow preservation requirement is superseded by this request.
