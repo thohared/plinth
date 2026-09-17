@@ -96,3 +96,16 @@ all existing geometry and bounds tests plus native image inspection. DPR1 cannot
 promise absence of every single-pixel staircase; report exports separately.
 Add a rounded-bar geometry regression (all vertices inside the opening) and
 phone minimum shadow footprint test. Write set includes their existing unit files.
+
+## F9 — preserve preview dimensions during export feedback
+
+The full CI candidate exposed two existing PNG invariants at
+`guards/png-export.test.ts:49,98`. A focused unchanged rerun confirms that the
+content-sized export footer changes the mobile canvas when the download/status
+appears: 656²→490² after a DPR3 download and 262×328→244×305 on an injected failure.
+The export renderer restores itself; the surrounding grid then resizes it.
+Remove the late `height:auto` override in `src/ui/panel.css` and retain a fixed,
+bounded, independently scrolling export area (238 px desktop / 172 px mobile).
+Keep the new visual styling, actual download link and recovery controls. Re-run
+these existing guards unchanged, then full CI. Refresh only the affected UI
+captures; scene/native exports and composition thumbnails are unaffected.
