@@ -205,3 +205,23 @@ dependencies, workflows, camera poses, source PNGs or spec edits. Browser CLI is
 unavailable in this environment; use the repository's existing Playwright path.
 Serialize browser work and validate this correction with focused regressions,
 typecheck/unit/build and the normal complete CI on its published head.
+
+## F15 — retain contact density after widening a thin footprint
+
+The first F13 80-view capture has continuous phone edges and rounded shadow ends,
+but card front/hero shadows become too faint: a 3 mm caster occupies very few
+rows of a capture widened to 165 mm. Blur conserves the small captured coverage.
+Apply a bounded post-blur alpha gain only when tablet/card capture depth expands.
+Use the fourth root of expanded/original depth, bounded to 1–3, so the wider
+penumbra remains visible without saturating the contact. Clamp the final shadow
+alpha to [0,1]. Keep preset opacity, 256² capture/blur and physical footprint
+unchanged; gain=1 for existing phone, laptop/browser and unexpanded top views.
+Do not stretch projection independently of its capture camera or add a fake
+elliptical image. Cover continuity, finite alpha, unchanged other-device paths
+and restoration using the existing output-alpha matrix plus focused unit checks.
+Write set adds only contactShadow.ts/contactShadow.test.ts to F12–F14's list.
+
+For F14 final layout, reserve a fixed 136 px mobile footer with explicit label
+and action rows, feedback above them and safe-area padding. This reduces empty
+space and enlarges the mobile preview while remaining the same height before,
+during and after download/error feedback. Reuse unchanged PNG size invariants.
