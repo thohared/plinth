@@ -229,7 +229,7 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   document.addEventListener('focusin', event => { if (event.target instanceof Element && event.target !== document.body) lastFocused = event.target; }, {signal});
   const adjustFocus = (): void => {
     const active = document.activeElement === document.body ? lastFocused : document.activeElement;
-    if (!media.matches && (active === close || active === opener)) pick.focus();
+    if (!media.matches && (active === close || active === opener || active === mobilePick)) pick.focus();
     else if (media.matches && !document.body.classList.contains('sheet-open') && root.contains(active)) opener.focus();
   };
   media.addEventListener('change',adjustFocus,{signal});

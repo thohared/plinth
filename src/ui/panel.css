@@ -155,9 +155,14 @@ body.editor[data-theme=dark] {
   .editor #png-scale { grid-row:2; }
   .editor #png-actions #png-export { grid-row:1 / 3; }
   /* Feedback does not reserve an empty row or resize the preview on export. */
-  .editor #png-feedback { position:absolute; z-index:2; bottom:calc(100% + 60px); left:0; right:0; max-height:min(144px,30dvh); overflow-y:auto; overscroll-behavior:contain; padding:10px 16px; background:var(--surface); border-top:1px solid var(--line); box-shadow:0 -4px 12px #0000000a; }
+  .editor #png-feedback { position:absolute; z-index:2; bottom:calc(100% + 60px); left:0; right:0; max-height:var(--png-feedback-limit,min(144px,30dvh)); overflow-y:auto; overscroll-behavior:contain; padding:10px 16px; background:var(--surface); border-top:1px solid var(--line); box-shadow:0 -4px 12px #0000000a; }
   .editor #png-feedback:not(:has(#png-status:not(:empty),#png-download:not([hidden]),#png-reload:not([hidden]))) { padding:0; border:0; box-shadow:none; }
   .editor.sheet-open #png-feedback { bottom:100%; }
+  .editor.sheet-open { --png-feedback-limit:min(144px,20dvh); }
+  /* Make the last settings reachable above populated feedback without resizing
+     the sheet, preview or primary footer. Idle state adds no scroll space. */
+  .editor.sheet-open:has(#png-status:not(:empty),#png-download:not([hidden]),#png-reload:not([hidden])) #panel { scroll-padding-bottom:calc(var(--png-feedback-limit) + 8px); }
+  .editor.sheet-open:has(#png-status:not(:empty),#png-download:not([hidden]),#png-reload:not([hidden])) #panel::after { content:''; display:block; height:max(0px,calc(var(--png-feedback-limit) - 20px)); }
   .editor #png-feedback #png-status { margin:0 0 4px; }
   .editor #png-feedback :is(#png-download,#png-reload) { margin:0; }
   .editor #png-export { margin:0; }

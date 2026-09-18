@@ -234,3 +234,35 @@ failures before implementation; the repaired seed must fail on UI behavior.
 Prior exact-head CI #133 and PNG #17 passed; PG #120 captured all 60 images and
 failed only 20 baseline comparisons. Owner baseline/dependency acceptance is
 separate from the code fixups; no merge or reference writes are authorized here.
+
+- F17: a conditional terminal scroll spacer and scroll-padding allow the full
+  last settings control to clear export feedback. They use the overlay's bound
+  and account for the existing 20 px bottom padding. Open-sheet feedback is
+  capped at 20dvh/144 px, preserving room for a full touch control on short
+  viewports. Idle spacing, fixed footer and preview dimensions remain intact.
+- F18: the existing breakpoint focus handoff now includes `mobilePick`; the
+  original opener/close paths and listener lifecycle remain unchanged.
+- F19: the old mutation matches either the original `root` or current
+  `mobileActions` receiver for the same PNG insertion. No assertion was removed
+  or weakened. Its repaired isolated seed reaches ready state and fails because
+  Export has no visible bounds (11.40 s), not because the mutation failed.
+- Before application fixes, all three new browser regressions fail (41.51 s):
+  both themes have last-control bottom 667.53 behind feedback top 618, and the
+  mobile picker ends with BODY focused. After the fix, all three pass (38.60 s):
+  real export/download, maximum-scroll hit-test and tap, full 44 px target at
+  400×800 and 400×400/DPR2, keyboard focus reveal, stable canvas, and both
+  mobile shortcuts transferring focus to the visible desktop picker.
+- Initial affected set: 9/11 PASS (147.20 s), including the existing PNG size,
+  failure/recovery, picker and mobile panel flows. The two new tests exposed
+  double-counted terminal padding on the short viewport (top 143.53 <148).
+  The spacer now accounts for that padding; the final three-test pass above
+  closes both failures without changing assertions. The focus-reveal test first
+  moves focus to another control before returning to help; it does not expect
+  a second focus event on an already focused element. Original tests and all
+  timeouts/thresholds remain unchanged.
+- Final TypeScript PASS, 207/207 units PASS (15.67 s), production build PASS
+  (708.37 kB; existing bundle warning). Only the three new affected regressions
+  were rerun after the terminal-padding adjustment; prior nine focused passes
+  are identified above rather than presented as a fresh complete final suite.
+  Full normal CI/PG/PNG on the published head and a new independent review remain
+  acceptance gates. No manual workflow dispatch, baseline write, merge or deploy.

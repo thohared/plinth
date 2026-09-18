@@ -56,6 +56,65 @@ it('T-P9e full wide demos have continuous border colors; explicit pads and user 
     expect(Math.max(...sample(png, 'tablet', .5, .5)), 'user content remains visible').toBeLessThan(50);
   } finally { await page.close(); }
 });
+for (const theme of ['light', 'dark']) it(`T-P9e review: final settings control is reachable after PNG download (${theme})`, async () => {
+  const page = await browser.newPage({ viewport: { width: 400, height: 800 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
+  try {
+    await ready(page);
+    if (theme === 'dark') {
+      await page.locator('#settings-open').click();
+      await page.locator('#interface-theme').click();
+      await page.locator('#sheet-close').click();
+    }
+    const before = await page.locator('#stage').boundingBox();
+    await page.locator('#png-export').click();
+    await page.locator('#png-download').waitFor({ timeout: 90000 });
+    const pending = page.waitForEvent('download');
+    await page.locator('#png-download').click();
+    expect(await (await pending).failure()).toBeNull();
+    expect(await page.locator('#stage').boundingBox()).toEqual(before);
+    await page.locator('#settings-open').click();
+    const canvas = await page.locator('#stage').boundingBox();
+    const panel = page.locator('#panel'), help = page.locator('#shortcut-help');
+    const assertReachable = async () => {
+      await panel.evaluate(element => { element.scrollTop = element.scrollHeight; });
+      const bounds = (await help.boundingBox())!;
+      expect(bounds.height).toBeGreaterThanOrEqual(44);
+      const visibleTop = (await panel.boundingBox())!.y;
+      const feedbackTop = (await page.locator('#png-feedback').boundingBox())!.y;
+      expect(bounds.y).toBeGreaterThanOrEqual(visibleTop);
+      expect(bounds.y + bounds.height, 'The entire last control clears export feedback').toBeLessThanOrEqual(feedbackTop);
+      expect(await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.closest('button')?.id,
+        { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 })).toBe('shortcut-help');
+      await help.tap();
+      expect(await page.locator('#shortcut-keys').isVisible()).toBe(true);
+      await help.tap();
+    };
+    await assertReachable();
+    expect(await page.locator('#stage').boundingBox()).toEqual(canvas);
+    // F17's clearance and cap must also leave room for a whole touch target
+    // in a short mobile viewport, including when keyboard focus scrolls it.
+    await page.setViewportSize({ width: 400, height: 400 });
+    await assertReachable();
+    await page.locator('#pick').focus();
+    await help.focus();
+    const focused = (await help.boundingBox())!, feedback = (await page.locator('#png-feedback').boundingBox())!;
+    expect(focused.y + focused.height).toBeLessThanOrEqual(feedback.y);
+  } finally { await page.close(); }
+});
+it('T-P9e review: both mobile shortcuts transfer focus to the visible desktop picker', async () => {
+  const page = await browser.newPage({ viewport: { width: 400, height: 800 } });
+  try {
+    await ready(page);
+    for (const selector of ['#settings-open', '#mobile-pick']) {
+      await page.setViewportSize({ width: 400, height: 800 });
+      await page.locator(selector).focus();
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+      expect(await page.evaluate(() => document.activeElement?.id), selector).toBe('pick');
+      expect(await page.locator('#pick').isVisible()).toBe(true);
+    }
+  } finally { await page.close(); }
+});
 it('T-P9e mobile image shortcut, theme, segmented looks and export stay usable', async () => {
   const page = await browser.newPage({ viewport: { width: 400, height: 800 }, deviceScaleFactor: 1, hasTouch: true, isMobile: true });
   try {
