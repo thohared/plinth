@@ -222,3 +222,15 @@ image only; all 3D device rendering remains unchanged. Same PR and review gate.
   PNG 35281590967 was still running when inspected. These are not new-head
   acceptance. Continue normal exact-head CI/PG/PNG and independent review;
   no duplicate workflow dispatch, baseline bless, merge or deployment.
+
+### Independent review fixups (F17–F19)
+
+Review 5242520013 on 97fcd37 identifies blocked final sheet controls after
+download, lost mobile-picker focus on desktop resize, and a stale PNG-access
+negative mutation target. Correct these three findings in the same PR using
+F17–F19. Preserve compact idle spacing, stable canvas/export dimensions and
+all existing assertions. New regressions must reproduce the actual first two
+failures before implementation; the repaired seed must fail on UI behavior.
+Prior exact-head CI #133 and PNG #17 passed; PG #120 captured all 60 images and
+failed only 20 baseline comparisons. Owner baseline/dependency acceptance is
+separate from the code fixups; no merge or reference writes are authorized here.

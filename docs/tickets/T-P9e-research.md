@@ -247,3 +247,41 @@ Write set: panel.css, additive assertions/seeds in the existing mobile review
 guard, this ticket/research. Reuse real download, recovery, small-viewport and
 canvas-size guards; inspect a fresh DPR2 mobile image. Do not rerender unchanged
 device matrices or alter 3D, PNG encoding, tests' old thresholds or fixtures.
+
+## F17–F19 — independent review corrections
+
+Source: review 5242520013 on exact head 97fcd37 / tree 30760ed, fetched
+2026-09-18. Review URL: https://github.com/thohared/plinth/pull/29#pullrequestreview-5242520013.
+Clauses: §4.6/P-13 stable export and recovery, §4.9/P-14(5) reachable
+controls/focus, §2.7/§7 meaningful negative evidence. No specification gap.
+
+- F17 — `src/ui/panel.css:#png-feedback` overlays the sheet, but `#panel`
+  has no terminal scroll clearance. The reviewer reproduced a blocked final
+  Keyboard shortcuts button after real export/download in both themes.
+  Add terminal scroll space only while mobile feedback is populated, using
+  the same upper bound as the overlay, plus matching scroll-padding so keyboard
+  focus can reveal controls. A pseudo-element avoids growing panel padding/min
+  size and preserves the existing canvas and 92 px footer. Bound open-sheet
+  feedback to at most 20dvh/144 px, leaving at least half the 40dvh sheet
+  available on short viewports; keep its independent scroll and live region.
+  Idle/closed/desktop panel spacing is unchanged. Prove actual export/download,
+  maximum sheet scroll, hit-test and real tap of its last control in both themes;
+  retain all existing preview-dimension/error assertions.
+- F18 — `src/ui/panel.ts:adjustFocus` tracks focus before a breakpoint hides
+  its active element but excludes `mobilePick`. Include that owned button in
+  the existing desktop handoff to `pick`. Preserve opener/close handling,
+  remembered focus, recovery, listeners and disposal. Verify picker and settings
+  opener through real focus + mobile-to-desktop resize, without assigning focus
+  as a substitute for checking the result.
+- F19 — `guards/png-access.test.ts` targets the old `root` insertion, but
+  `createPanel` now inserts PNG actions after `mobileActions`. Extend only the
+  mutation target to both supported receiver names with the exact PNG argument.
+  Preserve every old assertion. Run the seeded mobile access case and require
+  a behavioral failure after the app becomes ready, not a missing mutation.
+
+Write set: panel.css/panel.ts, additive review-polish cases, the PNG-access seed
+target, this research/ticket. First run new regressions against the unchanged
+application; then fix and run affected browser checks/typecheck/build. Reuse
+complete prior-head CI #133/PNG #17 as historical evidence only; final-head
+normal CI/PG/PNG and fresh review remain required. Do not re-run unchanged
+render matrices locally or bless the 20 known PG baseline differences.
