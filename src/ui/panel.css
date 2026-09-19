@@ -181,3 +181,30 @@ body.editor[data-theme=dark] {
 @media(max-width:899px) {
   .editor #mobile-actions #settings-open { grid-column:2; grid-row:1; }
 }
+
+/* T-P9f: recognizable home screen and complete download actions on every host. */
+.editor #workspace { position:relative; }
+#mobile-brand { display:none; }
+.editor #png-actions { position:relative; height:184px; overflow:visible; }
+.editor #png-feedback {
+  position:absolute; z-index:2; bottom:100%; left:0; right:0;
+  display:grid; grid-template-rows:minmax(0,1fr) auto auto; gap:4px;
+  max-height:var(--png-feedback-limit,min(160px,35dvh)); padding:10px 16px;
+  background:var(--surface); border-top:1px solid var(--line);
+  box-shadow:0 -4px 12px #0000000a; overflow:visible;
+}
+.editor #png-feedback #png-status { min-height:0; overflow-y:auto; margin:0; overscroll-behavior:contain; }
+.editor #png-feedback :is(#png-download,#png-reload) { margin:0; }
+.editor #png-feedback:not(:has(#png-status:not(:empty),#png-download:not([hidden]),#png-reload:not([hidden]))) { display:none; }
+@media(min-width:900px) {
+  .editor:has(#png-status:not(:empty),#png-download:not([hidden]),#png-reload:not([hidden])) #panel { scroll-padding-bottom:168px; }
+  .editor:has(#png-status:not(:empty),#png-download:not([hidden]),#png-reload:not([hidden])) #panel::after { content:''; display:block; height:160px; }
+}
+@media(max-width:899px) {
+  .editor #mobile-brand { display:block; position:absolute; top:12px; left:18px; font-size:1.25rem; font-weight:750; letter-spacing:-.6px; pointer-events:none; color:#1d2824; background:rgba(248,250,249,.92); border-radius:6px; padding:4px 9px; }
+  .editor.sheet-open #mobile-brand { display:none; }
+  .editor #png-actions { height:calc(82px + max(10px,env(safe-area-inset-bottom))); }
+  .editor #png-feedback { bottom:calc(100% + 60px); max-height:var(--png-feedback-limit,min(144px,30dvh)); }
+  .editor.sheet-open #png-feedback { bottom:100%; }
+  .editor #png-feedback #png-status { margin:0; }
+}

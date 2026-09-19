@@ -134,6 +134,7 @@ try {
   // T-P6 named evidence only; the 20 legacy diffs and 25 T-P5 captures above stay intact.
   const panelCases = [
     ...['studio-phone','dark-laptop','clean-browser','warm-card'].map(composition => ({ name: `composition-${composition}`, query: `composition=${composition}`, size: SIZE })),
+    {name:'composition-clean-tablet',query:'composition=clean-tablet',size:SIZE},
     ...['preset','solid','gradient','transparent'].map(background => ({ name: `background-${background}`, query: `background=${background}`, size: SIZE })),
     {name:'panel-desktop',query:'ui=1',size:SIZE},
     {name:'panel-mobile-closed',query:'ui=1',size:{width:400,height:700}},
@@ -177,6 +178,21 @@ try {
     await page.locator('#shortcut-help').click();
     await page.locator('#shortcut-keys').scrollIntoViewIfNeeded();
     await page.screenshot({path:join(OUT,`help-${mobile?'mobile':'desktop'}.png`)});captured++;
+    await page.close();
+  }
+  // T-P9f host defaults and real download UI, additive to all legacy candidates.
+  for (const host of [{name:'phone',width:400,height:800},{name:'tablet',width:1024,height:768}]) {
+    const page=await browser.newPage({viewport:{width:host.width,height:host.height},hasTouch:true,deviceScaleFactor:2});
+    const errors=[];page.on('pageerror',error=>errors.push(String(error)));
+    await page.goto(url,{waitUntil:'load'});
+    await page.waitForSelector('html[data-plinth-ready="1"]',{timeout:60000});
+    await page.screenshot({path:join(OUT,`live-${host.name}-home.png`)});captured++;
+    await page.locator('#png-export').click();
+    await page.locator('#png-download').waitFor({timeout:90000});
+    const pending=page.waitForEvent('download');await page.locator('#png-download').click();
+    if(await(await pending).failure())throw new Error('T-P9f evidence download failed.');
+    await page.screenshot({path:join(OUT,`live-${host.name}-download.png`)});captured++;
+    if(errors.length){failed++;annotate('error',`live-${host.name}: ${errors.join(' | ')}`);}
     await page.close();
   }
   // A separate T-P6 sheet leaves the legacy 20-cell contact-sheet helper intact.

@@ -111,8 +111,8 @@ PLINTH_CHROMIUM_PATH=/path/to/pinned/chromium node scripts/composition-thumbnail
 ```
 
 The script uses one temporary renderer and the committed demo, reads the same
-composition table as the panel, and fits each output aspect inside a 240×150
-editor frame. Implementation base: `c9a376418cebf33d7c1d2967aba9d37b6627d648`.
+composition table as the panel, and renders each full-frame canvas at 480×300.
+There are no screenshot controls or output-aspect bands in the thumbnails.
 Thumbnails are ordinary UI assets, not PG fixtures.
 
 `guards/output-alpha.test.ts` checks the production alpha adapter against 128
@@ -141,3 +141,17 @@ in the T-P7 ticket and implementation PR. No video export is implied.
 MIT. Dependency licences are recorded in [`LICENSES.md`](LICENSES.md).
 
 The preview and production interface use English, including controls, accessibility labels, export status and error messages.
+
+
+## Phone and tablet defaults
+
+A fresh editor starts at 1:1 on phones, 4:5 on tablets and 16:9 on desktop,
+with Space around device at 0%. Device detection is a startup hint; you can
+always select another format. Resizing keeps your chosen format. Ready-made
+looks keep that format and start with zero extra space; Clean view uses a tablet.
+Shared scene links retain their saved settings.
+
+New uploads initially Fill screen, which can crop an image with different
+proportions. Choose Fit image to show the complete screenshot with margins.
+Explicit image-fit choices and restored settings take precedence. Pointer
+rotation slows near the legal view limits; it does not rotate under the floor.

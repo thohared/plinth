@@ -100,6 +100,9 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   }
   const image = section('Your image');
   const pick = document.querySelector<HTMLButtonElement>('#pick')!; pick.textContent = 'Choose image'; image.append(pick, document.querySelector('#note')!);
+  const mobileBrand = document.createElement('div'); mobileBrand.id = 'mobile-brand';
+  mobileBrand.innerHTML = 'Plinth<span class="brand-dot" aria-hidden="true">.</span>';
+  document.querySelector('#workspace')!.append(mobileBrand);
   const mobileActions = document.createElement('div'); mobileActions.id = 'mobile-actions';
   const mobilePick = document.createElement('button'); mobilePick.type = 'button'; mobilePick.id = 'mobile-pick'; mobilePick.textContent = 'Choose image';
   mobilePick.addEventListener('click', () => { if (!mobilePick.disabled) pick.click(); }, { signal });
@@ -111,7 +114,7 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   grid.setAttribute('role', 'group'); grid.setAttribute('aria-label', 'Ready-made looks');
   for (const row of COMPOSITIONS) {
     const button = document.createElement('button'); button.type = 'button'; button.dataset.composition = row.id;
-    const img = document.createElement('img'); img.src = `compositions/${row.id}.png`; img.alt = ''; img.width = 240; img.height = 150;
+    const img = document.createElement('img'); img.src = `compositions/${row.id}.png`; img.alt = ''; img.width = 480; img.height = 300;
     const caption = document.createElement('span'); caption.textContent = row.name; button.append(img, caption);
     button.addEventListener('click', () => attempt(button, () => store.compose(row.id)), { signal }); grid.append(button);
     refreshers.push(state => button.setAttribute('aria-pressed', String(state.composition === row.id)));
@@ -136,6 +139,9 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   }
   const fit = section('Screen image');
   select(fit, 'fit', 'Image fit', ['contain', 'cover'], s => s.fit, value => store.apply({ fit: value as Settings['fit'] }));
+  const fitHint = document.createElement('p'); fitHint.className = 'hint';
+  fitHint.textContent = 'Fill screen removes empty bands and may crop the edges. Fit image shows the whole image.';
+  fit.append(fitHint);
   numeric(fit, 'pad', 'Image padding', 0, 25, 1, s => s.pad * 100, value => store.apply({ pad: value / 100 }));
   colour(fit, 'padColor', 'Padding color', s => s.padColor, value => store.apply({ padColor: value }));
   const png = exporter ? section('Save image') : undefined;
@@ -240,6 +246,6 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
       for (const element of root.children) if (element instanceof HTMLElement && element !== png && element.tagName !== 'HEADER') element.inert = value !== 'ready';
       refreshExport();
     },
-    dispose() { exportUnsubscribe(); unsubscribe(); abort.abort(); pickObserver.disconnect(); mobileActions.replaceWith(opener); png?.remove(); delete document.body.dataset['theme']; }
+    dispose() { exportUnsubscribe(); unsubscribe(); abort.abort(); pickObserver.disconnect(); mobileBrand.remove(); mobileActions.replaceWith(opener); png?.remove(); delete document.body.dataset['theme']; }
   };
 }

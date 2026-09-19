@@ -27,18 +27,22 @@ export interface SettingsStore {
   compose(id: CompositionId): void;
   reset(): void;
   setDevice(id: DeviceId): void;
+  prepareUpload(): void;
   subscribe(listener: (state: Settings, reason?: string) => void): () => void;
   dispose(): void;
 }
 function clone(value: Settings): Settings {
   return { ...value, spec: { ...value.spec }, background: { ...value.background }, custom: clonePoseSnapshot(value.custom) };
 }
-export function createSettingsStore(stage: Stage, studio: Studio, options: { immediate: boolean; msaa: boolean; fixedAspect?: number; onHydrationFailure?: (error: unknown) => void }): SettingsStore {
-  let state: Settings = { ...stage.snapshot(), aspect: '4:5', scene: stage.getScene(), tone: studio.getToneMapping(),
+export function createSettingsStore(stage: Stage, studio: Studio, options: { immediate: boolean; msaa: boolean; fixedAspect?: number; defaultAspect?: OutputAspect; fillUploads?: boolean; onHydrationFailure?: (error: unknown) => void }): SettingsStore {
+  const defaultAspect = options.defaultAspect ?? '4:5';
+  let automaticUploadFit = options.fillUploads ?? false;
+  let state: Settings = { ...stage.snapshot(), aspect: defaultAspect, scene: stage.getScene(), tone: studio.getToneMapping(),
     msaa: options.msaa, background: defaultBackground(), composition: null, pngScale: 1 };
   const identify = (): CompositionId | null => stage.isTransitioning() ? null : COMPOSITIONS.find(row => {
-    const expected = compositionSettings(row.id);
+    const expected = compositionSettings(row.id, options.defaultAspect ? state.aspect : undefined);
     if (stage.getImage()?.identity === 'demo') Object.assign(expected, { fit: demoFit(row.device) });
+    else if (options.fillUploads) Object.assign(expected, {fit:'cover'});
     return Object.entries(expected).every(([key,value]) => {
       if (key === 'composition') return true;
       const actual = state[key as keyof Settings];
@@ -77,6 +81,7 @@ export function createSettingsStore(stage: Stage, studio: Studio, options: { imm
         state = { ...next, custom: stage.snapshot().custom };
       } finally { applying = false; stageCandidate.dispose(); studioCandidate?.dispose(); }
       state.composition = identify();
+      if (Object.hasOwn(patch, 'fit') && !composition) automaticUploadFit = false;
       emit(composition ? 'compose' : 'apply');
     },
     hydrate(value) {
@@ -88,8 +93,19 @@ export function createSettingsStore(stage: Stage, studio: Studio, options: { imm
       catch (error) { options.onHydrationFailure?.(error); throw error; }
       finally { hydrating = false; }
     },
-    compose(id) { const next = compositionSettings(id); api.apply({ ...next, ...(stage.getImage()?.identity === 'demo' ? { fit: demoFit(next.device) } : {}) }, id); },
-    reset() { const prior = hydrating; hydrating = true; try { api.apply({...compositionSettings('studio-phone'),pngScale:1},'studio-phone'); } finally { hydrating = prior; } },
+    compose(id) {
+      const next = compositionSettings(id, options.defaultAspect ? state.aspect : undefined);
+      api.apply({ ...next, fit: stage.getImage()?.identity === 'demo' ? demoFit(next.device) : state.fit }, id);
+    },
+    reset() {
+      const prior = hydrating; hydrating = true;
+      try {
+        api.apply({...compositionSettings('studio-phone', defaultAspect),pngScale:1,
+          ...(options.fillUploads && stage.getImage()?.identity === 'user' ? {fit:'cover' as const} : {})},'studio-phone');
+        automaticUploadFit = options.fillUploads ?? false;
+      } finally { hydrating = prior; }
+    },
+    prepareUpload() { if (automaticUploadFit) api.apply({fit:'cover'}); },
     setDevice(id) { if (id !== state.device) api.apply({ device: id, spec: presetSpec(id), ...(stage.getImage()?.identity === 'demo' ? { fit: demoFit(id) } : {}) }); },
     subscribe(listener) { listeners.add(listener); return () => { listeners.delete(listener); }; },
     dispose() { if (disposed) return; disposed = true; unsubscribe(); listeners.clear(); },

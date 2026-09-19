@@ -75,3 +75,18 @@ Write set: this research/ticket, main/settings and their tests; ui panel,
 compositions and a small defaults helper; pointer controller and focused unit
 coverage; additive live-feedback browser guard; thumbnail generator/assets;
 named evidence in existing PG capture and README as needed.
+
+
+## F9 — regression assertions that encode the replaced defaults
+
+The first focused browser run passed all eight new checks and sixteen existing
+checks. Two old checks failed for identified expectation/setup reasons:
+`guards/panel.test.ts:49` asserts the obsolete .8 mobile aspect; retain the .01
+numeric tolerance but assert the owner's new literal 1:1. The same file's
+reset/fit/thumbnail expectations now assert desktop 16:9, preserved Cover and
+480px thumbnails, with no removed assertions. `guards/review-polish.test.ts:156`
+compares URL before/after theme while the new upload Cover setting is still
+within the existing 250ms URL debounce. Wait for that upload's hash before
+measuring theme isolation, retaining exact equality of settings/image/hash.
+No runtime debounce or threshold changes. Write set includes this setup-only
+addition to the existing guard. Full acceptance must pass after these changes.

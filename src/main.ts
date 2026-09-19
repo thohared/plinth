@@ -21,6 +21,8 @@ import { createSettingsStore, type Settings, type SettingsPatch, type SettingsSt
 import { fitOutput, type OutputAspect } from './output';
 import { createPanel } from './ui/panel';
 import { COMPOSITIONS, type CompositionId } from './ui/compositions';
+import { hostDefaultAspect } from './ui/defaults';
+import { directionToOrbit } from './camera/poses';
 import type { FitMode, ImageState } from './screen/types';
 
 /**
@@ -83,6 +85,8 @@ const PREVIEW_DPR_CAP = 2;
 
 const params = new URLSearchParams(window.location.search);
 const pg = params.get('pg') === '1';
+const defaultAspect = pg ? undefined : hostDefaultAspect(window.innerWidth, screen.width, screen.height,
+  matchMedia('(any-pointer: coarse)').matches || navigator.maxTouchPoints > 1);
 const initialHash = pg ? '' : window.location.hash;
 // Hash presence suppresses conflicting legacy query settings even when invalid.
 if (initialHash) for (const key of ['device','scene','pose','composition','background','msaa']) params.delete(key);
@@ -142,7 +146,7 @@ async function boot(): Promise<void> {
     if (captureOverride) return captureOverride;
     if (!ui) return { w: pgCaptureSize.width, h: pgCaptureSize.height };
     const rect = document.querySelector<HTMLElement>('#workspace')!.getBoundingClientRect();
-    return fitOutput(rect.width, rect.height, settings?.get().aspect ?? '4:5');
+    return fitOutput(rect.width, rect.height, settings?.get().aspect ?? defaultAspect ?? '4:5');
   }
 
   const v0 = viewport();
@@ -217,7 +221,11 @@ async function boot(): Promise<void> {
 
   const setImage = latestImageLoader(
     (src) => loadImage(src, cap),
-    ({ bitmap, meta }) => { if (disposed) { bitmap.close(); return; } stage.setImage(bitmap, meta); render(); },
+    ({ bitmap, meta }) => {
+      if (disposed) { bitmap.close(); return; }
+      try { settings?.prepareUpload(); } catch (error) { bitmap.close(); throw error; }
+      stage.setImage(bitmap, meta); render();
+    },
     text => { if (!disposed) showNote(text); },
   );
 
@@ -225,7 +233,7 @@ async function boot(): Promise<void> {
   resize();
   await studio.ready;
   if (disposed) return;
-  settings = createSettingsStore(stage, studio, { immediate: pg, msaa, onHydrationFailure: () => { hydrationFailed = true; recoveryState = 'failed'; panel?.setRecovery('failed'); exporter.invalidate('Scene restoration failed. Reload the page to continue.'); showNote('Scene restoration failed. Reload the page to continue.'); }, ...(!ui ? { fixedAspect: v0.w / v0.h } : {}) });
+  settings = createSettingsStore(stage, studio, { immediate: pg, msaa, ...(defaultAspect ? {defaultAspect,fillUploads:true} : {}), onHydrationFailure: () => { hydrationFailed = true; recoveryState = 'failed'; panel?.setRecovery('failed'); exporter.invalidate('Scene restoration failed. Reload the page to continue.'); showNote('Scene restoration failed. Reload the page to continue.'); }, ...(!ui ? { fixedAspect: v0.w / v0.h } : {}) });
   const store = settings;
   cleanup.push(() => store.dispose());
   let panel: ReturnType<typeof createPanel> | undefined;
@@ -258,7 +266,8 @@ async function boot(): Promise<void> {
   }
   revealNotice = () => { if (ui && matchMedia('(max-width: 899px)').matches) panel?.setOpen(true); };
   cleanup.push(() => { revealNotice = () => {}; });
-  const composition = params.get('composition');
+  const requestedComposition = params.get('composition');
+  const composition = requestedComposition === 'clean-browser' ? 'clean-tablet' : requestedComposition;
   if (COMPOSITIONS.some(row => row.id === composition)) store.compose(composition as CompositionId);
   const background = params.get('background');
   if (background && ['preset', 'solid', 'gradient', 'transparent'].includes(background)) store.apply({ background: { ...store.get().background, mode: background as Settings['background']['mode'] } });
@@ -389,6 +398,7 @@ async function boot(): Promise<void> {
     cleanup.push(() => window.removeEventListener('resize', resize));
     window.visualViewport?.addEventListener('resize', resize, { signal });
     controller = createPoseController(canvas, {
+      getOrbit: () => directionToOrbit(stage.snapshot().custom.direction),
       advance: (dt) => recoveryState === 'ready' ? stage.advancePose(dt) : false,
       orbit: (azimuth, elevation) => { if (recoveryState === 'ready') stage.orbit(azimuth, elevation); },
     }, render);

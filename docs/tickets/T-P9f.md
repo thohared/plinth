@@ -35,3 +35,25 @@ phone download, tablet download and looks are owner-facing evidence. No paid API
 dependency, workflow, spec, source demo PNG, shader or device model change.
 
 Implementation and verification results will be appended here before publication.
+
+## Implementation evidence
+
+- Linux, Node 24.19.0, Chromium 153.0.8010.0 with SwiftShader. Browser binaries
+  are environment tooling, not an application dependency. Agent-browser CLI was
+  unavailable; existing Playwright guard/capture infrastructure was used.
+- Initial eight new browser checks passed (55.91s); pointer integration adds a
+  ninth. All four seeded behavioral regressions failed on the intended assertion:
+  wrong phone default, clipped Download, Contain upload default, hard orbit stop.
+- Unit suite: 209 passed / 29 files (17.11s). Production build passed.
+  Existing >700kB bundle warning is reported, not suppressed (709.75kB JS).
+- Existing focused regressions: 16/18 passed before the F9 assertion/setup
+  updates; exact reasons are recorded in research F9. No assertion removed or
+  threshold relaxed. The complete post-fix acceptance command is running.
+- Native local phone home/download/settings and tablet download captures were
+  inspected. Download is fully visible without scrolling its container. All four
+  thumbnails were regenerated at 480x300; picker overlays are hidden by generator.
+- Fixtures/pg, device geometry, screen shader, PNG renderer/encoder, workflow
+  files, dependency pins and PLINTH_SPEC.md are unchanged. CI-derived PG visual
+  evidence, fresh independent review and owner confirmation remain separate.
+- Physical tablet/mobile Safari save/open and the §6 performance gate remain
+  release obligations; automated touch viewports are not physical-device proof.
