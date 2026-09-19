@@ -34,7 +34,7 @@ PG script, with no baseline replacement. Native screenshots of phone home,
 phone download, tablet download and looks are owner-facing evidence. No paid API,
 dependency, workflow, spec, source demo PNG, shader or device model change.
 
-Implementation and verification results will be appended here before publication.
+The implementation and verification evidence below accompanies publication.
 
 ## Implementation evidence
 
@@ -42,13 +42,20 @@ Implementation and verification results will be appended here before publication
   are environment tooling, not an application dependency. Agent-browser CLI was
   unavailable; existing Playwright guard/capture infrastructure was used.
 - Initial eight new browser checks passed (55.91s); pointer integration adds a
-  ninth. All four seeded behavioral regressions failed on the intended assertion:
+  ninth, which passed in the complete final matrix. All four seeded behavioral
+  regressions failed on the intended assertion:
   wrong phone default, clipped Download, Contain upload default, hard orbit stop.
 - Unit suite: 209 passed / 29 files (17.11s). Production build passed.
-  Existing >700kB bundle warning is reported, not suppressed (709.75kB JS).
+  Existing >700kB bundle warning is reported, not suppressed (final 709.77kB JS).
 - Existing focused regressions: 16/18 passed before the F9 assertion/setup
-  updates; exact reasons are recorded in research F9. No assertion removed or
-  threshold relaxed. The complete post-fix acceptance command is running.
+  updates; exact reasons are recorded in research F9. The first full guard matrix
+  passed 100/101; F10 documents the gutter setup failure and the additional upload
+  preference fix. Both focused regressions then passed. No assertion removed or
+  threshold relaxed.
+- Final `npm run ci` passed on source tree
+  `e2f83e8f4846df4a76f2478aff7c7f8eedd3a826`: 101 guards / 15 files
+  (705.50s), typecheck, 209 unit tests / 29 files (10.88s). Final `npm run build`
+  passed. Only this evidence note changed after the complete acceptance run.
 - Native local phone home/download/settings and tablet download captures were
   inspected. Download is fully visible without scrolling its container. All four
   thumbnails were regenerated at 480x300; picker overlays are hidden by generator.
