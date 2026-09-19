@@ -90,3 +90,20 @@ within the existing 250ms URL debounce. Wait for that upload's hash before
 measuring theme isolation, retaining exact equality of settings/image/hash.
 No runtime debounce or threshold changes. Write set includes this setup-only
 addition to the existing guard. Full acceptance must pass after these changes.
+
+## F10 — explicit gutter setup and implicit demo fitting
+
+The first complete guard matrix passed 100/101 checks. The remaining failure
+was `guards/demo-edges.test.ts` sampling gutter x=-1 because desktop 16:9 now
+fills the workspace width. Select 4:5 explicitly for its existing four exact
+gutter-color assertions. Select Contain explicitly before its upload retention
+scenario, keeping all resource/fit checks across five devices. This is a setup
+change, not a new threshold or deleted check.
+
+Inspection also found that internal demo framing in `setDevice()` counted as
+an explicit fitting choice and disabled the new first-upload Fill default.
+Preserve the automatic-upload preference across internal device changes; actual
+Fit control changes and restored links still disable it. Extend the new upload
+guard to cycle through all demo devices before uploading, then retain its
+Cover, explicit Contain, composition and shared-link assertions. This is within
+F3 and the settings write set; include demo-edges in the setup-only guard scope.
