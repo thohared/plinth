@@ -1,70 +1,104 @@
-# T-P5 — reference potvrđene od vlasnika
+# T-P9e — owner-approved final references
 
-PG-3(b): Novak je pregledao i prihvatio kadar, perspektivu, poze, ekran i senke iz PG run-a 34716279569; ovo je prvi upis tih neizmenjenih CI slika kao referenci posle T-P5, ne prilagođavanje slika neuspelom testu.
+PG-3(b): Novak approved the final Plinth images and asked to resolve the pending
+PRs: “Odobravam one slike. Treba da se rese isto ono pr-ovi” (2026-09-18).
+This follows his earlier acceptance, “To je to. Odobravam ovako. Ako nadjem u
+buducnosti nesto dsto treba da se popravi, javljam”. The images reviewed in
+`Plinth-PR29-CI-pregled.html` were the unmodified CI candidates linked below.
+Codex performs the mechanical transfer on the owner's instruction; it does not
+select new images, rerender, sharpen, resize, or change a comparison threshold.
 
-Vlasnička odluka: „Sve ok, moze dalje” posle uputstva za pregled ovog artefakta. Naknadno je izričito zatražio pripremu zasebnog baseline commita („Moze to sada”). Agent prenosi njegove odobrene slike; ne bira nove reference i ne renderuje ih ponovo.
+## Exact source
 
-- [Izvorni PG run](https://github.com/novakblagojevic-wq/plinth/actions/runs/34716279569): SUCCESS, 45 captured, 20 without baseline, 0 failed.
-- [Izvorni artefakt 10304854375](https://github.com/novakblagojevic-wq/plinth/actions/runs/34716279569/artifacts/10304854375): pg-candidates.
-- ZIP SHA256: `db5561c5af36ceee14fc983c2605718654ff765026868b86517c02d838516f2a`.
-- Testirani source head: `674d590d062eaa0f50aaa29c1c878315c5616bf7`.
-- Source tree: `6121dd99cb87e3bf507241b15fbb4d4c0792bf7a`, isti kao T-P5 main merge `f2b5eda2b37e9fda1eab27e19c9cc4c3e7b52c8c`.
-- Datum odluke i pripreme: 2026-09-12. Prenos: Codex, po vlasničkom odobrenju.
+- [PG #121 / run 35291033788](https://github.com/thohared/plinth/actions/runs/35291033788).
+- [pg-candidates artifact 10527036418](https://github.com/thohared/plinth/actions/runs/35291033788/artifacts/10527036418).
+- Artifact ZIP SHA256: `0406c635ce77c4d297a7c0c95ed65e9a74d3743d5a04dfba15764cfe28db7424`.
+- Source PR #29 head: `c2bfbe5c8f988db53795d46ef535272eb51f0df9`.
+- CI merge: `e83b7062bba1bea6588b9c45fbe546dcb47724ef`.
+- Both source and CI merge tree: `23eced7bca92df1f48e8597b4b3b87de75575923`.
+- Source result: **FAILURE**, 60 captures, zero missing baselines, 20 differences
+  against the previous T-P5 references. This approval does not relabel that run
+  as PASS. New CI comparison results must be reported separately.
 
-## Obuhvat i ograničenja
+## Scope and acceptance
 
-Svih 45 PNG fajlova je bajt-identično odobrenom artefaktu. Provereni su ZIP digest i Git blob identitet svakog upisa.
+The 45 existing PNG references are replaced byte-for-byte from that artifact.
+The 20 device × scene files remain the automatic PG comparison set at
+1280×800/DPR1. The other 20 pose + five aspect files remain approved visual
+references; the capture script does not automatically diff them. The additional
+15 panel/composition/background/share/help captures stay in the original CI
+artifact. Diff images and the contact sheet are not baselines.
 
-Postojeća skripta scripts/pg-capture.mjs automatski poredi **20 device × scene** referenci (1280×800) kada su ove datoteke na grani koja se testira. Još **20 pose + 5 aspect** slika ovde je sačuvano kao odobrene vizuelne reference; njihovi named capture slučajevi trenutno nemaju automatski baseline diff. Čuvanje tih 25 fajlova ne menja tu činjenicu.
+This standalone commit changes only `fixtures/pg/`. Application code, source
+images, thumbnails, specification, workflows, capture cases, guards and test
+thresholds are unchanged. The approval is for the final cumulative PR #29
+result, which includes the commits from #25 → #27 → #28. It is not a separate
+approval of their superseded intermediate renderings. The earlier T-P5 receipt
+and hashes remain available in Git history at baseline commit `30122fa`.
 
-Ovaj commit ne menja capture skriptu, pragove, aplikaciju ili testove. Prvi stvarni PG diff rezultat sa ovim referencama beleži se tek kada se izvrši provera grane; raniji SUCCESS bez baseline-a nije retroaktivni image-diff PASS. Puni §6 performance gate je odvojena release obaveza.
+The independent code reviews below reported no remaining code fixups on their
+respective heads; their overall verdicts remained FIXUP for owner baseline
+approval and/or dependency acceptance. They are prior evidence, not approval of
+this new commit or a self-authored MERGE verdict:
 
-## SHA256 pojedinačnih PNG fajlova
+- [#25 review 5223201087](https://github.com/thohared/plinth/pull/25#pullrequestreview-5223201087), head `209841ddd8a2272a3b4b6b1f299de0df4b41b00d`.
+- [#27 review 5223320815](https://github.com/thohared/plinth/pull/27#pullrequestreview-5223320815), head `edfe4ea86da2ac2a3881ad70ece3d185bcaf2cc5`.
+- [#28 review 5220953563](https://github.com/thohared/plinth/pull/28#pullrequestreview-5220953563), head `0914fa5b2a30be62523c2e705dc3cb7c3cac49bc`.
+- [#29 review 5243237578](https://github.com/thohared/plinth/pull/29#pullrequestreview-5243237578), head `c2bfbe5c8f988db53795d46ef535272eb51f0df9`.
 
-| Fajl | SHA256 |
+PR #29's source-head CI #134 (35291033887) passed 92 guards, typecheck and
+207 units; PNG #18 (35291033782) passed 15 sizes and 400 combinations.
+A fresh independent acceptance review and the required checks remain merge
+conditions under §7. Physical Safari validation and the §6 performance/release
+gates remain separate obligations. No new resolution, touchpad or other product
+fix is claimed by this baseline transfer.
+
+## SHA256 of each transferred PNG
+
+| File | SHA256 |
 |---|---|
-| aspect-browser-16x9.png | `68c018b442807b777eb2d36156cf6a88053eb5df295a53baf5f6448c5f623ab5` |
-| aspect-card-3x1.png | `a22079d62cda9c12ff258964a810636423e7c179f302ec5d93857a701bdfe88b` |
-| aspect-laptop-9x16.png | `f403a4f287e2c5269a60bd970d00ea0b63f3ef8bafe4cdf5039c9f314a1564f7` |
-| aspect-phone-square.png | `e5d06845a009ae6599b928a78694fab8d59a2aa3711ab3cacd6dd2385e274543` |
-| aspect-tablet-4x5.png | `b3d4f1a8788d9a58b894e1b79f80fb3eaf9842a89e668f718ac286a9d43afd33` |
-| browser-clean-white.png | `914f4281452eea1378f3cdfcd09bc509bfd9b468ce23c325056056fc59556f19` |
-| browser-dark-glass.png | `cf6c6a9e3358a2230354ec2d1cd1493bf7d175c512e18533228187e7d47629c7` |
-| browser-soft-studio.png | `d0c30c64d636b3b7554567cccbb26a5c7c37ac2bbce9d6fe5b19674e15e06034` |
-| browser-warm-sunset.png | `cf9cf98bb068b608606928eaeaaded000057a9f04a6fd4927a6027a54db0f47e` |
-| card-clean-white.png | `eec9d1d4bdfdc0b39b9966a1d49bad062e005ae1485cbe9b4de75a9de0320429` |
-| card-dark-glass.png | `ef45662738c0dd87434a6f141020f97ecdd5dfa2fea53ef88235b7b4811f452e` |
-| card-soft-studio.png | `b3499e6b15cbdacd5f4564e5b49d44990a9aad20accd15e4b7925e94c2b0b080` |
-| card-warm-sunset.png | `694afd19f09c8ca2d9d3abf3296fa5e8b84e4b4768e47693b9d53da7a51c18bc` |
-| laptop-clean-white.png | `a33369ebbf2b0867da134936b96ecb0dc5048189a5a73af6538302534801548e` |
-| laptop-dark-glass.png | `8d0b38845ad2ceb93bb7e72453844c94b4da96956fa074eb3e414c4768c49cba` |
-| laptop-soft-studio.png | `bf179ab920686fc2b1d59e06485a7d2927e3caeb0628c811f901a5c022fea678` |
-| laptop-warm-sunset.png | `515c152c81fe286e821321dd419865ad3d4672480d72faa721c73411c950de9e` |
-| phone-clean-white.png | `ba97234968cb9c660c9e74cb96ca74c0b61ab5c197fe72e2cd3b923db1eb73ea` |
-| phone-dark-glass.png | `83ae4bbc8aea2307a8a9d0a8dbfd670d617d916dbc4f34138b36094dcfd64c5b` |
-| phone-soft-studio.png | `8bf55cbbd094af282a6670203481ddbd0c11ed49964a39e901ebb933a356ca41` |
-| phone-warm-sunset.png | `790ca4b94a35990e623758a9938128bf8ceeb5ee292785505810d9d689eff5bd` |
-| pose-browser-front-reference.png | `bdaf0d3e7f6be3218b82d6028c8dcded065f9a37796f39179d189f80ebacb72b` |
-| pose-browser-hero-reference.png | `d0c30c64d636b3b7554567cccbb26a5c7c37ac2bbce9d6fe5b19674e15e06034` |
-| pose-browser-lean-reference.png | `9f15995fe57f04e00b0e5a3aff567b92ffeb16f7fe238465174d890abd3c3f93` |
-| pose-browser-top-reference.png | `c5675cd46c34dcce14438ec309a60d7d010f30e395aff90427aa31a7cc64bac7` |
-| pose-card-front-reference.png | `9ef7bc377e5d2e7afa25e4791b62f24837e1e949e7ce6eff13339dac2d89cae8` |
-| pose-card-hero-reference.png | `b3499e6b15cbdacd5f4564e5b49d44990a9aad20accd15e4b7925e94c2b0b080` |
-| pose-card-lean-reference.png | `0e80f88459496e64386defdb71f6590e1e6b75048666d4150da0e3dc2255d2d9` |
-| pose-card-top-reference.png | `2ef00a3c7c35426f3b76e8db8cde1de65d2fc0fb87b65eb293f9327f5a074702` |
-| pose-laptop-front-reference.png | `97b88d5507946952f8c5efc5ba528ee8cbdaf3ec5bc286c8c5a959060d208348` |
-| pose-laptop-hero-reference.png | `bf179ab920686fc2b1d59e06485a7d2927e3caeb0628c811f901a5c022fea678` |
-| pose-laptop-lean-reference.png | `e79cf11cc2bd74d9b898599640b4b11b291463dc21ec72515015b5d26670273f` |
-| pose-laptop-top-reference.png | `335931f00cccb35358a0a6099a2b5104268ced02911b00ba01d25bea37406b82` |
-| pose-phone-front-reference.png | `e792e59349ed2301bcccfa0f4f35fda9d82fedabaf94e0afe3ac3608ef79c200` |
-| pose-phone-hero-reference.png | `8bf55cbbd094af282a6670203481ddbd0c11ed49964a39e901ebb933a356ca41` |
-| pose-phone-lean-reference.png | `5779e933b815a12d13c4987051fb4093d58d9ddce9f299425d4ebdbf39e21628` |
-| pose-phone-top-reference.png | `c85564d9a8ae17d31ac31e37627ac4e91461f96872ed895ae5cc3fa067e3772a` |
-| pose-tablet-front-reference.png | `0aa4099b3bfca97fe1d12cd13236c6dfdd8c0685256887194a86c7fdf060d6fc` |
-| pose-tablet-hero-reference.png | `93888fdea86eeb9bd0fd4f3930f982c8600f0f7787310d1719a7b2fa3415e335` |
-| pose-tablet-lean-reference.png | `729921f4a3783e0864888658c74552e7adfc3d08a67a25eaf08813007e3cf189` |
-| pose-tablet-top-reference.png | `eff86cbfa120e6d722c6d26c4a47f07ab542c9a01097e900a3e3a08370988b08` |
-| tablet-clean-white.png | `ac4976db972f1e9a067f6dec3b0289ee5801da868628201b2efdeb88a6090018` |
-| tablet-dark-glass.png | `21e9949389a4c293b34b15bd11a51bb6af680a28cce48a30fb639204e83769ed` |
-| tablet-soft-studio.png | `93888fdea86eeb9bd0fd4f3930f982c8600f0f7787310d1719a7b2fa3415e335` |
-| tablet-warm-sunset.png | `e365a0f70f09b452313433e03d8df75a71c664c23bdf8ac5befc19e54f787ae6` |
+| aspect-browser-16x9.png | `ca8ba5a3acfb7e4b531ab32f27e31eb7476b5bcdacb99d5618bd5a939dbe9705` |
+| aspect-card-3x1.png | `539374bd870d6c2739c5f08374433b27bc20edbb3f2d0002947db1f0127c6919` |
+| aspect-laptop-9x16.png | `4400dc2a3ee6263927fbc572b78982703aa2f7fc01349202ca2e5941e60a0d81` |
+| aspect-phone-square.png | `812786e8d9f53e736777f435f048fec3646543f0b9beb7bb1fe1e474ad5be871` |
+| aspect-tablet-4x5.png | `15cc6b4870c271e66a18e51629a052ed0431a0d713a7faaa7f03e2702a4aecdb` |
+| browser-clean-white.png | `d83457c1ab93a21f090a1cc58c0c3c9c2652d9742a11fdf45a2cd93d11fc5364` |
+| browser-dark-glass.png | `751ae8be9bcbfa9dd119a53d5752bf91de1237519bda28c83780a11ecd953d70` |
+| browser-soft-studio.png | `8e12560dca288bb5f4a891996716d694fec9400570c4c6102edec2017fdf58c9` |
+| browser-warm-sunset.png | `d921d13e79087e43192a656251ec9d74516b95797eb694811ac85f3ebeeff9c0` |
+| card-clean-white.png | `4cea3ec96c998b7f69332fc1a370538e69e4f12b16c8dc833044977892a699e1` |
+| card-dark-glass.png | `8ddd0e354881bb3d3e123a6f15c48636a198656662794702836144968ae85751` |
+| card-soft-studio.png | `be6ef2c6611302548484cc1314d72faac7a77d7ece54531fc5b6e79a1ecf78c2` |
+| card-warm-sunset.png | `92d5e664aea779e7df78241cbb854b31bfdccd1fb41698b357329c7d41047cf3` |
+| laptop-clean-white.png | `a44600459e7059152ef460ffacb91ace27d0bdba0c24c985431c0166d9563542` |
+| laptop-dark-glass.png | `9a659696fdaf44924ba42db729d75fd2ca12fab181e1b7e49ed8c07e992eebb9` |
+| laptop-soft-studio.png | `b52fe8aff598354be65ad81da64d5afccffd4007718cd04b103c37d6eb63eb69` |
+| laptop-warm-sunset.png | `e24c3787b93046af0165f1a9bbdb56f057650728eff6019d0f733d486f138851` |
+| phone-clean-white.png | `f6734d3a29ff1d302054090a36b5c026d3ba7c4547cd25c175d0e74a5c47ff00` |
+| phone-dark-glass.png | `80d8ae22d4ce2d2c6062897f62e4bb93b5d484bba78a93dbee588adfacf97351` |
+| phone-soft-studio.png | `df1756b40dcdeb7f6b3e57d30408649e00c84a866ccb4b3b2448ef80b871bf08` |
+| phone-warm-sunset.png | `f34fd329e852d00236fb257d861df791af6f26d78260f4e1f5d99081fcf18f4d` |
+| pose-browser-front-reference.png | `1dc9a047bbafebfa4ab6b6f4d866a529cdf5cdb1d872c06f06e7af75a1007a9c` |
+| pose-browser-hero-reference.png | `8e12560dca288bb5f4a891996716d694fec9400570c4c6102edec2017fdf58c9` |
+| pose-browser-lean-reference.png | `2901b8e966b4f18bfdac5d172df26a8aa187c360b2b926af778e677d8c4a6d68` |
+| pose-browser-top-reference.png | `431af7f75b368267fae8947a2c1d60c6bdf0a034c2aacd0f33d882c376f2782f` |
+| pose-card-front-reference.png | `01d65fdd8251bee140b4fad688809e5c573937c7604598aefbc2030f215126c0` |
+| pose-card-hero-reference.png | `be6ef2c6611302548484cc1314d72faac7a77d7ece54531fc5b6e79a1ecf78c2` |
+| pose-card-lean-reference.png | `cb8504a01ff0aa51f10bc1554ddf34912ad1a5f90ebca1835c957fd330d0ed0a` |
+| pose-card-top-reference.png | `91fbe0c5f11dd5c87183810575a7c7b3cadfd2725df63b45f54f85b5ccd4470c` |
+| pose-laptop-front-reference.png | `9b721da90cd19386ca083081bd993a6551926c9bab2bc87132fc5f1944913fca` |
+| pose-laptop-hero-reference.png | `b52fe8aff598354be65ad81da64d5afccffd4007718cd04b103c37d6eb63eb69` |
+| pose-laptop-lean-reference.png | `267e43794fdc5ed31bb9d62cfea4ab632a03c3b65119542b9100b7298161ea19` |
+| pose-laptop-top-reference.png | `00e48af92eefa12c38886cb890dc97d9d543c5d29295e2b2b19c0ab589e92cbc` |
+| pose-phone-front-reference.png | `c08998745229ae60cbbb1ed9d091f316b46021031a76e7f55653c4f895e56295` |
+| pose-phone-hero-reference.png | `df1756b40dcdeb7f6b3e57d30408649e00c84a866ccb4b3b2448ef80b871bf08` |
+| pose-phone-lean-reference.png | `981655f4d2c1e765a439fb137ea8997e63062a59bfe997de3c72050342dc82b5` |
+| pose-phone-top-reference.png | `14304eb50911a004246a2ec7f0a05f777e9f50cc2b25a3886dead4e69c2011bf` |
+| pose-tablet-front-reference.png | `147f299c50db29e966b7b2ce5f249e5f1ef137f0a94b41fefe56f6f67f725e40` |
+| pose-tablet-hero-reference.png | `e78f2aed30d2b1b4f5f84b0aa55eb160f713d50811d815982b3d531232f39ae4` |
+| pose-tablet-lean-reference.png | `12138cc334546ba6c11f9b660eb72bde1da902e6f9ed1987fe616cb25416810c` |
+| pose-tablet-top-reference.png | `a92eab8ac5ac5779cf86de379dd24799144f66fb4de692a3c8c6d04962a82102` |
+| tablet-clean-white.png | `d0b28b4f42afd2692af790bba0b67bc4c7043dd5b7c9a502ab5b59a89a0693e3` |
+| tablet-dark-glass.png | `cd59d3572d293fc17a209b4448833186d2f3e531e6cc919a6743db238303e178` |
+| tablet-soft-studio.png | `e78f2aed30d2b1b4f5f84b0aa55eb160f713d50811d815982b3d531232f39ae4` |
+| tablet-warm-sunset.png | `45396adb4e7c510dde0b354caca1b2bf48d3a7299008f4756cf20a69d376ecf2` |

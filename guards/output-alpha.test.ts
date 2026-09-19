@@ -86,7 +86,9 @@ for(const device of ['phone','tablet','laptop','browser','card'] as const) it(`P
               // Independent source-over of two separately rendered premultiplied
               // buffers. PNG encoding/straight conversion remains a T-P7 gate.
               const x=(i/4)%r.width,y=Math.floor(i/4/r.width);
-              for(const bg of [0,255,((Math.floor(x/8)+Math.floor(y/8))%2===0?[35,100,190]:[220,170,60])[c]!])compositeMax=Math.max(compositeMax,Math.abs((v+bg*(1-a/255))-(p+bg*(1-pa/255))));
+              // Exact integer numerator avoids cancellation at the unchanged
+              // two-byte bound (e.g. 2 becoming 2.0000000000000284).
+              for(const bg of [0,255,((Math.floor(x/8)+Math.floor(y/8))%2===0?[35,100,190]:[220,170,60])[c]!])compositeMax=Math.max(compositeMax,Math.abs(255*(v-p)+bg*(pa-a))/255);
             }
           }
           if(partial>0)shadowFrames++;results.push({scene,tone,size:[width!,height!],partial});count++;

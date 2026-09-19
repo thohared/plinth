@@ -1,3 +1,4 @@
+import type { DemoImages } from './screen/demo';
 import {
   Box3, Color, DirectionalLight, Group, InstancedMesh, Matrix4, Mesh, PerspectiveCamera, Scene,
   SRGBColorSpace, Texture, Vector3,
@@ -48,6 +49,7 @@ export interface Stage {
   /** A finite pointer delta in radians; a real move selects custom pose. */
   orbit(deltaAzimuth: number, deltaElevation: number): void;
   setImage(bitmap: ImageBitmap, meta: ImageMeta): void;
+  setDemoImages(images: DemoImages): void;
   setFit(mode: FitMode): void;
   setPad(value: number): void;
   setPadColor(hex: string): void;
@@ -170,7 +172,7 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
 
   let id: DeviceId = initialDevice;
   let sceneId: SceneId = initialScene;
-  let rig: DeviceRig = buildDevice(presetSpec(id), id === 'browser');
+  let rig: DeviceRig = buildDevice(presetSpec(id), id === 'browser', id !== 'browser' && id !== 'card');
   rig.group.name = 'device-rig';
   posePivot.add(rig.group);
   let localGeometry: readonly number[] = cachedLocalGeometry(rig.group, id, rig.spec);
@@ -178,8 +180,25 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
   let selected: PoseSelection = 'hero';
   let transition: PoseTransition | null = null;
   let worldBounds = new Box3();
-  let image: { bitmap: ImageBitmap; texture: Texture; meta: ImageMeta } | null = null;
-  let imageTextureReleased = false;
+  type OwnedImage = { bitmap: ImageBitmap; texture: Texture; meta: ImageMeta; released: boolean };
+  let image: OwnedImage | null = null;
+  let demos: { portrait: OwnedImage; landscape: OwnedImage } | null = null;
+  const ownedImages = (): OwnedImage[] => demos ? [demos.portrait, demos.landscape] : image ? [image] : [];
+  function imageTexture(bitmap: ImageBitmap): Texture {
+    const texture = new Texture(bitmap); texture.colorSpace = SRGBColorSpace;
+    // Three clamps this request to the device's actual anisotropy capability.
+    // Keep trilinear mipmaps; nearest sampling damages text at oblique angles.
+    texture.anisotropy = 8;
+    texture.flipY = false; texture.needsUpdate = true;
+    return texture;
+  }
+  function makeImage(bitmap: ImageBitmap, meta: ImageMeta): OwnedImage {
+    return { bitmap, texture: imageTexture(bitmap), meta: { ...meta }, released: false };
+  }
+  function retireImage(value: OwnedImage): void {
+    if (!value.released) value.texture.dispose();
+    value.bitmap.close();
+  }
   let fit: FitMode = 'contain';
   let pad = 0;
   let outputPad = 0;
@@ -193,7 +212,8 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
   const deviceChanged = (): void => { for (const cb of deviceListeners) cb(); };
 
   function bindImage(): void {
-    if (image) rig.setImage(image.texture, { w: image.meta.width, h: image.meta.height });
+    if (demos) image = id === 'phone' ? demos.portrait : demos.landscape;
+    if (image) rig.setImage(image.texture, { w: image.meta.width, h: image.meta.height }, !!demos && id !== 'phone');
     rig.setImageFit(fit, pad, padColor);
   }
   function applyPreset(): void {
@@ -236,7 +256,9 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
       || verticalTangent <= 0 || horizontalTangent <= 0) {
       throw new Error('Unable to frame device safely.');
     }
-    const referenceFit = Math.max(size.y, size.x / REFERENCE_ASPECT, size.z / REFERENCE_ASPECT) / FRAME_FILL;
+    // P-15 changes only the phone's reference fill; safe framing still follows.
+    const referenceFill = device === 'phone' ? 0.82 : FRAME_FILL;
+    const referenceFit = Math.max(size.y, size.x / REFERENCE_ASPECT, size.z / REFERENCE_ASPECT) / referenceFill;
     const referenceDist = referenceFit / 2 / Math.tan((CAMERA_FOV * Math.PI) / 360) + Math.max(size.z, size.x) / 2;
     const lensScale = Math.tan((CAMERA_FOV * Math.PI) / 360) / Math.tan((fov0 * Math.PI) / 360);
     const candidate = new PerspectiveCamera(fov, aspect, 0.01, 50);
@@ -320,19 +342,19 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
         resources.add(object.geometry);
         for (const material of Array.isArray(object.material) ? object.material : [object.material]) resources.add(material);
       } });
-      if (image && !imageTextureReleased) { resources.add(image.texture); imageTextureReleased = true; }
+      for (const value of ownedImages()) if (!value.released) { resources.add(value.texture); value.released = true; }
       const errors: unknown[] = [];
       for (const resource of resources) try { resource.dispose(); } catch(error) { errors.push(error); }
       if (errors.length) throw new AggregateError(errors, 'GPU resource release failed.');
     },
     restoreImageTexture() {
       if (disposed) throw new Error('Stage is disposed.');
-      if (image) {
-        const old = image.texture;
-        const texture = new Texture(image.bitmap); texture.colorSpace = SRGBColorSpace;
-        texture.flipY = false; texture.needsUpdate = true; image.texture = texture;
-        bindImage(); if (!imageTextureReleased) old.dispose(); imageTextureReleased = false;
+      for (const value of ownedImages()) {
+        const old = value.texture;
+        value.texture = imageTexture(value.bitmap);
+        if (!value.released) old.dispose(); value.released = false;
       }
+      bindImage();
       scene.traverse(object => {
         if (object instanceof Mesh) for (const material of Array.isArray(object.material) ? object.material : [object.material]) material.needsUpdate = true;
       });
@@ -344,7 +366,7 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
     dispose() {
       if (disposed) return; disposed = true;
       stateListeners.clear(); geometryListeners.clear(); deviceListeners.clear();
-      rig.dispose(); if (!imageTextureReleased) image?.texture.dispose(); image?.bitmap.close(); image = null;
+      rig.dispose(); for (const value of ownedImages()) retireImage(value); image = null; demos = null;
       scene.clear();
     },
     prepareSettings(next, immediate = false, changePose = false) {
@@ -371,7 +393,7 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
       let committed = false;
       try {
         if (shapeChanged) {
-          candidateRig = buildDevice(next.spec, next.device === 'browser');
+          candidateRig = buildDevice(next.spec, next.device === 'browser', next.device !== 'browser' && next.device !== 'card');
           if (image) candidateRig.setImage(image.texture, { w: image.meta.width, h: image.meta.height });
           candidateRig.setImageFit(next.fit, next.pad, next.padColor);
         }
@@ -430,7 +452,7 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
       posePivot.remove(rig.group);
       rig.dispose();
       id = next;
-      rig = buildDevice(presetSpec(id), id === 'browser');
+      rig = buildDevice(presetSpec(id), id === 'browser', id !== 'browser' && id !== 'card');
       rig.group.name = 'device-rig';
       posePivot.add(rig.group);
       scene.updateMatrixWorld(true);
@@ -516,16 +538,22 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
       frame();
     },
     setImage(bitmap, meta) {
-      if (image?.bitmap === bitmap) { image.meta = { ...meta }; bindImage(); return; }
-      const previous = image;
-      const texture = new Texture(bitmap);
-      texture.colorSpace = SRGBColorSpace;
-      texture.flipY = false;
-      texture.needsUpdate = true;
-      image = { bitmap, texture, meta: { ...meta } };
+      const previous = ownedImages();
+      const next = previous.find(value => value.bitmap === bitmap) ?? makeImage(bitmap, meta);
+      next.meta = { ...meta }; demos = null; image = next;
       bindImage();
-      if (!imageTextureReleased) previous?.texture.dispose(); imageTextureReleased = false;
-      previous?.bitmap.close();
+      for (const value of previous) if (value !== next) retireImage(value);
+    },
+    setDemoImages(next) {
+      if (next.portrait.bitmap === next.landscape.bitmap) throw new Error('Demo images must be distinct.');
+      const previous = ownedImages();
+      const own = (value: DemoImages['portrait']): OwnedImage => {
+        const result = previous.find(old => old.bitmap === value.bitmap) ?? makeImage(value.bitmap, value.meta);
+        result.meta = { ...value.meta, identity: 'demo' }; return result;
+      };
+      demos = { portrait: own(next.portrait), landscape: own(next.landscape) };
+      bindImage();
+      for (const value of previous) if (value !== demos.portrait && value !== demos.landscape) retireImage(value);
     },
     setFit(mode) {
       if (mode !== 'contain' && mode !== 'cover') throw new Error('Unknown image fit.');
@@ -543,7 +571,7 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
     onDeviceChange(cb) { deviceListeners.add(cb); return () => deviceListeners.delete(cb); },
     onGeometryChange(cb) { geometryListeners.add(cb); return () => geometryListeners.delete(cb); },
   };
-  for (const name of ['setDevice', 'setSpec', 'setAspect', 'setScene', 'setPose', 'advancePose', 'orbit', 'setImage', 'setFit', 'setPad', 'setPadColor'] as const) {
+  for (const name of ['setDevice', 'setSpec', 'setAspect', 'setScene', 'setPose', 'advancePose', 'orbit', 'setImage', 'setDemoImages', 'setFit', 'setPad', 'setPadColor'] as const) {
     const method = api[name] as (...args: never[]) => unknown;
     Object.assign(api, { [name]: (...args: never[]) => { const result = method(...args); stateChanged(name); return result; } });
   }

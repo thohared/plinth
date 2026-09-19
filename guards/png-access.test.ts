@@ -11,7 +11,7 @@ async function visible(page:Page,id:string){
 }
 for(const width of [400,1280])it(`T-P9a visible PNG access, settings separation and resize at ${width}`,async()=>{
  const page=await browser.newPage({viewport:{width,height:800}});try{
- if(process.env['PLINTH_PNG_ACCESS_SEED'])await page.route('**/src/ui/panel.ts',async route=>{const response=await route.fetch(),source=await response.text(),body=source.replace(/root\.insertAdjacentElement\(["']afterend["'], png\);/,"root.append(png);");expect(body).not.toBe(source);await route.fulfill({response,body});});
+ if(process.env['PLINTH_PNG_ACCESS_SEED'])await page.route('**/src/ui/panel.ts',async route=>{const response=await route.fetch(),source=await response.text(),body=source.replace(/(?:root|mobileActions)\.insertAdjacentElement\(["']afterend["'], png\);/,"root.append(png);");expect(body).not.toBe(source);await route.fulfill({response,body});});
  await page.goto(url);await page.waitForSelector('html[data-plinth-ready="1"]',{timeout:60000});
  await visible(page,'#png-export');await visible(page,'#png-scale');
  expect(await page.locator('#panel').evaluate(e=>e.scrollTop)).toBe(0);

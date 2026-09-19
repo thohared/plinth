@@ -1,5 +1,6 @@
 import {
   Box3,
+  type BufferGeometry,
   CylinderGeometry,
   ExtrudeGeometry,
   Group,
@@ -13,8 +14,10 @@ import {
   Shape,
   ShapeGeometry,
   Texture,
+  Vector2,
   Vector3,
 } from 'three';
+import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
 import { screenRect, shapeHash, type DeviceSpec } from './spec';
 import { patchScreen } from '../screen/material';
 import type { FitMode, Size } from '../screen/types';
@@ -46,8 +49,8 @@ export const BUILDER_RATIOS = {
   /** Edge rounding = min(edgeBevel × depth, edgeBevelOfBezel × bezel). */
   edgeBevel: 0.3,
   edgeBevelOfBezel: 0.35,
-  bevelSegments: 3,
-  curveSegments: 16,
+  bevelSegments: 6,
+  curveSegments: 24,
   /** Browser title bar height as a fraction of h; dots sized from the bar. */
   browserBarHeight: 0.07,
   browserDotRadius: 0.22,
@@ -92,7 +95,7 @@ export interface DeviceRig {
   /** Re-apply a spec: geometry is rebuilt only when a shape field changed. */
   update(spec: DeviceSpec): void;
   /** Borrows the Stage-owned texture; never disposes it. */
-  setImage(texture: Texture, imageSize: Size): void;
+  setImage(texture: Texture, imageSize: Size, demoEdges?: boolean): void;
   setImageFit(mode: FitMode, pad: number, padColor: string): void;
   setScreenColor(hex: string): void;
   dispose(): void;
@@ -133,6 +136,23 @@ export function roundedPlaneGeometry(w: number, h: number, r: number): ShapeGeom
   return g;
 }
 
+/** Chrome follows the same rounded opening; its lower edge meets the screen. */
+function browserBarGeometry(w: number, openingHeight: number, h: number, radius: number): ShapeGeometry {
+  const opening = new Shape(); roundedRect(w, openingHeight, radius, opening);
+  const outline = opening.getPoints(BUILDER_RATIOS.curveSegments);
+  const floor = openingHeight / 2 - h;
+  const clipped: Vector2[] = [];
+  for (let i = 0; i < outline.length; i++) {
+    const a = outline[i]!; const b = outline[(i + 1) % outline.length]!;
+    if (a.y >= floor) clipped.push(a.clone());
+    if ((a.y >= floor) !== (b.y >= floor)) {
+      clipped.push(new Vector2(a.x + (b.x - a.x) * (floor - a.y) / (b.y - a.y), floor));
+    }
+  }
+  for (const point of clipped) point.y -= openingHeight / 2 - h / 2;
+  return new ShapeGeometry(new Shape(clipped));
+}
+
 interface SlabOpts {
   w: number;
   h: number;
@@ -140,10 +160,11 @@ interface SlabOpts {
   radius: number;
   bevel: number;
   hole?: { w: number; h: number; radius: number };
+  detail?: { bevelSegments: number; curveSegments: number };
 }
 
 /** Extruded rounded slab spanning x∈[−w/2,w/2], y∈[−h/2,h/2], z∈[0,depth]. */
-function slabGeometry(o: SlabOpts): ExtrudeGeometry {
+function slabGeometry(o: SlabOpts): BufferGeometry {
   const b = Math.min(o.bevel, o.depth / 2 - 1e-6, o.radius);
   const shape = new Shape();
   roundedRect(o.w - 2 * b, o.h - 2 * b, o.radius - b, shape);
@@ -158,13 +179,19 @@ function slabGeometry(o: SlabOpts): ExtrudeGeometry {
     bevelThickness: b,
     bevelSize: b,
     bevelOffset: 0,
-    bevelSegments: BUILDER_RATIOS.bevelSegments,
-    curveSegments: BUILDER_RATIOS.curveSegments,
+    bevelSegments: o.detail?.bevelSegments ?? BUILDER_RATIOS.bevelSegments,
+    curveSegments: o.detail?.curveSegments ?? BUILDER_RATIOS.curveSegments,
     steps: 1,
   });
   g.translate(0, 0, b); // ExtrudeGeometry spans z∈[−b, depth−b]; shift to [0, depth]
-  g.computeVertexNormals();
-  return g;
+  // The pinned utility hashes positions at 0.01 units. Work in millimetres
+  // so neighbouring corners of a metre-scale device are not merged together.
+  // It changes normals only; the outline, triangles and UVs stay unchanged.
+  g.scale(1000, 1000, 1000);
+  const smooth = toCreasedNormals(g, Math.PI / 3);
+  smooth.scale(0.001, 0.001, 0.001);
+  if (smooth !== g) g.dispose();
+  return smooth;
 }
 
 function edgeBevel(spec: DeviceSpec, depth: number): number {
@@ -173,6 +200,7 @@ function edgeBevel(spec: DeviceSpec, depth: number): number {
 
 interface Materials {
   frame: MeshPhysicalMaterial;
+  screenBacking: MeshPhysicalMaterial;
   key: MeshPhysicalMaterial;
   well: MeshPhysicalMaterial;
   screen: MeshPhysicalMaterial;
@@ -197,8 +225,16 @@ export function emissiveCompensation(clearcoat: number): number {
   return 1 / (1 - clearcoat * CLEARCOAT_F0);
 }
 
-function makeMaterials(spec: DeviceSpec): Materials {
+function makeMaterials(spec: DeviceSpec, darkScreenRecess: boolean): Materials {
   return {
+    // Physical screens reveal a dark recess at the SDF edge. Flat classes
+    // match the shell to avoid emphasizing edge stipple against white pads.
+    // This material belongs to the existing backplate, not a glass layer.
+    screenBacking: new MeshPhysicalMaterial({
+      color: darkScreenRecess ? 0x080a0d : 0xd9dde3,
+      metalness: darkScreenRecess ? 0 : spec.frameMetalness,
+      roughness: darkScreenRecess ? 0.85 : spec.frameRoughness,
+    }),
     frame: new MeshPhysicalMaterial({
       color: 0xd9dde3,
       metalness: spec.frameMetalness,
@@ -276,11 +312,26 @@ function buildSlab(
       radius: open.radius + bevel,
       bevel: 0,
     }),
-    mats.frame,
+    mats.screenBacking,
   );
   backplate.name = 'backplate';
   backplate.position.z = BUILDER_RATIOS.gap;
   parent.add(backplate);
+
+  // A solid housing ledge seats the display underneath its SDF edge. Without
+  // this overlap a subpixel strip of the dark cavity shows through as dashes.
+  // It stays behind the image; screen dimensions, UVs and masking are unchanged.
+  const seatWidth = Math.min(spec.bezel * 0.4, open.w * 0.04, open.h * 0.04);
+  const seatShape = new Shape();
+  roundedRect(open.w + 2 * bevel, open.h + 2 * bevel, open.radius + bevel, seatShape);
+  const seatHole = new Path();
+  roundedRect(open.w - 2 * seatWidth, open.h - 2 * seatWidth,
+    Math.max(0, open.radius - seatWidth), seatHole);
+  seatShape.holes.push(seatHole);
+  const seat = new Mesh(new ShapeGeometry(seatShape, BUILDER_RATIOS.curveSegments), mats.frame);
+  seat.name = 'screen-seat';
+  seat.position.z = recess - BUILDER_RATIOS.gap * 0.25;
+  parent.add(seat);
 
   let screenW = open.w;
   let screenH = open.h;
@@ -289,7 +340,7 @@ function buildSlab(
     const barH = BUILDER_RATIOS.browserBarHeight * spec.h;
     screenH = open.h - barH;
     screenY = -barH / 2;
-    const bar = new Mesh(new PlaneGeometry(open.w, barH), mats.bar);
+    const bar = new Mesh(browserBarGeometry(open.w, open.h, barH, open.radius), mats.bar);
     bar.name = 'titlebar';
     bar.position.set(0, open.h / 2 - barH / 2, recess);
     parent.add(bar);
@@ -364,6 +415,9 @@ function buildDeck(
       depth: keyH,
       radius: Math.min(keyW, keyD) * 0.16,
       bevel: keyH * 0.3,
+      // Keep the accepted keycaps light: this geometry is drawn 70 times.
+      // Denser bevels belong on the larger visible device frame and body.
+      detail: { bevelSegments: 3, curveSegments: 16 },
     }),
     mats.key,
     R.keyCols * R.keyRows,
@@ -462,10 +516,10 @@ function buildInto(root: Group, spec: DeviceSpec, mats: Materials, browser: bool
   return { ...parts, bounds };
 }
 
-export function buildDevice(initial: DeviceSpec, browser = false): DeviceRig {
+export function buildDevice(initial: DeviceSpec, browser = false, darkScreenRecess = true): DeviceRig {
   const group = new Group();
   group.name = 'device';
-  const mats = makeMaterials(initial);
+  const mats = makeMaterials(initial, darkScreenRecess);
   let spec = { ...initial };
   let hash = shapeHash(spec);
   let built = buildInto(group, spec, mats, browser);
@@ -491,6 +545,10 @@ export function buildDevice(initial: DeviceSpec, browser = false): DeviceRig {
       spec = { ...next };
       mats.frame.metalness = spec.frameMetalness;
       mats.frame.roughness = spec.frameRoughness;
+      if (!darkScreenRecess) {
+        mats.screenBacking.metalness = spec.frameMetalness;
+        mats.screenBacking.roughness = spec.frameRoughness;
+      }
       mats.screen.clearcoat = spec.glassClearcoat;
       mats.screen.emissiveIntensity = emissiveCompensation(spec.glassClearcoat);
       const h = shapeHash(spec);
@@ -506,8 +564,8 @@ export function buildDevice(initial: DeviceSpec, browser = false): DeviceRig {
       rig.spec = spec;
       refreshScreen();
     },
-    setImage(texture, size) {
-      imageSize = picture.bind(texture, size);
+    setImage(texture, size, demoEdges = false) {
+      imageSize = picture.bind(texture, size, demoEdges);
       refreshScreen();
     },
     setImageFit(mode, value, colour) {

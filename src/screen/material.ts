@@ -13,6 +13,7 @@ uniform vec2 pictureMetres;
 uniform vec4 screenRadii;
 uniform vec3 screenPadColor;
 uniform bool screenColourOverride;
+uniform bool screenDemoEdges;
 float screenDistance(vec2 p) {
   float radius = p.y > 0.0
     ? (p.x < 0.0 ? screenRadii.x : screenRadii.y)
@@ -34,6 +35,9 @@ const sample = `
 if (!screenColourOverride) {
   vec2 pictureUv = screenPoint / pictureMetres + 0.5;
   vec3 picture = screenPadColor;
+  // Only the owned landscape demo continues its border colors into unused
+  // Contain space. The fitted picture itself is neither cropped nor stretched.
+  if (screenDemoEdges) pictureUv = clamp(pictureUv, vec2(0.0), vec2(1.0));
   if (all(lessThanEqual(abs(screenPoint), innerMetres * 0.5))
       && all(greaterThanEqual(pictureUv, vec2(0.0)))
       && all(lessThanEqual(pictureUv, vec2(1.0)))) {
@@ -54,10 +58,13 @@ export function patchScreen(material: MeshPhysicalMaterial) {
     screenRadii: { value: new Vector4() },
     screenPadColor: { value: new Color('#ffffff') },
     screenColourOverride: { value: false },
+    screenDemoEdges: { value: false },
   };
-  // Keep the opaque P-6 material. Its deterministic coverage test consumes only
-  // the SDF's subfragment edge coverage before the existing SMAA/MSAA path.
-  material.alphaHash = true;
+  let extendDemoEdges = false;
+  // Continuous opaque silhouette: threshold derivative-based SDF coverage,
+  // then let existing SMAA/MSAA smooth the edge without stochastic holes.
+  material.alphaHash = false;
+  material.alphaTest = 0.5;
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
     shader.vertexShader = `varying vec2 vScreenUv;\n${shader.vertexShader}`
@@ -66,9 +73,10 @@ export function patchScreen(material: MeshPhysicalMaterial) {
       .replace('#include <alphatest_fragment>', `${mask}\n#include <alphatest_fragment>`)
       .replace('#include <emissivemap_fragment>', sample);
   };
-  material.customProgramCacheKey = () => 't-p3-screen-v2';
+  material.customProgramCacheKey = () => 't-p9e-screen-v1';
   return {
-    bind(texture: Texture, imageSize: Size) {
+    bind(texture: Texture, imageSize: Size, demoEdges = false) {
+      extendDemoEdges = demoEdges;
       texture.colorSpace = SRGBColorSpace;
       texture.flipY = false;
       const needsCompile = material.emissiveMap === null;
@@ -85,6 +93,7 @@ export function patchScreen(material: MeshPhysicalMaterial) {
       uniforms.pictureMetres.value.set(fitted.image.w, fitted.image.h);
       uniforms.screenRadii.value.set(...radii);
       uniforms.screenPadColor.value.set(padColor);
+      uniforms.screenDemoEdges.value = extendDemoEdges && mode === 'contain' && pad === 0 && padColor.toLowerCase() === '#ffffff';
     },
     colour(hex: string) {
       uniforms.screenColourOverride.value = true;
