@@ -69,6 +69,8 @@ it('T-P9f upload fills the screen while explicit Fit image and shared settings r
       expect(body).not.toBe(source);await route.fulfill({response,body});
     });
     if(process.env['PLINTH_LIVE_SEED']==='upload')await ready(page);
+    // Picking demo devices must not count as an explicit Fit image preference.
+    for(const id of ['tablet','laptop','card','browser','phone'])await page.locator('#control-device').selectOption(id);
     const png=new PNG({width:200,height:380});for(let i=0;i<png.data.length;i+=4){png.data[i]=20;png.data[i+1]=30;png.data[i+2]=40;png.data[i+3]=255;}
     const file={name:'test-upload.png',mimeType:'image/png',buffer:PNG.sync.write(png)};
     await page.locator('#image-file').setInputFiles(file);await page.waitForFunction(()=>window.__plinth.getImage()?.identity==='user');

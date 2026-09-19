@@ -106,7 +106,13 @@ export function createSettingsStore(stage: Stage, studio: Studio, options: { imm
       } finally { hydrating = prior; }
     },
     prepareUpload() { if (automaticUploadFit) api.apply({fit:'cover'}); },
-    setDevice(id) { if (id !== state.device) api.apply({ device: id, spec: presetSpec(id), ...(stage.getImage()?.identity === 'demo' ? { fit: demoFit(id) } : {}) }); },
+    setDevice(id) {
+      if (id === state.device) return;
+      const uploadFit = automaticUploadFit;
+      api.apply({ device: id, spec: presetSpec(id), ...(stage.getImage()?.identity === 'demo' ? { fit: demoFit(id) } : {}) });
+      // Demo framing is internal, not an explicit user choice of image fitting.
+      automaticUploadFit = uploadFit;
+    },
     subscribe(listener) { listeners.add(listener); return () => { listeners.delete(listener); }; },
     dispose() { if (disposed) return; disposed = true; unsubscribe(); listeners.clear(); },
   };
