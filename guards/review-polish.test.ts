@@ -131,6 +131,9 @@ it('T-P9e mobile image shortcut, theme, segmented looks and export stay usable',
     const source = new PNG({ width: 64, height: 32 }); source.data.fill(255);
     await chooser.setFiles({ name: 'phone-upload.png', mimeType: 'image/png', buffer: PNG.sync.write(source) });
     await page.waitForFunction(() => window.__plinth.getImage()?.identity === 'user');
+    // T-P9f's first upload also chooses Cover. Let that real settings update
+    // finish its P-14 address synchronization before measuring theme isolation.
+    await page.waitForFunction(() => location.hash.startsWith('#s='));
     await page.locator('#settings-open').click();
     if (process.env['PLINTH_POLISH_SEED'] === 'footer') await page.addStyleTag({ content:
       '.editor #png-actions{height:136px;align-content:start;grid-template-rows:auto auto}.editor #png-actions label{grid-row:1}.editor #png-actions #png-scale{grid-row:2}.editor #png-actions #png-export{grid-row:1 / 3}' });

@@ -1,7 +1,9 @@
 /** Browser-only pose interaction adapter. The pose math remains in poses.ts. */
+import { AZIMUTH_LIMIT, ELEVATION_MIN, ELEVATION_MAX } from './poses';
 export interface PoseControllerTarget {
   advance(dt: number): boolean;
   orbit(deltaAzimuth: number, deltaElevation: number): void;
+  getOrbit?(): { azimuth: number; elevation: number };
 }
 
 export interface PoseController {
@@ -10,6 +12,17 @@ export interface PoseController {
 }
 
 const PIXELS_PER_RADIAN = 240;
+
+/** Exponential approach inside the final 15 degrees, with no stored overshoot.
+ * Integrating distance gives the same result for one drag or many small events. */
+export function easedOrbitDelta(value: number, delta: number, min: number, max: number): number {
+  if (delta === 0) return 0;
+  const sign = Math.sign(delta), band = 15 * Math.PI / 180;
+  const remaining = Math.max(0, sign > 0 ? max - value : value - min);
+  const linear = Math.min(Math.abs(delta), Math.max(0, remaining - band));
+  const near = remaining - linear;
+  return sign * (linear + near * (1 - Math.exp(-(Math.abs(delta) - linear) / band)));
+}
 
 export function createPoseController(canvas: HTMLCanvasElement, target: PoseControllerTarget, redraw: () => void): PoseController {
   // Reserve gestures before pointerdown; capture alone cannot stop native scrolling.
@@ -57,7 +70,10 @@ export function createPoseController(canvas: HTMLCanvasElement, target: PoseCont
     x = event.clientX;
     y = event.clientY;
     if (dx === 0 && dy === 0) return;
-    target.orbit(dx / PIXELS_PER_RADIAN, -dy / PIXELS_PER_RADIAN);
+    const orbit = target.getOrbit?.();
+    const azimuth = dx / PIXELS_PER_RADIAN, elevation = -dy / PIXELS_PER_RADIAN;
+    target.orbit(orbit ? easedOrbitDelta(orbit.azimuth, azimuth, -AZIMUTH_LIMIT, AZIMUTH_LIMIT) : azimuth,
+      orbit ? easedOrbitDelta(orbit.elevation, elevation, ELEVATION_MIN, ELEVATION_MAX) : elevation);
     redraw();
   };
   const release = (event: PointerEvent): void => {

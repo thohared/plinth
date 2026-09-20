@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createPoseController } from './controller';
+import { createPoseController, easedOrbitDelta } from './controller';
 
 type Listener = (event: { pointerId?: number; clientX?: number; clientY?: number }) => void;
 class FakeTarget {
@@ -24,6 +24,21 @@ class FakeCanvas extends FakeTarget {
 const originalDocument = globalThis.document;
 const originalRaf = globalThis.requestAnimationFrame;
 const originalCancel = globalThis.cancelAnimationFrame;
+it('pointer motion slows before a limit, reverses immediately and is independent of event subdivision', () => {
+  const min = -75*Math.PI/180, max = 75*Math.PI/180;
+  const start = 65*Math.PI/180;
+  const whole = start + easedOrbitDelta(start,.3,min,max);
+  expect(whole).toBeGreaterThan(start);
+  expect(whole).toBeLessThan(max);
+  expect(whole-start).toBeLessThan(.3);
+  let split = start;
+  for(let i=0;i<30;i++) split += easedOrbitDelta(split,.01,min,max);
+  expect(split).toBeCloseTo(whole,12);
+  expect(easedOrbitDelta(whole,-.05,min,max)).toBeCloseTo(-.05,12);
+  expect(easedOrbitDelta(max,-.05,min,max)).toBeCloseTo(-.05,12);
+  expect(easedOrbitDelta(max,1,min,max)).toBe(0);
+  expect(easedOrbitDelta(0,.05,min,max)).toBeCloseTo(.05,12);
+});
 afterEach(() => {
   Object.defineProperty(globalThis, 'document', { configurable: true, value: originalDocument });
   Object.defineProperty(globalThis, 'requestAnimationFrame', { configurable: true, value: originalRaf });

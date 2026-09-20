@@ -46,7 +46,7 @@ it('T-P6 mobile: sheet reserves space, real touch scroll/slider/orbit, focus, re
     for(const size of [{width:700,height:400},{width:820,height:1180},{width:1280,height:800},{width:400,height:700}]){
       await page.setViewportSize(size);
       await page.waitForFunction(()=>{const c=document.querySelector('#stage')!.getBoundingClientRect();return c.right<=innerWidth&&c.bottom<=innerHeight;});
-      const ratio=await canvas.evaluate(el=>el.getBoundingClientRect().width/el.getBoundingClientRect().height);expect(Math.abs(ratio-.8)).toBeLessThan(.01);
+      const ratio=await canvas.evaluate(el=>el.getBoundingClientRect().width/el.getBoundingClientRect().height);expect(Math.abs(ratio-1)).toBeLessThan(.01);
       expect(await page.evaluate(()=>window.__plinth.getSettings().custom)).toEqual(custom);
       if(size.width>=900)expect((await panel.boundingBox())!.width).toBe(320);
     }
@@ -68,17 +68,17 @@ it('T-P6 composition/reset and QA changes update native controls without losing 
     await page.waitForFunction(()=>window.__plinth.getImage()?.identity==='user');
     await page.evaluate(()=>window.__plinth.applySettings({fit:'cover',pad:.2}));
     await page.locator('[data-composition="dark-laptop"]').click();
-    expect(await page.locator('#control-device').inputValue()).toBe('laptop');expect(await page.locator('#control-fit').inputValue()).toBe('contain');
+    expect(await page.locator('#control-device').inputValue()).toBe('laptop');expect(await page.locator('#control-fit').inputValue()).toBe('cover');
     expect(await page.evaluate(()=>window.__plinth.getSpec().hingeAngle)).toBe(1.85);
     await page.evaluate(()=>{window.__plinth.applySettings({background:{mode:'gradient',solid:'#123456',top:'#203040',bottom:'#e0d0c0'}});window.__plinth.setScene('warm-sunset');});
     expect(await page.locator('#control-background').inputValue()).toBe('gradient');expect(await page.locator('#control-top').inputValue()).toBe('#203040');
     const before=await page.evaluate(()=>window.__plinth.getSettings());
     expect(await page.evaluate(()=>{try{window.__plinth.applySettings({scene:'soft-studio',spec:{...window.__plinth.getSpec(),bezel:99}});return false;}catch{return true;}})).toBe(true);
     expect(await page.evaluate(()=>window.__plinth.getSettings())).toEqual(before);
-    await page.locator('#reset').click();expect(await page.locator('#control-device').inputValue()).toBe('phone');expect(await page.locator('#control-aspect').inputValue()).toBe('4:5');expect(await page.evaluate(()=>window.__plinth.getImage())).toMatchObject({identity:'user',width:40,height:20,fit:'contain',pad:0});
-    const observations=await page.evaluate(()=>['studio-phone','dark-laptop','clean-browser','warm-card'].map(id=>{const start=performance.now();window.__plinth.compose(id as 'studio-phone');return{id,ms:performance.now()-start};}));
+    await page.locator('#reset').click();expect(await page.locator('#control-device').inputValue()).toBe('phone');expect(await page.locator('#control-aspect').inputValue()).toBe('16:9');expect(await page.evaluate(()=>window.__plinth.getImage())).toMatchObject({identity:'user',width:40,height:20,fit:'cover',pad:0});
+    const observations=await page.evaluate(()=>['studio-phone','dark-laptop','clean-tablet','warm-card'].map(id=>{const start=performance.now();window.__plinth.compose(id as 'studio-phone');return{id,ms:performance.now()-start};}));
     console.log('T-P6 composition apply timings, Linux/SwiftShader, one observed sequence; not the §6 release gate',observations);
-    expect(await page.locator('.looks img').evaluateAll(images=>images.every(image=>(image as HTMLImageElement).complete&&(image as HTMLImageElement).naturalWidth===240))).toBe(true);
+    expect(await page.locator('.looks img').evaluateAll(images=>images.every(image=>(image as HTMLImageElement).complete&&(image as HTMLImageElement).naturalWidth===480))).toBe(true);
   } finally {await page.close();}
 });
 

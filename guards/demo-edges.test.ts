@@ -20,10 +20,14 @@ it('T-P9d real controls choose full demo screens and retain an uploaded image',a
    expect(await page.evaluate(()=>window.__plinth.getImage())).toMatchObject({identity:'demo',originalWidth:id==='phone'?845:2880,originalHeight:id==='phone'?1862:1800});
    expect(await page.locator('#control-fit').inputValue()).toBe('contain');
   }
+  // This probe needs side gutters; desktop now starts with a wide 16:9 output.
+  await page.locator('#control-aspect').selectOption('4:5');
   const screenshot=PNG.sync.read(await page.screenshot());
   const boxes=await page.evaluate(()=>({stage:document.querySelector('#stage')!.getBoundingClientRect().toJSON(),workspace:document.querySelector('#workspace')!.getBoundingClientRect().toJSON()}));
   const y=40;const xs=[2,Math.floor(boxes.stage.x)-1,Math.ceil(boxes.stage.right)+1,Math.floor(boxes.workspace.right)-2];
   for(const x of xs){const offset=(y*screenshot.width+x)*4;expect([...screenshot.data.subarray(offset,offset+3)],`gutter ${x}`).toEqual([233,235,238]);}
+  // Explicit Fit image must survive upload and device changes.
+  await page.locator('#control-fit').selectOption('contain');
   const source=new PNG({width:64,height:32});source.data.fill(255);
   await page.locator('#image-file').setInputFiles({name:'user.png',mimeType:'image/png',buffer:PNG.sync.write(source)});
   await page.waitForFunction(()=>window.__plinth.getImage()?.identity==='user');
