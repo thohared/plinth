@@ -85,7 +85,7 @@ export function deckDetails(parent: Group, spec: DeviceSpec, baseD: number, base
   const pad = parent.getObjectByName('trackpad');
   if (pad instanceof Mesh) {
     pad.geometry.computeBoundingBox();
-    const size = pad.geometry.boundingBox!.getSize(new Vector3()), edge = Math.min(d * .07, size.y * .025);
+    const size = pad.geometry.boundingBox!.getSize(new Vector3()), edge = Math.min(d * .15, size.y * .03);
     const rim = mesh(parent, 'trackpad-rim', geometry.plane(size.x + edge * 2, size.y + edge * 2, size.y * .06 + edge), mats.aperture);
     rim.rotation.copy(pad.rotation); rim.position.copy(pad.position); rim.position.y = baseT + gap;
     pad.material = mats.key;

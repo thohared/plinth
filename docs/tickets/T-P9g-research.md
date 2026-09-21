@@ -51,3 +51,12 @@ screenshots. No third-party hardware assets, paid API, new dependency or network
 surface is necessary. Named views keep their accepted camera rules; hardware can
 alter silhouettes and therefore PG differences must be disclosed, never blessed
 by the builder. Physical mobile performance and Safari remain release gates.
+
+## Implementation finding — F10
+
+`buildInto` cleared children but retained root.position before measuring rebuilt
+geometry. New bottom sockets make this observable: after a phone dimension edit,
+rig.bounds.min.y was -0.000075 instead of zero. The added lifecycle assertion
+failed before the fix. Reset the builder's local position before rebuilding;
+Stage still owns its separate world pose/floor correction. This restores the
+existing builder contract rather than changing the P-11 floor rule.

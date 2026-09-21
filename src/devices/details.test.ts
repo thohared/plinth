@@ -39,6 +39,7 @@ describe('P-16 generic hardware', () => {
     const old = rig.group.getObjectByName('camera-module');
     rig.update({...rig.spec,w:.082,h:.16});
     expect(rig.group.getObjectByName('camera-module')).not.toBe(old);
+    expect(rig.bounds.min.y).toBeCloseTo(0,7);
     for(const spy of [...g,...i]) expect(spy).toHaveBeenCalledTimes(1);
     for(const spy of m) expect(spy).not.toHaveBeenCalled();
     rig.dispose();for(const spy of m) expect(spy).toHaveBeenCalledTimes(1);

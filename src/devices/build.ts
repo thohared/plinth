@@ -455,6 +455,8 @@ function buildDeck(
 
 function buildInto(root: Group, spec: DeviceSpec, mats: Materials, browser: boolean, device?: DeviceId) {
   root.clear();
+  // Rebuild from local coordinates, never from the previous floor correction.
+  root.position.set(0, 0, 0);
   const slab = new Group();
   slab.name = 'slab';
   // Slab local frame is centred in x/y with z∈[0,depth]; lift so y∈[0,h].
