@@ -28,6 +28,9 @@ it('Free view reaches the back, reverses, persists v1, exports and resets withou
   try{
     await ready(page);const start=await pose(page);
     await page.locator('#free-view').click();expect(await pose(page)).toEqual(start);
+    await page.locator('#stage').click();await page.keyboard.press('w');
+    expect(await page.locator('#free-view').getAttribute('aria-pressed')).toBe('false');
+    await page.locator('#free-view').click();
     await drag(page,Math.PI*240);
     const back=await pose(page);expect(back.pose).toBeNull();expect(back.direction).toEqual(start.direction);
     // Literal half-turn: scalar component is zero, irrespective of camera-relative axis.

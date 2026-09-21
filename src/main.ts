@@ -409,7 +409,7 @@ async function boot(): Promise<void> {
       orbit: (azimuth, elevation) => { if (recoveryState === 'ready') stage.orbit(azimuth, elevation); },
     }, render);
     cleanup.push(() => controller?.dispose());
-    cleanup.push(attachShortcuts(window,{ready:() => recoveryState === 'ready',device:id => store.setDevice(id),pose:id => {store.apply({pose:id});controller?.start();},png:() => {if (exporter.get().busy) return false; void exporter.run(store.get().pngScale).catch(() => {}); return true;},error:error => showNote(error instanceof Error ? error.message : 'Unable to apply shortcut.')}));
+    cleanup.push(attachShortcuts(window,{ready:() => recoveryState === 'ready',device:id => store.setDevice(id),pose:id => {store.apply({pose:id});panel?.exitFreeView();controller?.start();},png:() => {if (exporter.get().busy) return false; void exporter.run(store.get().pngScale).catch(() => {}); return true;},error:error => showNote(error instanceof Error ? error.message : 'Unable to apply shortcut.')}));
     // Query compositions are applied before the interaction controller exists.
     if (COMPOSITIONS.some(row => row.id === composition)) controller.start();
   }

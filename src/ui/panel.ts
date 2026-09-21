@@ -255,7 +255,7 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
     else if (media.matches && !document.body.classList.contains('sheet-open') && root.contains(active)) opener.focus();
   };
   media.addEventListener('change',adjustFocus,{signal});
-  return { setOpen, showShare, showAddressNotice,
+  return { setOpen, showShare, showAddressNotice, exitFreeView: () => setFree(false),
     setRecovery(value: RecoveryState) {
       recovery = value;
       syncMobilePick();
