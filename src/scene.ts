@@ -82,6 +82,17 @@ function meshVertexBounds(root: Group, retainPoints = false): { bounds: Box3; po
     if (!(object instanceof Mesh)) return;
     const position = object.geometry.getAttribute('position');
     if (!position) return;
+    // Extruded faces repeat positions for UVs and hard normals. For the local
+    // support-point cache, retain each exact position once per geometry before
+    // applying instances. The independent world-bound path still reads all vertices.
+    let unique: number[] | undefined;
+    if (retainPoints) {
+      unique = []; const seen = new Set<string>();
+      for (let v = 0; v < position.count; v++) {
+        const key = `${position.getX(v)}:${position.getY(v)}:${position.getZ(v)}`;
+        if (!seen.has(key)) { seen.add(key); unique.push(v); }
+      }
+    }
     const instances = object instanceof InstancedMesh ? object.count : 1;
     for (let i = 0; i < instances; i++) {
       if (object instanceof InstancedMesh) {
@@ -89,7 +100,8 @@ function meshVertexBounds(root: Group, retainPoints = false): { bounds: Box3; po
         transform.multiplyMatrices(object.matrixWorld, instance);
       } else transform.copy(object.matrixWorld);
       const e = transform.elements;
-      for (let v = 0; v < position.count; v++) {
+      for (let j = 0; j < (unique?.length ?? position.count); j++) {
+        const v = unique ? unique[j]! : j;
         const x = position.getX(v); const y = position.getY(v); const z = position.getZ(v);
         const w = e[3]! * x + e[7]! * y + e[11]! * z + e[15]!;
         const px = (e[0]! * x + e[4]! * y + e[8]! * z + e[12]!) / w;
@@ -173,7 +185,7 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
 
   let id: DeviceId = initialDevice;
   let sceneId: SceneId = initialScene;
-  let rig: DeviceRig = buildDevice(presetSpec(id), id === 'browser', id !== 'browser' && id !== 'card', id);
+  let rig: DeviceRig = buildDevice(presetSpec(id), id === 'browser', id !== 'browser' && id !== 'card', id, true);
   rig.group.name = 'device-rig';
   posePivot.add(rig.group);
   let localGeometry: readonly number[] = cachedLocalGeometry(rig.group, id, rig.spec);
@@ -394,7 +406,7 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
       let committed = false;
       try {
         if (shapeChanged) {
-          candidateRig = buildDevice(next.spec, next.device === 'browser', next.device !== 'browser' && next.device !== 'card', next.device);
+          candidateRig = buildDevice(next.spec, next.device === 'browser', next.device !== 'browser' && next.device !== 'card', next.device, true);
           if (image) candidateRig.setImage(image.texture, { w: image.meta.width, h: image.meta.height });
           candidateRig.setImageFit(next.fit, next.pad, next.padColor);
         }
@@ -453,7 +465,7 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
       posePivot.remove(rig.group);
       rig.dispose();
       id = next;
-      rig = buildDevice(presetSpec(id), id === 'browser', id !== 'browser' && id !== 'card', id);
+      rig = buildDevice(presetSpec(id), id === 'browser', id !== 'browser' && id !== 'card', id, true);
       rig.group.name = 'device-rig';
       posePivot.add(rig.group);
       scene.updateMatrixWorld(true);

@@ -60,3 +60,23 @@ rig.bounds.min.y was -0.000075 instead of zero. The added lifecycle assertion
 failed before the fix. Reset the builder's local position before rebuilding;
 Stage still owns its separate world pose/floor correction. This restores the
 existing builder contract rather than changing the P-11 floor rule.
+
+## Implementation finding — F11
+
+The unchanged 100-endpoint test exceeds its 5s timeout on both main (9.58s) and
+this branch (7.09–8.95s) in this workspace, on Node 24 and Node 22. No assertion
+or deadline is changed. CPU profiling identified repeated ExtrudeGeometry vertex,
+UV and buffer creation as the dominant cost. A normal-only cache was insufficient
+and was discarded before commit. Stage now explicitly requests immutable CPU-only
+extrusion templates from the builder (32 entries / 8 MiB cap). Each rig receives
+its own BufferGeometry and copied attributes. The direct authoring builder still
+creates the extrusion; new tests compare every cached production position, normal,
+UV, index and group byte-for-byte against it, and prove disposal/mutation isolation.
+This reduces repeated device/Advanced rebuild work without changing rendered data.
+
+F11 also found that the pose support-point cache retained every duplicate triangle
+position (UV/normal seams), multiplying work on every drag. Deduplicate exact
+local positions per mesh before applying instances when collecting cached points.
+No rounding or hull approximation; all unique actual vertices remain. The separate
+geometryWorldBounds path continues reading every triangle vertex, preserving its
+independence in the existing 100-endpoint/1,500-transition checks.
