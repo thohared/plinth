@@ -113,3 +113,29 @@ Physical mobile/Safari and the full §6 performance gate remain release obligati
 - Publication preserved all eight local code/research/spec commits with verified
   identical Git trees. This final commit records evidence only, following loss of
   the local execution environment. No merge or deployment is claimed.
+
+## Review follow-up — finding 1 (F13)
+
+Independent review: https://github.com/thohared/plinth/pull/31#pullrequestreview-5269491897
+Reviewed head: 4cd40ffe88fce7fea82b9b7368c414ce2ef0e9dd.
+
+The desktop guard now completes the W-triggered named transition through the
+existing deterministic advancePose hook and snapshots the actual drag start.
+W exit, exact direction equality, activation no-op, half-turn/reversal, reload,
+PNG and reset assertions remain. No tolerance, production file or fixture changed.
+
+Linux/Node 24.19.0/Chromium 153.0.8010.0 focused verification:
+- Both corrected guards PASS: 73.80s, including the complete desktop export flow.
+- Served-source rotation-to-orbit seed: both guards FAIL as expected, 45.14s.
+  Desktop detects a large direction change; touch detects quaternion w=1.
+  The seed changes only the served response and leaves no production mutation.
+- Reuse the independent review's exact-production typecheck and 228/228 unit
+  results, plus completed PNG evidence (15 sizes / 400 combinations). Only this
+  guard and documentation change. The normal PR update triggers cloud acceptance;
+  no workflow was manually rerun. Full CI on the new head remains pending.
+
+Finding 2 remains OPEN: owner approval of PG artifact 10637525423 is required by
+§7/PG-3(b). Its ZIP digest is
+cc584a7ac7a6e978e48d355f4e110075f1af536405f5f29a21c5dac9ca3ca607.
+Production rendering is unchanged by this follow-up; these reviewed images remain
+applicable. No baseline bless, merge or self-review is performed.
