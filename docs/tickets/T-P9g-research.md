@@ -80,3 +80,19 @@ local positions per mesh before applying instances when collecting cached points
 No rounding or hull approximation; all unique actual vertices remain. The separate
 geometryWorldBounds path continues reading every triangle vertex, preserving its
 independence in the existing 100-endpoint/1,500-transition checks.
+
+## F12 — instance buffers across context recovery (2026-09-21)
+
+The full acceptance run exposed a regression in the unchanged state-share
+recovery guard. The isolated guard also failed (60s wait for ready), while base
+main passed. A served-code logging probe narrowed it to deferred device navigation
+after restoration: four `INVALID_OPERATION: delete: object does not belong to this
+context` warnings and recovery=`failed`. Restoration without navigation succeeded.
+
+`Stage.releaseGpuResources` disposed geometry/materials but did not dispose
+InstancedMesh-owned buffers/listeners. The new repeated phone details introduced
+these resources to the default rig; later rig disposal still called old renderer
+listeners after restoration. Include InstancedMesh in the existing release set
+before renderer reinitialization. The unchanged browser guard is the regression
+check; do not change its assertions or timeouts. This is within P-16's resource
+ownership/recovery requirement and does not affect rendered geometry.

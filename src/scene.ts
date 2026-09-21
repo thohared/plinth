@@ -352,6 +352,9 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
     releaseGpuResources() {
       const resources = new Set<{ dispose(): void }>();
       scene.traverse(object => { if (object instanceof Mesh) {
+        // Instance attributes have renderer-owned listeners separate from geometry.
+        // Remove them before context restoration can install new GPU ownership.
+        if (object instanceof InstancedMesh) resources.add(object);
         resources.add(object.geometry);
         for (const material of Array.isArray(object.material) ? object.material : [object.material]) resources.add(material);
       } });
