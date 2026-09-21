@@ -96,3 +96,14 @@ listeners after restoration. Include InstancedMesh in the existing release set
 before renderer reinitialization. The unchanged browser guard is the regression
 check; do not change its assertions or timeouts. This is within P-16's resource
 ownership/recovery requirement and does not affect rendered geometry.
+
+## F13 — review 5269491897: sample the actual start of Free view
+
+The independent review reproduced the desktop guard's one-ULP direction mismatch
+and traced it to the preceding W-triggered named-pose transition, before Free view
+rotation. Its isolated probe confirmed exact direction preservation across rotate.
+The guard must complete the named transition deterministically, then take a fresh
+snapshot at the actual start of the drag. Keep W's exit assertion, exact direction
+equality, the half-turn/reversal checks, reload/PNG/reset, and rotation-to-orbit
+negative probe. Do not adjust floating-point tolerances or production camera code.
+The second finding is an owner decision on PG artifact 10637525423, not a code fix.
