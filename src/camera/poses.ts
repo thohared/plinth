@@ -116,3 +116,14 @@ export function advanceTransition(transition: PoseTransition, dt: number): { val
     ? { value, transition: null }
     : { value, transition: { ...transition, elapsed } };
 }
+
+/** Full model rotation about stable camera-relative axes. No Euler limits/poles. */
+export function rotateInView(rotation: Quaternion, direction: Vector3, horizontal: number, vertical: number): Quaternion {
+  const angle = Math.hypot(horizontal, vertical);
+  if (!Number.isFinite(angle)) throw new Error('Rotation delta must be finite.');
+  if (angle === 0) return rotation.clone();
+  const right = new Vector3(0, 1, 0).cross(direction).normalize();
+  const up = direction.clone().cross(right).normalize();
+  const axis = right.multiplyScalar(vertical / angle).addScaledVector(up, horizontal / angle).normalize();
+  return new Quaternion().setFromAxisAngle(axis, angle % (2 * Math.PI)).multiply(rotation).normalize();
+}

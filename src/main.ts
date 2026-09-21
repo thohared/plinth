@@ -238,6 +238,7 @@ async function boot(): Promise<void> {
   cleanup.push(() => store.dispose());
   let panel: ReturnType<typeof createPanel> | undefined;
   let qaShadowOnly = false;
+  let freeView = false;
   const exporter = createDownload(scale => {
     if (disposed || recoveryState !== 'ready') throw new Error('The preview is not ready for PNG export.');
     const state = store.get(); const visible = stage.getRig().group.visible;
@@ -258,7 +259,7 @@ async function boot(): Promise<void> {
     },
   });
   cleanup.push(() => recovery.dispose());
-  if (ui) { panel = createPanel(document.querySelector<HTMLElement>('#panel')!, store, resize, exporter, pg ? undefined : () => { void sharing?.copy(); }); cleanup.push(() => panel!.dispose()); }
+  if (ui) { panel = createPanel(document.querySelector<HTMLElement>('#panel')!, store, resize, exporter, pg ? undefined : () => { void sharing?.copy(); }, pg ? undefined : active => { freeView = active; }); cleanup.push(() => panel!.dispose()); }
   if (ui) {
     const workspaceObserver = new ResizeObserver(() => resize());
     workspaceObserver.observe(document.querySelector('#workspace')!);
@@ -306,7 +307,7 @@ async function boot(): Promise<void> {
     const start = state.pose !== lastPose || state.device !== lastDevice;
     lastPose = state.pose; lastDevice = state.device;
     // The orbit controller (and QA step) already renders its own frame.
-    if (!['advancePose', 'orbit', 'setImage'].includes(reason ?? '')) resize();
+    if (!['advancePose', 'orbit', 'rotate', 'setImage'].includes(reason ?? '')) resize();
     if (start && state.pose !== null) controller?.start();
   }));
   armed = true;
@@ -398,6 +399,11 @@ async function boot(): Promise<void> {
     cleanup.push(() => window.removeEventListener('resize', resize));
     window.visualViewport?.addEventListener('resize', resize, { signal });
     controller = createPoseController(canvas, {
+      freeRotate: (horizontal, vertical) => {
+        if (!freeView) return false;
+        if (recoveryState === 'ready') stage.rotate(horizontal, vertical);
+        return true;
+      },
       getOrbit: () => directionToOrbit(stage.snapshot().custom.direction),
       advance: (dt) => recoveryState === 'ready' ? stage.advancePose(dt) : false,
       orbit: (azimuth, elevation) => { if (recoveryState === 'ready') stage.orbit(azimuth, elevation); },

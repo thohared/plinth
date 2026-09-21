@@ -19,6 +19,8 @@ import {
 } from 'three';
 import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
 import { screenRect, shapeHash, type DeviceSpec } from './spec';
+import { detailMaterials, slabDetails, deckDetails } from './details';
+import type { DeviceId } from './presets';
 import { patchScreen } from '../screen/material';
 import type { FitMode, Size } from '../screen/types';
 
@@ -198,7 +200,7 @@ function edgeBevel(spec: DeviceSpec, depth: number): number {
   return Math.min(BUILDER_RATIOS.edgeBevel * depth, BUILDER_RATIOS.edgeBevelOfBezel * spec.bezel);
 }
 
-interface Materials {
+interface Materials extends ReturnType<typeof detailMaterials> {
   frame: MeshPhysicalMaterial;
   screenBacking: MeshPhysicalMaterial;
   key: MeshPhysicalMaterial;
@@ -235,6 +237,7 @@ function makeMaterials(spec: DeviceSpec, darkScreenRecess: boolean): Materials {
       metalness: darkScreenRecess ? 0 : spec.frameMetalness,
       roughness: darkScreenRecess ? 0.85 : spec.frameRoughness,
     }),
+    ...detailMaterials(),
     frame: new MeshPhysicalMaterial({
       color: 0xd9dde3,
       metalness: spec.frameMetalness,
@@ -450,13 +453,28 @@ function buildDeck(
   parent.add(pad);
 }
 
-function buildInto(root: Group, spec: DeviceSpec, mats: Materials, browser: boolean) {
+function buildInto(root: Group, spec: DeviceSpec, mats: Materials, browser: boolean, device?: DeviceId) {
   root.clear();
   const slab = new Group();
   slab.name = 'slab';
   // Slab local frame is centred in x/y with z∈[0,depth]; lift so y∈[0,h].
   slab.position.y = spec.h / 2;
   const parts = buildSlab(slab, spec, mats, browser);
+  const solids = new Map<string, BufferGeometry>();
+  const detailGeometry = {
+    plane: roundedPlaneGeometry,
+    solid: (w: number, h: number, depth: number, radius: number) => {
+      const key = `${w}:${h}:${depth}:${radius}`;
+      let geometry = solids.get(key);
+      if (!geometry) {
+        geometry = slabGeometry({ w, h, depth, radius,
+          bevel: Math.min(depth * .2, radius * .2), detail: { curveSegments: 8, bevelSegments: 2 } });
+        solids.set(key, geometry);
+      }
+      return geometry;
+    },
+  };
+  slabDetails(slab, spec, device, mats, detailGeometry);
 
   if (spec.standType === 'hinge') {
     const baseD = BUILDER_RATIOS.baseDepth * spec.h;
@@ -477,6 +495,7 @@ function buildInto(root: Group, spec: DeviceSpec, mats: Materials, browser: bool
     base.position.z = baseD / 2;
     root.add(base);
     buildDeck(root, mats, spec.w, baseD, baseT);
+    if (device === 'laptop') deckDetails(root, spec, baseD, baseT, mats, detailGeometry);
 
     const hinge = new Group();
     hinge.name = 'hinge';
@@ -516,13 +535,13 @@ function buildInto(root: Group, spec: DeviceSpec, mats: Materials, browser: bool
   return { ...parts, bounds };
 }
 
-export function buildDevice(initial: DeviceSpec, browser = false, darkScreenRecess = true): DeviceRig {
+export function buildDevice(initial: DeviceSpec, browser = false, darkScreenRecess = true, device?: DeviceId): DeviceRig {
   const group = new Group();
   group.name = 'device';
   const mats = makeMaterials(initial, darkScreenRecess);
   let spec = { ...initial };
   let hash = shapeHash(spec);
-  let built = buildInto(group, spec, mats, browser);
+  let built = buildInto(group, spec, mats, browser, device);
   const picture = patchScreen(mats.screen);
   let imageSize: Size = { w: 1, h: 1 };
   let fit: FitMode = 'contain';
@@ -554,7 +573,7 @@ export function buildDevice(initial: DeviceSpec, browser = false, darkScreenRece
       const h = shapeHash(spec);
       if (h !== hash) {
         disposeGeometries(group);
-        built = buildInto(group, spec, mats, browser);
+        built = buildInto(group, spec, mats, browser, device);
         hash = h;
       }
       rig.frame = built.frame;
@@ -585,7 +604,10 @@ export function buildDevice(initial: DeviceSpec, browser = false, darkScreenRece
 }
 
 function disposeGeometries(root: Group): void {
+  const geometries = new Set<BufferGeometry>();
   root.traverse((o) => {
-    if (o instanceof Mesh) o.geometry.dispose();
+    if (o instanceof InstancedMesh) o.dispose();
+    if (o instanceof Mesh) geometries.add(o.geometry);
   });
+  for (const geometry of geometries) geometry.dispose();
 }

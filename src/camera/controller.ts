@@ -3,6 +3,7 @@ import { AZIMUTH_LIMIT, ELEVATION_MIN, ELEVATION_MAX } from './poses';
 export interface PoseControllerTarget {
   advance(dt: number): boolean;
   orbit(deltaAzimuth: number, deltaElevation: number): void;
+  freeRotate?(horizontal: number, vertical: number): boolean;
   getOrbit?(): { azimuth: number; elevation: number };
 }
 
@@ -70,6 +71,7 @@ export function createPoseController(canvas: HTMLCanvasElement, target: PoseCont
     x = event.clientX;
     y = event.clientY;
     if (dx === 0 && dy === 0) return;
+    if (target.freeRotate?.(dx / PIXELS_PER_RADIAN, dy / PIXELS_PER_RADIAN)) { redraw(); return; }
     const orbit = target.getOrbit?.();
     const azimuth = dx / PIXELS_PER_RADIAN, elevation = -dy / PIXELS_PER_RADIAN;
     target.orbit(orbit ? easedOrbitDelta(orbit.azimuth, azimuth, -AZIMUTH_LIMIT, AZIMUTH_LIMIT) : azimuth,

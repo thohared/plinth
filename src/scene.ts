@@ -3,7 +3,7 @@ import {
   Box3, Color, DirectionalLight, Group, InstancedMesh, Matrix4, Mesh, PerspectiveCamera, Scene,
   SRGBColorSpace, Texture, Vector3,
 } from 'three';
-import { advanceTransition, clampOrbit, clonePose, clonePoseSnapshot, type PoseSnapshot, directionToOrbit, isPoseId, isWideDevice, orbitToDirection, poseValue, type PoseId, type PoseSelection, type PoseTransition, type PoseValue } from './camera/poses';
+import { rotateInView, advanceTransition, clampOrbit, clonePose, clonePoseSnapshot, type PoseSnapshot, directionToOrbit, isPoseId, isWideDevice, orbitToDirection, poseValue, type PoseId, type PoseSelection, type PoseTransition, type PoseValue } from './camera/poses';
 import { buildDevice, type DeviceRig } from './devices/build';
 import { isDeviceId, presetSpec, type DeviceId } from './devices/presets';
 import { invariantViolations, shapeHash, type DeviceSpec } from './devices/spec';
@@ -48,6 +48,7 @@ export interface Stage {
   advancePose(dt: number): boolean;
   /** A finite pointer delta in radians; a real move selects custom pose. */
   orbit(deltaAzimuth: number, deltaElevation: number): void;
+  rotate(horizontal: number, vertical: number): void;
   setImage(bitmap: ImageBitmap, meta: ImageMeta): void;
   setDemoImages(images: DemoImages): void;
   setFit(mode: FitMode): void;
@@ -172,7 +173,7 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
 
   let id: DeviceId = initialDevice;
   let sceneId: SceneId = initialScene;
-  let rig: DeviceRig = buildDevice(presetSpec(id), id === 'browser', id !== 'browser' && id !== 'card');
+  let rig: DeviceRig = buildDevice(presetSpec(id), id === 'browser', id !== 'browser' && id !== 'card', id);
   rig.group.name = 'device-rig';
   posePivot.add(rig.group);
   let localGeometry: readonly number[] = cachedLocalGeometry(rig.group, id, rig.spec);
@@ -393,7 +394,7 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
       let committed = false;
       try {
         if (shapeChanged) {
-          candidateRig = buildDevice(next.spec, next.device === 'browser', next.device !== 'browser' && next.device !== 'card');
+          candidateRig = buildDevice(next.spec, next.device === 'browser', next.device !== 'browser' && next.device !== 'card', next.device);
           if (image) candidateRig.setImage(image.texture, { w: image.meta.width, h: image.meta.height });
           candidateRig.setImageFit(next.fit, next.pad, next.padColor);
         }
@@ -452,7 +453,7 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
       posePivot.remove(rig.group);
       rig.dispose();
       id = next;
-      rig = buildDevice(presetSpec(id), id === 'browser', id !== 'browser' && id !== 'card');
+      rig = buildDevice(presetSpec(id), id === 'browser', id !== 'browser' && id !== 'card', id);
       rig.group.name = 'device-rig';
       posePivot.add(rig.group);
       scene.updateMatrixWorld(true);
@@ -537,6 +538,20 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
       // Orbit changes only the camera direction; the shadow's world geometry is unchanged.
       frame();
     },
+    rotate(horizontal, vertical) {
+      const rotation = rotateInView(display.rotation, display.direction, horizontal, vertical);
+      if (horizontal === 0 && vertical === 0) return;
+      const next = { rotation, direction: display.direction.clone() };
+      const pivot = new Group(); pivot.quaternion.copy(rotation);
+      const raw = boundsFromLocal(localGeometry, pivot), centre = raw.getCenter(new Vector3());
+      pivot.position.set(-centre.x, -raw.min.y, -centre.z);
+      const bounds = boundsFromLocal(localGeometry, pivot);
+      // Calculate everything before committing: a rejected delta cannot mutate the view.
+      const framing = calculateFrame(camera.aspect, bounds, id, next);
+      display = next; selected = null; transition = null; worldBounds = bounds;
+      posePivot.position.copy(pivot.position); posePivot.quaternion.copy(rotation);
+      scene.updateMatrixWorld(true); installFrame(framing); changed();
+    },
     setImage(bitmap, meta) {
       const previous = ownedImages();
       const next = previous.find(value => value.bitmap === bitmap) ?? makeImage(bitmap, meta);
@@ -571,7 +586,7 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
     onDeviceChange(cb) { deviceListeners.add(cb); return () => deviceListeners.delete(cb); },
     onGeometryChange(cb) { geometryListeners.add(cb); return () => geometryListeners.delete(cb); },
   };
-  for (const name of ['setDevice', 'setSpec', 'setAspect', 'setScene', 'setPose', 'advancePose', 'orbit', 'setImage', 'setDemoImages', 'setFit', 'setPad', 'setPadColor'] as const) {
+  for (const name of ['setDevice', 'setSpec', 'setAspect', 'setScene', 'setPose', 'advancePose', 'orbit', 'rotate', 'setImage', 'setDemoImages', 'setFit', 'setPad', 'setPadColor'] as const) {
     const method = api[name] as (...args: never[]) => unknown;
     Object.assign(api, { [name]: (...args: never[]) => { const result = method(...args); stateChanged(name); return result; } });
   }
