@@ -16,6 +16,7 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { CopyShader } from 'three/addons/shaders/CopyShader.js';
 import { installAlphaSmaa } from './alphaSmaa';
+import { installSmaaEdgeSearch } from './edgeSmaa';
 
 /**
  * PLINTH_SPEC §4.4.5 / §4.4.6 — the render pipeline, and the one rule it
@@ -123,6 +124,7 @@ export function createPipeline(
       textures.push(lookups._areaTexture, lookups._searchTexture);
       addPass(smaa);
       installAlphaSmaa(smaa);
+      installSmaaEdgeSearch(smaa);
       // Start each decode through a promise so a synchronous throw cannot leave
       // an earlier decode rejection unobserved.
       ready = Promise.all(textures.map((t) =>
