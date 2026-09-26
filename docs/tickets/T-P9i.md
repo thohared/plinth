@@ -30,6 +30,46 @@ No fixture, dependency, workflow or existing test modifications.
 
 ## Evidence
 
-Pending implementation verification. PR #32's old camera edge-quality guard
-is not part of this branch; integration must preserve that angled regression
-with an explicit legacy/custom camera fixture, not remove its assertions.
+Verification on 2026-09-26, Linux, Node 24.19.0, Chromium 153.0.8010.0,
+ANGLE SwiftShader. Pinned Playwright browser download failed; an external
+workspace Chromium executable was used through the existing override. Project
+dependencies, lockfile and CI browser installation remain unchanged.
+
+- New production geometry test PASS, including all five aspects, resize,
+  completed Lean→Hero transitions, export framing and retained custom orbit.
+- New canvas guard PASS (20.20 s). Restoring the old lateral camera in the
+  served module FAILS the same guard (18.61 s total): top endpoint mismatch
+  3 px at ±120, against the unchanged 1 px tolerance. The initial seed attempt
+  failed to match Vite's shortened decimal syntax and timed out; it is not
+  the negative proof. The corrected one-match seed produced the metric failure.
+- Native screen-height differences at ±120/180/220 pixels from center:
+  original 9/13/15 px; candidate 0/0/0 px. Candidate top Y=246, bottom Y=575
+  at all six sampled columns. Flat QA color is used only for measurement;
+  review PNGs retain the unchanged original demo.
+- Phone original/candidate decoded pixels are identical (0 changed pixels).
+- Typecheck and build PASS. Existing >700 kB warning retained (709.80 kB JS).
+- Full unit suite: 209/210 PASS; one existing 100-endpoint camera test timed
+  out at 6.653 s with its original 5 s limit. Focused candidate retry also
+  timed out at 6.605 s. The identical test on clean main cdcd80a timed out
+  at 7.041 s in the same environment. This documents a baseline timing
+  limitation, not a full unit PASS. No timeout/assertion/configuration changed.
+- A full local npm run ci was interrupted during guards without a verdict.
+  Its incomplete run is not acceptance. Normal published-head cloud CI/PNG/PG
+  results remain required; no manual dispatch or duplicate rerun requested.
+- Native capture pages report zero page/console/GL errors. The optional
+  agent-browser CLI daemon could not start; actual browser evidence uses the
+  project's Playwright path and native screenshots, not a claimed CLI pass.
+
+See `docs/evidence/T-P9i/receipt.json` for hashes, dimensions, per-pair
+measurements and source identity. Local capture source
+459a129a52c09800ad7affedd7c673e8bd893f76 and published source
+bed42166b51cad51cab6b03ceebf4aadbbb26fd4 have identical complete Git tree
+39f376093fd0ae423573e422d1f4b8febcf2505f; subsequent changes are evidence/docs.
+Unit and clean-main comparison logs are included. These are local captures,
+not CI PG baselines, owner approval or target-device performance evidence.
+
+PR #32's old camera edge-quality guard is not part of this branch; integration
+must preserve that angled regression with an explicit legacy/custom camera
+fixture, not remove its assertions. Intentional Browser Hero PG differences
+remain unblessed. Fresh review, successful cloud checks and owner visual
+acceptance are outstanding. No merge or deploy.

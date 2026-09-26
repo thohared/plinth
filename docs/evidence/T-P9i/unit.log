@@ -1,0 +1,33 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> plinth@0.0.0 test
+> vitest run --project unit
+
+
+ RUN  v5.0.0 /workspace/scratch/8c61ee66c153/plinth-browser-fix
+
+ ❯ |unit| src/scene.test.ts (17 tests | 1 failed) 24153ms
+   ❯ T-P5 world framing and posing (6)
+     × keeps all 100 device/pose/aspect endpoints framed by independently projected world corners 6653ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |unit| src/scene.test.ts > T-P5 world framing and posing > keeps all 100 device/pose/aspect endpoints framed by independently projected world corners
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/scene.test.ts:105:3
+    103|   };
+    104|
+    105|   it('keeps all 100 device/pose/aspect endpoints framed by independent…
+       |   ^
+    106|     for (const id of DEVICE_IDS) for (const aspect of aspects) for (co…
+    107|       const stage = createStage(id, 'soft-studio', aspect);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 29 passed (30)
+      Tests  1 failed | 209 passed (210)
+   Start at  19:38:03
+   Duration  25.31s (tests 88%, import 6%, transform 6%, worker 1%)
+
