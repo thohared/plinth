@@ -83,3 +83,15 @@ the initial patch; this extension also touches §4.4.3/P-11(6). Reuse the
 existing thin-device footprint; preserve all guards, thresholds, fixtures
 and camera symmetry. Browser shadows in other poses also receive the
 minimum footprint; other device recipes do not change.
+
+Local fixup verification: TypeScript PASS, build PASS (unchanged >700 kB
+warning), all 210 unit tests PASS. `npm run ci` cannot complete browser
+guards: no Chromium executable is installed; pinned Playwright download
+failed with an invalid/truncated ZIP. No GPU PASS, native new image, or
+closure of the isolated-shadow finding is claimed.
+
+Publication is pending the required local CI gate or an explicit owner
+exception permitting draft publication for normal cloud verification.
+AGENTS/HANDOFF require successful local acceptance before publication;
+no check, fixture, dependency or workflow was altered to evade it.
+The old images remain historical evidence and are not this fixup's images.
