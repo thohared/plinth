@@ -1,0 +1,156 @@
+{
+  "head": "459a129a52c09800ad7affedd7c673e8bd893f76",
+  "tree": "39f376093fd0ae423573e422d1f4b8febcf2505f",
+  "dirty": "",
+  "node": "v24.19.0",
+  "browser": "153.0.8010.0",
+  "platform": "linux",
+  "note": "Local software-renderer captures. Not CI PG candidates, baseline blessing or physical-device performance evidence.",
+  "cases": [
+    {
+      "file": "browser-original.png",
+      "device": "browser",
+      "variant": "original",
+      "replacements": 1,
+      "sha256": "c1d97c425eb2d0cc9bb7dde0b7fcee05ea1fcfb88daf966c7aee746f85ca8a11",
+      "width": 1280,
+      "height": 800,
+      "dpr": 1,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "glError": 0,
+      "measurements": [
+        {
+          "offset": 120,
+          "left": {
+            "top": 245,
+            "bottom": 569,
+            "height": 324
+          },
+          "right": {
+            "top": 248,
+            "bottom": 581,
+            "height": 333
+          },
+          "heightDifference": 9
+        },
+        {
+          "offset": 180,
+          "left": {
+            "top": 244,
+            "bottom": 566,
+            "height": 322
+          },
+          "right": {
+            "top": 249,
+            "bottom": 584,
+            "height": 335
+          },
+          "heightDifference": 13
+        },
+        {
+          "offset": 220,
+          "left": {
+            "top": 243,
+            "bottom": 564,
+            "height": 321
+          },
+          "right": {
+            "top": 250,
+            "bottom": 586,
+            "height": 336
+          },
+          "heightDifference": 15
+        }
+      ],
+      "errors": []
+    },
+    {
+      "file": "phone-original.png",
+      "device": "phone",
+      "variant": "original",
+      "replacements": 1,
+      "sha256": "de6a0375eabb28901c7ea59db723b9adf714a0d106a349f6bec657d11b0690e4",
+      "width": 1280,
+      "height": 800,
+      "dpr": 1,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "glError": 0,
+      "measurements": [],
+      "errors": []
+    },
+    {
+      "file": "browser-candidate.png",
+      "device": "browser",
+      "variant": "candidate",
+      "replacements": 0,
+      "sha256": "d90dd5fcd899857991fd4212b50a3c9946445b2fd52d629dfd2c22d3ac748389",
+      "width": 1280,
+      "height": 800,
+      "dpr": 1,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "glError": 0,
+      "measurements": [
+        {
+          "offset": 120,
+          "left": {
+            "top": 246,
+            "bottom": 575,
+            "height": 329
+          },
+          "right": {
+            "top": 246,
+            "bottom": 575,
+            "height": 329
+          },
+          "heightDifference": 0
+        },
+        {
+          "offset": 180,
+          "left": {
+            "top": 246,
+            "bottom": 575,
+            "height": 329
+          },
+          "right": {
+            "top": 246,
+            "bottom": 575,
+            "height": 329
+          },
+          "heightDifference": 0
+        },
+        {
+          "offset": 220,
+          "left": {
+            "top": 246,
+            "bottom": 575,
+            "height": 329
+          },
+          "right": {
+            "top": 246,
+            "bottom": 575,
+            "height": 329
+          },
+          "heightDifference": 0
+        }
+      ],
+      "errors": []
+    },
+    {
+      "file": "phone-candidate.png",
+      "device": "phone",
+      "variant": "candidate",
+      "replacements": 0,
+      "sha256": "de6a0375eabb28901c7ea59db723b9adf714a0d106a349f6bec657d11b0690e4",
+      "width": 1280,
+      "height": 800,
+      "dpr": 1,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "glError": 0,
+      "measurements": [],
+      "errors": []
+    }
+  ],
+  "publishedSourceCommit": "bed42166b51cad51cab6b03ceebf4aadbbb26fd4",
+  "publishedSourceTree": "39f376093fd0ae423573e422d1f4b8febcf2505f",
+  "publicationNote": "Local capture source and published source commits have identical complete Git trees. GitHub connector publication preserves the research/spec/code sequence; evidence is added afterwards."
+}
