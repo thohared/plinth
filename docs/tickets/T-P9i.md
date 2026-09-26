@@ -95,3 +95,12 @@ exception permitting draft publication for normal cloud verification.
 AGENTS/HANDOFF require successful local acceptance before publication;
 no check, fixture, dependency or workflow was altered to evade it.
 The old images remain historical evidence and are not this fixup's images.
+
+### Owner publication exception — 2026-09-27
+
+After disclosure of the unavailable local Chromium, all 210 unit tests,
+TypeScript and build passing, the owner explicitly replied “Odobravam”
+to publishing this fixup to draft PR #33 for normal GitHub CI verification.
+This supersedes the publication hold above, not the required GPU checks,
+independent review, owner visual approval or CI-derived baseline bless.
+No manual workflow dispatch, rerun, threshold change or merge is authorized.
