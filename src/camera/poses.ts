@@ -48,7 +48,9 @@ export function poseValue(id: PoseId, device: string): PoseValue {
       direction = new Vector3(0, Math.tan(radians(5)), 1);
       break;
     case 'hero':
-      direction = wide ? new Vector3(0.2, 0.16, 1) : new Vector3(0.28, 0.38, 1);
+      // P-17: center Browser Hero so its vertical sides have equal projected heights.
+      direction = device === 'browser' ? new Vector3(0, 0.16, 1)
+        : wide ? new Vector3(0.2, 0.16, 1) : new Vector3(0.28, 0.38, 1);
       break;
     case 'top':
       if (device === 'laptop') direction = new Vector3(0, Math.sin(radians(65)), Math.cos(radians(65)));
