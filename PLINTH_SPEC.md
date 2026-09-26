@@ -801,5 +801,24 @@ polje, nova verzija state-a, crop ili letterbox.
 Odobrenje vizuelnog pravca nije CI/PG prolaz, baseline bless, nezavisan
 review, merge ili release. Izmena je u zasebnom planskom commitu po P-5.
 
+### P-17 — Symmetric Browser Hero perspective (2026-09-26)
+
+Owner direction: Novak identified the Browser right edge appearing taller
+than the left in the T-P9h candidate and requested “E to. Ispravi”.
+Author: Codex; planning amendment based on T-P9i research F1–F6.
+This narrow exception to P-11(2) centers only the `browser` class's named
+`hero` camera direction on (0,0.16,1), normalized. Its device rotation remains
+(0,0,0). Equal-height left/right screen edges must project to equal heights;
+top and bottom edge endpoints must each share an image-space Y coordinate.
+The modest elevated perspective remains; this is not an orthographic view.
+
+Other devices and named poses, explicit custom views, the Browser dimensions,
+image mapping, 24–28° wide-device lens policy, framing/floor/orbit limits,
+output padding and PNG sizes remain governed by their existing contracts.
+Named Browser Hero links use the corrected preset; stored custom directions
+are preserved. P-16 is reserved by the separate, still-open T-P9g PR #31.
+This owner's correction request authorizes implementation of the exception,
+not approval of yet-unseen images, CI success, a baseline bless or merge.
+
 ## §10 Open TODO(spec)
 - Codename/product name before T-P10 (README, OG title).
