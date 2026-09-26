@@ -48,3 +48,28 @@ for this Browser exception. No new device geometry, orthographic camera,
 roll, title-bar design, 16:9 claim or global camera change is authorized.
 Research is committed first, then the spec-only amendment, then the ticket
 and focused implementation. No merge/deploy or baseline blessing is implied.
+
+## Review fixup research (2026-09-27, owner: “Uradi”)
+
+F7 — §4.4.3, §4.5–4.6/P-13 and P-11(6): CI 36259980582
+failed the unchanged isolated Browser shadow assertion at
+`guards/output-alpha.test.ts:101`. The 40 full-foreground cases do not prove
+an isolated shadow. `studio.ts:captureShadow` excludes Browser from the
+minimum footprint already used for thin upright devices. Its world depth
+is approximately 0.004 m; `ContactShadow.fit` clamps to 0.01 then multiplies
+by 1.6. A centered camera can undersample this thin strip. This sampling
+mechanism is a hypothesis until the unchanged GPU guard confirms it.
+
+F8 — Reuse the existing width-relative minimum-depth and bounded density
+compensation for Browser, like tablet/card. This keeps the real depth
+capture, 256-square target, blur passes and actual larger rotated bounds.
+It changes Browser shadows across poses deliberately, avoiding a camera-
+dependent shadow cache or a discontinuity during Hero transitions. Other
+devices retain their existing branches. No camera, device geometry, alpha
+shader, resolution, assertion, threshold or fixture change is needed.
+This repairs the existing contact-shadow contract, not a new spec rule.
+
+F9 — Verify unchanged Browser alpha guard, symmetry guard, unit suite and
+build. New CI-derived Browser images supersede the old visual candidates
+for approval; no bless before successful checks and owner inspection.
+Shared policy re-read at Astra main 05cdc2f09aa4c8096a79ed4621a06f9c0bad3ace.

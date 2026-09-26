@@ -73,3 +73,13 @@ must preserve that angled regression with an explicit legacy/custom camera
 fixture, not remove its assertions. Intentional Browser Hero PG differences
 remain unblessed. Fresh review, successful cloud checks and owner visual
 acceptance are outstanding. No merge or deploy.
+
+## Authorized review fixup (2026-09-27)
+
+Owner requested the shadow fix after the independent FIXUP. F7–F9 extend
+the write set to `src/scene/studio.ts` only for Browser shadow fitting,
+plus this research/ticket/evidence. Earlier camera-only scope describes
+the initial patch; this extension also touches §4.4.3/P-11(6). Reuse the
+existing thin-device footprint; preserve all guards, thresholds, fixtures
+and camera symmetry. Browser shadows in other poses also receive the
+minimum footprint; other device recipes do not change.
