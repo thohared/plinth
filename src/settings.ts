@@ -87,7 +87,7 @@ export function createSettingsStore(stage: Stage, studio: Studio, options: { imm
     hydrate(value) {
       const data = decodeV1(value);
       const {v: _version, view, ...fields} = data;
-      const custom = view.pose === null ? {rotation:new Quaternion(...view.rotation),direction:new Vector3(...view.direction),position:new Vector3()} : state.custom;
+      const custom = view.pose === null ? {rotation:new Quaternion(...view.rotation),direction:new Vector3(...view.direction),position:new Vector3(),...(view.framing ? {framing:view.framing} : {})} : state.custom;
       hydrating = true;
       try { api.apply({...fields,pose:view.pose,custom}); }
       catch (error) { options.onHydrationFailure?.(error); throw error; }

@@ -862,5 +862,28 @@ are preserved. P-16 is reserved by the separate, still-open T-P9g PR #31.
 This owner's correction request authorizes implementation of the exception,
 not approval of yet-unseen images, CI success, a baseline bless or merge.
 
+### P-18 — Stable Free view framing (2026-09-27)
+
+Owner requested “Popravi” after observing distance pumping during Free view.
+Planning amendment for T-P9j, based on research F1–F6; standalone P-5 commit.
+
+For poses created by a nonzero Free view drag, replace the pose-dependent P-11
+framing box with a rotation-invariant cube enclosing the local mesh bounding
+sphere. Center that cube on the sphere center transformed by the current pose
+and exact floor correction. Reuse the existing FOV, fill, padding, safe NDC and
+near/far rules on this enclosure. For unchanged geometry/aspect/padding/direction,
+full rotation must preserve camera distance to this center and camera orientation.
+The first drag may widen the named-pose framing once to reserve rotation space.
+Floor contact remains exact; named poses and ordinary preexisting custom views
+retain their framing. A named pose exits the stable framing policy.
+
+Exception to P-16(2): custom v1 views may include the optional literal field
+`framing: "rotation"`, written only for this policy; absence keeps legacy behavior.
+Reject other values and unknown keys. This is derived framing policy, not a zoom
+control or persisted Free view input mode. Preserve it through ordinary orbit,
+resize, settings edits, custom copy/reload and PNG export. Old v1 links remain valid.
+No fixture edits, tolerance relaxation or baseline blessing. Independent review,
+CI and owner visual approval remain separate gates.
+
 ## §10 Open TODO(spec)
 - Codename/product name before T-P10 (README, OG title).

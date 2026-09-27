@@ -36,6 +36,7 @@ it('Free view reaches the back, reverses, persists v1, exports and resets withou
     const dragStart=await pose(page);expect(dragStart.pose).toBe('hero');
     await page.locator('#free-view').click();expect(await pose(page)).toEqual(dragStart);
     await drag(page,Math.PI*240);
+    expect(await page.evaluate(()=>window.__plinth.getSettings().custom.framing)).toBe('rotation');
     const back=await pose(page);expect(back.pose).toBeNull();expect(back.direction).toEqual(dragStart.direction);
     // Literal half-turn: scalar component is zero, irrespective of camera-relative axis.
     expect(Math.abs(back.rotation[3]!)).toBeLessThan(.01);
@@ -47,6 +48,7 @@ it('Free view reaches the back, reverses, persists v1, exports and resets withou
       return state.view.pose===null&&state.view.rotation.every((v:number,i:number)=>Math.abs(v-r[i]!)<1e-7);
     },{r:restored.rotation});
     await page.reload();await page.waitForSelector('html[data-plinth-ready="1"]',{timeout:60000});
+    expect(await page.evaluate(()=>window.__plinth.getSettings().custom.framing)).toBe('rotation');
     const after=await pose(page);after.rotation.forEach((v,i)=>expect(v).toBeCloseTo(restored.rotation[i]!,9));
     expect(await page.locator('#free-view').getAttribute('aria-pressed')).toBe('false');
     await page.locator('#control-aspect').selectOption('1:1');

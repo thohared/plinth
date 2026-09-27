@@ -11,6 +11,8 @@ export const ELEVATION_MAX = 85 * Math.PI / 180;
 
 export interface PoseValue {
   rotation: Quaternion;
+  /** Rotation-invariant framing, independent of the transient input tool. */
+  framing?: 'rotation';
   /** Normalized vector from framing target to camera. */
   direction: Vector3;
 }
@@ -68,7 +70,7 @@ export function poseValue(id: PoseId, device: string): PoseValue {
 }
 
 export function clonePose(value: PoseValue): PoseValue {
-  return { rotation: value.rotation.clone(), direction: value.direction.clone() };
+  return { rotation: value.rotation.clone(), direction: value.direction.clone(), ...(value.framing !== undefined ? { framing: value.framing } : {}) };
 }
 
 /** Converts a legal orbit direction into azimuth/elevation without a roll axis. */
