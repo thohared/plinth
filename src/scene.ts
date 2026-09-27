@@ -256,8 +256,24 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
     position: Vector3;
     quaternion: typeof camera.quaternion;
   }
-  function calculateFrame(aspect: number, worldBoundsArg = worldBounds, device = id, pose = display, padding = outputPad): CameraFrame {
-    const worldBounds = worldBoundsArg;
+  const rotationEnclosures = new WeakMap<readonly number[], { center: Vector3; radius: number }>();
+  function rotationBounds(points: readonly number[], pose: PoseValue, pivot: Group): Box3 {
+    let enclosure = rotationEnclosures.get(points);
+    if (!enclosure) {
+      const local = new Box3();
+      const point = new Vector3();
+      for (let i = 0; i < points.length; i += 3) local.expandByPoint(point.fromArray(points, i));
+      const center = local.getCenter(new Vector3());
+      let radius = 0;
+      for (let i = 0; i < points.length; i += 3) radius = Math.max(radius, point.fromArray(points, i).distanceTo(center));
+      enclosure = { center, radius }; rotationEnclosures.set(points, enclosure);
+    }
+    const center = enclosure.center.clone().applyQuaternion(pose.rotation).add(pivot.position);
+    const extent = new Vector3().setScalar(enclosure.radius);
+    return new Box3(center.clone().sub(extent), center.clone().add(extent));
+  }
+  function calculateFrame(aspect: number, worldBoundsArg = worldBounds, device = id, pose = display, padding = outputPad, points = localGeometry, pivot = posePivot): CameraFrame {
+    const worldBounds = pose.framing === 'rotation' ? rotationBounds(points, pose, pivot) : worldBoundsArg;
     const size = worldBounds.getSize(new Vector3());
     const target = worldBounds.getCenter(new Vector3());
     const fov0 = isWideDevice(device) ? WIDE_SCREEN_FOV : CAMERA_FOV;
@@ -399,6 +415,7 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
       if (!['contain', 'cover'].includes(next.fit) || !Number.isFinite(next.pad) || next.pad < 0 || next.pad > 0.25
         || !/^#[0-9a-f]{6}$/i.test(next.padColor)) throw new Error('Invalid image settings.');
       const custom = next.custom;
+      if (custom.framing !== undefined && custom.framing !== 'rotation') throw new Error('Invalid custom framing.');
       if ([...custom.rotation.toArray(), ...custom.direction.toArray(), ...custom.position.toArray()].some(value => !Number.isFinite(value))
         || Math.abs(custom.rotation.length() - 1) > 1e-6 || Math.abs(custom.direction.length() - 1) > 1e-6) throw new Error('Invalid custom pose.');
       const orbit = directionToOrbit(custom.direction);
@@ -429,13 +446,13 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
         const raw = boundsFromLocal(points, pivot); const centre = raw.getCenter(new Vector3());
         pivot.position.set(-centre.x, -raw.min.y, -centre.z);
         const bounds = boundsFromLocal(points, pivot);
-        const framing = calculateFrame(next.aspect, bounds, next.device, nextDisplay, next.outputPad);
+        const framing = calculateFrame(next.aspect, bounds, next.device, nextDisplay, next.outputPad, points, pivot);
         // Validate the endpoint too before beginning a live transition.
         if (nextTransition) {
           const end = new Group(); end.quaternion.copy(target.rotation);
           const rawEnd = boundsFromLocal(points, end); const c = rawEnd.getCenter(new Vector3());
           end.position.set(-c.x, -rawEnd.min.y, -c.z);
-          calculateFrame(next.aspect, boundsFromLocal(points, end), next.device, target, next.outputPad);
+          calculateFrame(next.aspect, boundsFromLocal(points, end), next.device, target, next.outputPad, points, end);
         }
         return {
           commit() {
@@ -549,20 +566,20 @@ export function createStage(initialDevice: DeviceId, initialScene: SceneId, aspe
       const next = clampOrbit(orbit.azimuth + deltaAzimuth, orbit.elevation + deltaElevation);
       transition = null;
       selected = null;
-      display = { rotation: display.rotation.clone(), direction: orbitToDirection(next.azimuth, next.elevation) };
+      display = { ...clonePose(display), direction: orbitToDirection(next.azimuth, next.elevation) };
       // Orbit changes only the camera direction; the shadow's world geometry is unchanged.
       frame();
     },
     rotate(horizontal, vertical) {
       const rotation = rotateInView(display.rotation, display.direction, horizontal, vertical);
       if (horizontal === 0 && vertical === 0) return;
-      const next = { rotation, direction: display.direction.clone() };
+      const next: PoseValue = { rotation, direction: display.direction.clone(), framing: 'rotation' };
       const pivot = new Group(); pivot.quaternion.copy(rotation);
       const raw = boundsFromLocal(localGeometry, pivot), centre = raw.getCenter(new Vector3());
       pivot.position.set(-centre.x, -raw.min.y, -centre.z);
       const bounds = boundsFromLocal(localGeometry, pivot);
       // Calculate everything before committing: a rejected delta cannot mutate the view.
-      const framing = calculateFrame(camera.aspect, bounds, id, next);
+      const framing = calculateFrame(camera.aspect, bounds, id, next, outputPad, localGeometry, pivot);
       display = next; selected = null; transition = null; worldBounds = bounds;
       posePivot.position.copy(pivot.position); posePivot.quaternion.copy(rotation);
       scene.updateMatrixWorld(true); installFrame(framing); changed();

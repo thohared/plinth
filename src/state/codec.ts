@@ -3,7 +3,7 @@ import { invariantViolations, type DeviceSpec } from '../devices/spec';
 import type { PoseId } from '../camera/poses';
 import type { Settings } from '../settings';
 
-export type SharedView = { pose: PoseId } | { pose: null; rotation: [number, number, number, number]; direction: [number, number, number] };
+export type SharedView = { pose: PoseId } | { pose: null; rotation: [number, number, number, number]; direction: [number, number, number]; framing?: 'rotation' };
 export interface SharedState {
   v: 1; device: DeviceId; spec: DeviceSpec; view: SharedView;
   scene: Settings['scene']; tone: Settings['tone']; msaa: boolean;
@@ -49,13 +49,15 @@ export function decodeV1(value: unknown): SharedState {
   const rawView = row.view as Record<string, unknown> | null;
   let view: SharedView;
   if (rawView?.pose === null) {
-    const v = object(rawView, ['pose','rotation','direction']);
+    const hasFraming = Object.hasOwn(rawView, 'framing');
+    const v = object(rawView, ['pose','rotation','direction', ...(hasFraming ? ['framing'] : [])]);
+    if (hasFraming && v.framing !== 'rotation') return invalid();
     const rotation = vector(v.rotation,4) as [number,number,number,number];
     const direction = vector(v.direction,3) as [number,number,number];
     const azimuth = Math.atan2(direction[0],direction[2]);
     const elevation = Math.asin(Math.max(-1,Math.min(1,direction[1]/Math.hypot(...direction))));
     if (Math.abs(azimuth) > 75*Math.PI/180+1e-9 || elevation < 5*Math.PI/180-1e-9 || elevation > 85*Math.PI/180+1e-9) return invalid();
-    view = { pose: null, rotation, direction };
+    view = { pose: null, rotation, direction, ...(hasFraming ? {framing: 'rotation' as const} : {}) };
   } else { const v = object(rawView,['pose']); view = { pose: choice<PoseId>(v.pose,['front','hero','top','lean']) }; }
   const b = object(row.background,['mode','solid','top','bottom']);
   if (typeof row.msaa !== 'boolean' || ![1,2,3].includes(row.pngScale as number)) return invalid();
@@ -89,7 +91,7 @@ export function snapshotState(state: Settings, transitioning: boolean): SharedSt
   const s = state.spec;
   return decodeV1({v:1,device:state.device,spec:{w:s.w,h:s.h,depth:s.depth,cornerRadius:s.cornerRadius,bezel:s.bezel,screenInset:s.screenInset,
     frameMetalness:s.frameMetalness,frameRoughness:s.frameRoughness,glassClearcoat:s.glassClearcoat,standType:s.standType,hingeAngle:s.hingeAngle},
-    view:state.pose !== null && !transitioning ? {pose:state.pose} : {pose:null,rotation:state.custom.rotation.toArray(),direction:state.custom.direction.toArray()},
+    view:state.pose !== null && !transitioning ? {pose:state.pose} : {pose:null,rotation:state.custom.rotation.toArray(),direction:state.custom.direction.toArray(),...(state.custom.framing ? {framing:state.custom.framing} : {})},
     scene:state.scene,tone:state.tone,msaa:state.msaa,aspect:state.aspect,outputPad:state.outputPad,
     background:{mode:state.background.mode,solid:state.background.solid,top:state.background.top,bottom:state.background.bottom},
     fit:state.fit,pad:state.pad,padColor:state.padColor,pngScale:state.pngScale});
