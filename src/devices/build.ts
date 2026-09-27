@@ -1,6 +1,6 @@
 import {
   Box3,
-  type BufferGeometry,
+  BufferGeometry,
   CylinderGeometry,
   ExtrudeGeometry,
   Group,
@@ -19,6 +19,8 @@ import {
 } from 'three';
 import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
 import { screenRect, shapeHash, type DeviceSpec } from './spec';
+import { detailMaterials, slabDetails, deckDetails } from './details';
+import type { DeviceId } from './presets';
 import { patchScreen } from '../screen/material';
 import type { FitMode, Size } from '../screen/types';
 
@@ -194,11 +196,33 @@ function slabGeometry(o: SlabOpts): BufferGeometry {
   return smooth;
 }
 
+// Immutable CPU-only extrusion templates for production rig rebuilds. The direct
+// builder remains useful for authoring geometry; Stage opts into reuse explicitly.
+const geometryCache = new Map<string, { geometry: BufferGeometry; bytes: number }>();
+const GEOMETRY_CACHE_BYTES = 8 * 1024 * 1024;
+let geometryCacheBytes = 0;
+function cachedSlabGeometry(options: SlabOpts): BufferGeometry {
+  const key = JSON.stringify(options), cached = geometryCache.get(key);
+  if (cached) return new BufferGeometry().copy(cached.geometry);
+  const geometry = slabGeometry(options);
+  const bytes = Object.values(geometry.attributes).reduce((sum, attribute) => sum + attribute.array.byteLength, 0);
+  if (bytes <= GEOMETRY_CACHE_BYTES) {
+    while (geometryCacheBytes + bytes > GEOMETRY_CACHE_BYTES || geometryCache.size >= 32) {
+      const oldest = geometryCache.keys().next().value;
+      if (oldest === undefined) break;
+      const entry = geometryCache.get(oldest)!; geometryCacheBytes -= entry.bytes;
+      entry.geometry.dispose(); geometryCache.delete(oldest);
+    }
+    geometryCache.set(key, { geometry: new BufferGeometry().copy(geometry), bytes }); geometryCacheBytes += bytes;
+  }
+  return geometry;
+}
+
 function edgeBevel(spec: DeviceSpec, depth: number): number {
   return Math.min(BUILDER_RATIOS.edgeBevel * depth, BUILDER_RATIOS.edgeBevelOfBezel * spec.bezel);
 }
 
-interface Materials {
+interface Materials extends ReturnType<typeof detailMaterials> {
   frame: MeshPhysicalMaterial;
   screenBacking: MeshPhysicalMaterial;
   key: MeshPhysicalMaterial;
@@ -235,6 +259,7 @@ function makeMaterials(spec: DeviceSpec, darkScreenRecess: boolean): Materials {
       metalness: darkScreenRecess ? 0 : spec.frameMetalness,
       roughness: darkScreenRecess ? 0.85 : spec.frameRoughness,
     }),
+    ...detailMaterials(),
     frame: new MeshPhysicalMaterial({
       color: 0xd9dde3,
       metalness: spec.frameMetalness,
@@ -282,12 +307,13 @@ function buildSlab(
   spec: DeviceSpec,
   mats: Materials,
   browser: boolean,
+  extrude: typeof slabGeometry,
 ): { frame: Mesh; screen: Mesh; screenSize: { w: number; h: number } } {
   const open = screenRect(spec);
   const bevel = edgeBevel(spec, spec.depth);
 
   const frame = new Mesh(
-    slabGeometry({
+    extrude({
       w: spec.w,
       h: spec.h,
       depth: spec.depth,
@@ -305,7 +331,7 @@ function buildSlab(
   // Covers the opening at the back cap (open + 2·bevel), rounded like the opening so
   // its corners never poke past the slab's own rounded outline on thin bezels (card).
   const backplate = new Mesh(
-    slabGeometry({
+    extrude({
       w: open.w + 2 * bevel,
       h: open.h + 2 * bevel,
       depth: plateDepth,
@@ -383,6 +409,7 @@ function buildDeck(
   baseW: number,
   baseD: number,
   baseT: number,
+  extrude: typeof slabGeometry,
 ): void {
   const R = BUILDER_RATIOS;
   const gap = R.gap;
@@ -409,7 +436,7 @@ function buildDeck(
   const keyD = (wellD - gapZ * (R.keyRows + 1)) / R.keyRows;
   const keyH = R.keyHeight * baseT;
   const keys = new InstancedMesh(
-    slabGeometry({
+    extrude({
       w: keyW,
       h: keyD,
       depth: keyH,
@@ -450,19 +477,37 @@ function buildDeck(
   parent.add(pad);
 }
 
-function buildInto(root: Group, spec: DeviceSpec, mats: Materials, browser: boolean) {
+function buildInto(root: Group, spec: DeviceSpec, mats: Materials, browser: boolean, device: DeviceId | undefined, reuseGeometry: boolean) {
   root.clear();
+  // Rebuild from local coordinates, never from the previous floor correction.
+  root.position.set(0, 0, 0);
   const slab = new Group();
   slab.name = 'slab';
   // Slab local frame is centred in x/y with z∈[0,depth]; lift so y∈[0,h].
   slab.position.y = spec.h / 2;
-  const parts = buildSlab(slab, spec, mats, browser);
+  const extrude = reuseGeometry ? cachedSlabGeometry : slabGeometry;
+  const parts = buildSlab(slab, spec, mats, browser, extrude);
+  const solids = new Map<string, BufferGeometry>();
+  const detailGeometry = {
+    plane: roundedPlaneGeometry,
+    solid: (w: number, h: number, depth: number, radius: number) => {
+      const key = `${w}:${h}:${depth}:${radius}`;
+      let geometry = solids.get(key);
+      if (!geometry) {
+        geometry = extrude({ w, h, depth, radius,
+          bevel: Math.min(depth * .2, radius * .2), detail: { curveSegments: 8, bevelSegments: 2 } });
+        solids.set(key, geometry);
+      }
+      return geometry;
+    },
+  };
+  slabDetails(slab, spec, device, mats, detailGeometry);
 
   if (spec.standType === 'hinge') {
     const baseD = BUILDER_RATIOS.baseDepth * spec.h;
     const baseT = BUILDER_RATIOS.baseThickness * spec.depth;
     const base = new Mesh(
-      slabGeometry({
+      extrude({
         w: spec.w,
         h: baseD,
         depth: baseT,
@@ -476,7 +521,8 @@ function buildInto(root: Group, spec: DeviceSpec, mats: Materials, browser: bool
     base.rotation.x = -Math.PI / 2;
     base.position.z = baseD / 2;
     root.add(base);
-    buildDeck(root, mats, spec.w, baseD, baseT);
+    buildDeck(root, mats, spec.w, baseD, baseT, extrude);
+    if (device === 'laptop') deckDetails(root, spec, baseD, baseT, mats, detailGeometry);
 
     const hinge = new Group();
     hinge.name = 'hinge';
@@ -488,7 +534,7 @@ function buildInto(root: Group, spec: DeviceSpec, mats: Materials, browser: bool
     const plateD = BUILDER_RATIOS.plateDepth * spec.h;
     const plateT = BUILDER_RATIOS.plateThickness * spec.depth;
     const plate = new Mesh(
-      slabGeometry({
+      extrude({
         w: spec.w,
         h: plateD,
         depth: plateT,
@@ -516,13 +562,13 @@ function buildInto(root: Group, spec: DeviceSpec, mats: Materials, browser: bool
   return { ...parts, bounds };
 }
 
-export function buildDevice(initial: DeviceSpec, browser = false, darkScreenRecess = true): DeviceRig {
+export function buildDevice(initial: DeviceSpec, browser = false, darkScreenRecess = true, device?: DeviceId, reuseGeometry = false): DeviceRig {
   const group = new Group();
   group.name = 'device';
   const mats = makeMaterials(initial, darkScreenRecess);
   let spec = { ...initial };
   let hash = shapeHash(spec);
-  let built = buildInto(group, spec, mats, browser);
+  let built = buildInto(group, spec, mats, browser, device, reuseGeometry);
   const picture = patchScreen(mats.screen);
   let imageSize: Size = { w: 1, h: 1 };
   let fit: FitMode = 'contain';
@@ -554,7 +600,7 @@ export function buildDevice(initial: DeviceSpec, browser = false, darkScreenRece
       const h = shapeHash(spec);
       if (h !== hash) {
         disposeGeometries(group);
-        built = buildInto(group, spec, mats, browser);
+        built = buildInto(group, spec, mats, browser, device, reuseGeometry);
         hash = h;
       }
       rig.frame = built.frame;
@@ -585,7 +631,10 @@ export function buildDevice(initial: DeviceSpec, browser = false, darkScreenRece
 }
 
 function disposeGeometries(root: Group): void {
+  const geometries = new Set<BufferGeometry>();
   root.traverse((o) => {
-    if (o instanceof Mesh) o.geometry.dispose();
+    if (o instanceof InstancedMesh) o.dispose();
+    if (o instanceof Mesh) geometries.add(o.geometry);
   });
+  for (const geometry of geometries) geometry.dispose();
 }

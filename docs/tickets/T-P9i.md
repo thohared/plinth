@@ -104,3 +104,23 @@ to publishing this fixup to draft PR #33 for normal GitHub CI verification.
 This supersedes the publication hold above, not the required GPU checks,
 independent review, owner visual approval or CI-derived baseline bless.
 No manual workflow dispatch, rerun, threshold change or merge is authorized.
+
+## Integration for owner live inspection — 2026-09-27
+
+Owner explicitly requested closing remaining Plinth PRs and publishing all
+changes to the site to inspect their appearance. This authorizes merging and
+deployment before final visual acceptance; it is not a baseline bless.
+PRs #31/#32/#33 have no remaining code findings in their independent reviews.
+
+Integration preserves both P-16 and P-17 verbatim when resolving their
+append-only spec conflict. T-P9h's edge guard explicitly sets the legacy
+normalized (0.2,0.16,1) custom direction through the real settings API.
+Its measurements, thresholds and original-pipeline seed remain unchanged.
+This is required to preserve the angled regression after centered Hero.
+No fixture is changed. Final integrated GPU/PG results and owner visual
+acceptance remain distinct from the prior individual-branch evidence.
+
+Integrated local checks: TypeScript PASS, build PASS (existing 700 kB
+warning), 230/230 unit tests across 33 files PASS. Browser guard execution
+remains cloud-only under the disclosed Chromium limitation. Owner requested
+live inspection before visual acceptance; no PG result is relabeled green.

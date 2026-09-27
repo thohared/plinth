@@ -38,10 +38,12 @@ export function deviceEditError(spec: DeviceSpec): string | undefined {
   const violation = invariantViolations(spec)[0];
   return violation ? messages[violation] ?? 'Check the device dimensions.' : undefined;
 }
-export function createPanel(root: HTMLElement, store: SettingsStore, layoutChanged: () => void, exporter?: DownloadController, share?: () => void) {
+export function createPanel(root: HTMLElement, store: SettingsStore, layoutChanged: () => void, exporter?: DownloadController, share?: () => void, freeView?: (active: boolean) => void) {
   const abort = new AbortController(); const signal = abort.signal;
   const refreshers: ((state: Settings) => void)[] = [];
   let recovery: RecoveryState = 'ready';
+  let free = false;
+  let setFree = (_active: boolean): void => {};
   root.innerHTML = '<header><div><h1>Plinth<span class="brand-dot" aria-hidden="true">.</span></h1><p class="studio-subtitle">Screenshot studio</p></div><div class="header-actions"><button type="button" id="interface-theme" aria-label="Use dark interface" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3a9 9 0 0 0 0 18Z" fill="currentColor"/></svg></button><button type="button" id="sheet-close" aria-label="Close settings">×</button></div></header>';
   const theme = root.querySelector<HTMLButtonElement>('#interface-theme')!;
   theme.addEventListener('click', () => {
@@ -116,12 +118,23 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
     const button = document.createElement('button'); button.type = 'button'; button.dataset.composition = row.id;
     const img = document.createElement('img'); img.src = `compositions/${row.id}.png`; img.alt = ''; img.width = 480; img.height = 300;
     const caption = document.createElement('span'); caption.textContent = row.name; button.append(img, caption);
-    button.addEventListener('click', () => attempt(button, () => store.compose(row.id)), { signal }); grid.append(button);
+    button.addEventListener('click', () => attempt(button, () => { store.compose(row.id); setFree(false); }), { signal }); grid.append(button);
     refreshers.push(state => button.setAttribute('aria-pressed', String(state.composition === row.id)));
   }
   const view = section('Device and framing');
   select(view, 'device', 'Device', DEVICE_IDS, s => s.device, value => store.setDevice(value as Settings['device']));
-  select(view, 'pose', 'Angle', [...POSE_IDS, 'custom'], s => s.pose ?? 'custom', value => store.apply({ pose: value as Settings['pose'] }));
+  select(view, 'pose', 'Angle', [...POSE_IDS, 'custom'], s => s.pose ?? 'custom', value => { store.apply({ pose: value as Settings['pose'] }); setFree(false); });
+  if (freeView) {
+    const actions = document.createElement('div'); actions.className = 'view-actions';
+    const turn = document.createElement('button'); turn.type = 'button'; turn.id = 'free-view'; turn.textContent = 'Free view'; turn.setAttribute('aria-pressed', 'false');
+    const resetView = document.createElement('button'); resetView.type = 'button'; resetView.id = 'reset-view'; resetView.textContent = 'Reset view';
+    const hint = document.createElement('p'); hint.className = 'hint'; hint.id = 'view-hint';
+    turn.setAttribute('aria-describedby', hint.id);
+    setFree = active => { free = active; freeView(active); turn.setAttribute('aria-pressed', String(active)); hint.textContent = active ? 'Drag the preview to turn the device. Every side is available.' : 'Turn on Free view to see the back and underside.'; };
+    turn.addEventListener('click', () => setFree(!free), { signal });
+    resetView.addEventListener('click', () => attempt(resetView, () => { store.apply({ pose: 'hero' }); setFree(false); }), { signal });
+    actions.append(turn, resetView); view.append(actions, hint); setFree(false);
+  }
   select(view, 'aspect', 'Aspect ratio', ASPECT_IDS, s => s.aspect, value => store.apply({ aspect: value as Settings['aspect'] }));
   numeric(view, 'outputPad', 'Space around device', 0, 25, 1, s => s.outputPad * 100, value => store.apply({ outputPad: value / 100 }));
   const light = section('Lighting and background');
@@ -214,8 +227,11 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   select(advanced, 'tone', 'Tone mapping', ['agx', 'aces'], s => s.tone, value => store.apply({ tone: value as Settings['tone'] }));
   const msaaLabel = label(advanced, 'MSAA preview smoothing', 'control-msaa'); const msaa = document.createElement('input'); msaa.id = 'control-msaa'; msaa.type = 'checkbox'; msaaLabel.prepend(msaa);
   msaa.addEventListener('change', () => attempt(msaa, () => store.apply({ msaa: msaa.checked })), { signal }); refreshers.push(s => { msaa.checked = s.msaa; });
-  const reset = document.createElement('button'); reset.type = 'button'; reset.id = 'reset'; reset.textContent = 'Reset look'; reset.addEventListener('click', () => attempt(reset, () => store.reset()), { signal }); root.append(reset, error, utilities);
+  const reset = document.createElement('button'); reset.type = 'button'; reset.id = 'reset'; reset.textContent = 'Reset look'; reset.addEventListener('click', () => attempt(reset, () => { store.reset(); setFree(false); }), { signal }); root.append(reset, error, utilities);
+  let previousPose = store.get().pose;
   const refresh = (state: Settings, reason?: string): void => {
+    if (state.pose !== null && (state.pose !== previousPose || ['compose', 'reset', 'hydrate', 'setPose'].includes(reason ?? ''))) setFree(false);
+    previousPose = state.pose;
     // A complete composition replaces pending edits, including through the QA API.
     // Unrelated successful edits leave other invalid controls and their messages intact.
     if (reason === 'compose' || (reason === 'apply' && state.composition !== null)) clearError();
@@ -239,7 +255,7 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
     else if (media.matches && !document.body.classList.contains('sheet-open') && root.contains(active)) opener.focus();
   };
   media.addEventListener('change',adjustFocus,{signal});
-  return { setOpen, showShare, showAddressNotice,
+  return { setOpen, showShare, showAddressNotice, exitFreeView: () => setFree(false),
     setRecovery(value: RecoveryState) {
       recovery = value;
       syncMobilePick();

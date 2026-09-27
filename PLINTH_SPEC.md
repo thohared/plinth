@@ -801,6 +801,48 @@ polje, nova verzija state-a, crop ili letterbox.
 Odobrenje vizuelnog pravca nije CI/PG prolaz, baseline bless, nezavisan
 review, merge ili release. Izmena je u zasebnom planskom commitu po P-5.
 
+### P-16 — All-side device views and generic hardware (2026-09-21)
+
+Planning amendment by Codex before T-P9g implementation; owner explicitly approved
+“Uradi sve to” after requesting rear/underside views and hardware details.
+Cites §2.1–2.3, §4.2–4.4, §4.8–4.9, P-8/P-11/P-14/P-15 and
+T-P9g-research F1–F9. This commit contains only the specification.
+
+1. Add an explicit **Free view** interaction tool. One-finger/mouse drag rotates
+   the device continuously about camera-relative axes using a normalized
+   quaternion, including full turns, back and underside. Camera up stays stable;
+   its P-11 direction domain remains intact. Existing default constrained camera
+   orbit and four named angles remain available. **Reset view** returns to the
+   class's Three-quarter pose and exits Free view, preserving image, geometry,
+   scene, framing, export size and other settings. Choosing a named angle/look or
+   Reset look also exits Free view. Mode changes themselves do not alter the pose.
+2. Input mode is transient UI state, initially off. The displayed free rotation
+   is an ordinary custom pose in the existing v1 quaternion schema; copy/reload,
+   PNG export and resize preserve it. No new URL field, camera zoom, timer,
+   analytics, storage or network. PG never enables live pointer controls.
+3. Extend generic phone/tablet slabs with opaque rear covers, unbranded camera
+   lenses/flash, side buttons, charging sockets and speaker/microphone openings.
+   Laptop keeps its generic key grid and touchpad; add webcam, side sockets,
+   ventilation and underside feet. Browser/Card remain simple flat objects.
+   Details are original procedural geometry, sized from DeviceSpec and class,
+   not a manufacturer's design. They may read as recessed dark apertures with
+   rims/contact inserts; no costly boolean modelling or external assets required.
+4. All hardware participates in real mesh bounds, floor correction, contact
+   shadow, safe NDC framing and resource lifecycle. Repeated details use shared
+   or instanced geometry. No coplanar flicker or screenshot seen through the
+   back. Spec edits rebuild details; materials and image changes retain ownership.
+   Screenshot texture, UV, filtering, dimensions and PNG resolution contracts do
+   not change. Existing named-camera fill and mobile export layout remain.
+5. Acceptance includes continuous turns/reversal/underside, interruption of an
+   in-flight named pose, floor/framing across device classes, v1 round-trip and
+   real PNG export, finite-input rejection, disposal, additive browser guards
+   with seeded failure and inspected high-resolution front/rear/underside images.
+   Target added hardware budget: at most 30 draw calls and 40,000 submitted
+   vertices per rig, with measured counts reported. Full §6 target-device gate
+   remains; software-renderer measurements are not physical mobile performance.
+   All old PG cases/thresholds and owner-owned baselines remain. Geometry-related
+   differences need explicit disclosure and owner blessing, not a builder bless.
+
 ### P-17 — Symmetric Browser Hero perspective (2026-09-26)
 
 Owner direction: Novak identified the Browser right edge appearing taller
