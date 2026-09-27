@@ -103,7 +103,7 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   const image = section('Your image');
   const pick = document.querySelector<HTMLButtonElement>('#pick')!; pick.textContent = 'Choose image'; image.append(pick, document.querySelector('#note')!);
   const mobileBrand = document.createElement('div'); mobileBrand.id = 'mobile-brand';
-  mobileBrand.innerHTML = 'Plinth<span class="brand-dot" aria-hidden="true">.</span>';
+  mobileBrand.innerHTML = 'Plinth<span class="brand-dot" aria-hidden="true">.</span><span class="mobile-subtitle">Screenshot studio</span>';
   document.querySelector('#workspace')!.append(mobileBrand);
   const mobileActions = document.createElement('div'); mobileActions.id = 'mobile-actions';
   const mobilePick = document.createElement('button'); mobilePick.type = 'button'; mobilePick.id = 'mobile-pick'; mobilePick.textContent = 'Choose image';

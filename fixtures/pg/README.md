@@ -102,3 +102,39 @@ fix is claimed by this baseline transfer.
 | tablet-dark-glass.png | `cd59d3572d293fc17a209b4448833186d2f3e531e6cc919a6743db238303e178` |
 | tablet-soft-studio.png | `e78f2aed30d2b1b4f5f84b0aa55eb160f713d50811d815982b3d531232f39ae4` |
 | tablet-warm-sunset.png | `45396adb4e7c510dde0b354caca1b2bf48d3a7299008f4756cf20a69d376ecf2` |
+
+## PG-3(b) — Owner approval, 2026-09-27
+
+Novak explicitly approved the 13 inherited visual differences after PR #35's
+independent review: “Odobravam” (20:13 Europe/Belgrade). Codex mechanically
+transfers only these 13 approved candidates, byte-for-byte, without rerendering
+or changing thresholds. This standalone commit touches only fixtures/pg/.
+
+Source: PR #35 head e0f6000ac5081e4ce1752a7f7ffff16996874ed0,
+[PG run 36336649888](https://github.com/thohared/plinth/actions/runs/36336649888),
+[artifact 10937577858](https://github.com/thohared/plinth/actions/runs/36336649888/artifacts/10937577858).
+The source run had 73 captures, zero missing baselines and 13 differences;
+it remains a failed historical run. Independent review confirmed all 20
+device/scene candidates pixel-identical to the integrated base artifact.
+The remaining references and all application code are unchanged.
+This approval does not cover unreviewed Free view PR #34.
+
+ZIP SHA256: `3f0c01263a61cb4ddfd97ecb06021e12bdbc17fa4526e7c99d1c7398c86f6fff`.
+
+These hashes supersede the earlier table only for the following files:
+
+| File | SHA256 |
+|---|---|
+| phone-soft-studio.png | `e3bd868e4979f80c5f79ee9b4b1c6877ee77c5ef6ae7998b407f1a63eb6e5f1f` |
+| phone-dark-glass.png | `1216450f780013a5a8cdbe1adfaf826c4782428f6ac2a946bc66dc5b8a6cd98f` |
+| phone-warm-sunset.png | `65a159915e0812925d913637ccf9a31a50dff3a6fb8ff6e7c25f16db69b4f9fe` |
+| phone-clean-white.png | `fa0c298ff33a09ea3824a12902ea5b013a1013971946f6edf752f617a6a896e2` |
+| laptop-soft-studio.png | `b61ed4b1e5e0b5ef958e51f8102431c22b8f0056cd4e51696fe03b4b279e477e` |
+| laptop-dark-glass.png | `fc420679c9e236e6eed01a11500face8db94d90e2b52b7e6ed1679dc35f2ab07` |
+| laptop-warm-sunset.png | `4a09badd4e053c24e2f82eb3a0330de7f7dec02aaded06908ab2b2f9c3134b56` |
+| laptop-clean-white.png | `f2c5f6fa22cb227cea11de24d3f826bd7e44a9e94c60edca71da7326f72a6b5f` |
+| browser-soft-studio.png | `2949e221d01eac164087048c8448d57314fad2b3bf2a7bc10a0a85fc99a47f40` |
+| browser-dark-glass.png | `cd8b07b5833bd974a5a43ef24c7b14aae003ca70b8cd2c5f6ee6edefaf9c8596` |
+| browser-warm-sunset.png | `5b344da8c9519290fe7a5534d4dabbe01678fa09e539bfe284a71e92119e5407` |
+| browser-clean-white.png | `f4fb1aa9dc85d9e272a97941d03a364e3bbcf790e4493ea34e5860aadae1d536` |
+| tablet-dark-glass.png | `eb745ad4bcf4f005d1c6756b93c4ffa61b6f0b40011674e34b442c4697f3c10c` |
