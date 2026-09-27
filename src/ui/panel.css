@@ -208,3 +208,8 @@ body.editor[data-theme=dark] {
   .editor.sheet-open #png-feedback { bottom:100%; }
   .editor #png-feedback #png-status { margin:0; }
 }
+
+/* P-16: a touch-sized tool row; export layout remains independent. */
+.view-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+.view-actions button { min-height:44px; }
+.view-actions button[aria-pressed="true"] { border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); }

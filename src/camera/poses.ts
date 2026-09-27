@@ -48,7 +48,9 @@ export function poseValue(id: PoseId, device: string): PoseValue {
       direction = new Vector3(0, Math.tan(radians(5)), 1);
       break;
     case 'hero':
-      direction = wide ? new Vector3(0.2, 0.16, 1) : new Vector3(0.28, 0.38, 1);
+      // P-17: center Browser Hero so its vertical sides have equal projected heights.
+      direction = device === 'browser' ? new Vector3(0, 0.16, 1)
+        : wide ? new Vector3(0.2, 0.16, 1) : new Vector3(0.28, 0.38, 1);
       break;
     case 'top':
       if (device === 'laptop') direction = new Vector3(0, Math.sin(radians(65)), Math.cos(radians(65)));
@@ -115,4 +117,15 @@ export function advanceTransition(transition: PoseTransition, dt: number): { val
   return elapsed >= TRANSITION_SECONDS
     ? { value, transition: null }
     : { value, transition: { ...transition, elapsed } };
+}
+
+/** Full model rotation about stable camera-relative axes. No Euler limits/poles. */
+export function rotateInView(rotation: Quaternion, direction: Vector3, horizontal: number, vertical: number): Quaternion {
+  const angle = Math.hypot(horizontal, vertical);
+  if (!Number.isFinite(angle)) throw new Error('Rotation delta must be finite.');
+  if (angle === 0) return rotation.clone();
+  const right = new Vector3(0, 1, 0).cross(direction).normalize();
+  const up = direction.clone().cross(right).normalize();
+  const axis = right.multiplyScalar(vertical / angle).addScaledVector(up, horizontal / angle).normalize();
+  return new Quaternion().setFromAxisAngle(axis, angle % (2 * Math.PI)).multiply(rotation).normalize();
 }

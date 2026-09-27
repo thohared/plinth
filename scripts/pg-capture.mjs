@@ -1,3 +1,4 @@
+import { captureDeviceDetails } from './device-details-capture.mjs';
 // PLINTH_SPEC §7 — PG capture. Builds the site, serves it, renders every device
 // × scene preset in `?pg=1` mode with the same headless Chromium recipe the
 // no-network guard uses (SwiftShader: the CI runner is the reference GPU), and
@@ -195,6 +196,7 @@ try {
     if(errors.length){failed++;annotate('error',`live-${host.name}: ${errors.join(' | ')}`);}
     await page.close();
   }
+  captured += await captureDeviceDetails(browser, url, OUT);
   // A separate T-P6 sheet leaves the legacy 20-cell contact-sheet helper intact.
   // All images below are the actual CI candidates above, not regenerated scenes.
   const sheet=await browser.newPage({viewport:{width:1280,height:900},deviceScaleFactor:1});

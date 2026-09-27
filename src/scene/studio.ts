@@ -72,8 +72,10 @@ export function createStudio(renderer: WebGLRenderer, stage: Stage, opts: { msaa
       renderer.setScissorTest(false);
       shadow.setParams(contactShadowPreset(settings.scene, stage.getDevice()));
       // Thin upright devices otherwise squeeze the blur into a pointed sliver.
-      // Actual wider footprints still win; laptop/browser retain their recipe.
-      if (['phone', 'tablet', 'card'].includes(stage.getDevice())) {
+      // Browser needs the same footprint: its centered Hero camera otherwise
+      // projects the thin ground shadow between pixel rows at small outputs.
+      // Actual wider footprints still win; laptop retains its recipe.
+      if (['phone', 'tablet', 'card', 'browser'].includes(stage.getDevice())) {
         const bounds = stage.getWorldBounds();
         const depth = (bounds.max.x - bounds.min.x) * 0.55;
         if (stage.getDevice() === 'phone') shadow.fit(bounds, depth);
