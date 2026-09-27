@@ -202,6 +202,7 @@ body.editor[data-theme=dark] {
 }
 @media(max-width:899px) {
   .editor #mobile-brand { display:block; position:absolute; top:12px; left:18px; font-size:1.25rem; font-weight:750; letter-spacing:-.6px; pointer-events:none; color:#1d2824; background:rgba(248,250,249,.92); border-radius:6px; padding:4px 9px; }
+  .editor #mobile-brand .mobile-subtitle { display:block; margin-top:2px; color:#53635c; font-size:.75rem; font-weight:400; letter-spacing:normal; line-height:1.4; }
   .editor.sheet-open #mobile-brand { display:none; }
   .editor #png-actions { height:calc(82px + max(10px,env(safe-area-inset-bottom))); }
   .editor #png-feedback { bottom:calc(100% + 60px); max-height:var(--png-feedback-limit,min(144px,30dvh)); }
