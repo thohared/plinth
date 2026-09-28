@@ -124,3 +124,66 @@ it('T-P6 review: interactive composition query completes its displayed pose with
     expect(await page.evaluate(()=>window.__plinth.advancePose(0))).toBe(false);
   } finally {await page.close();}
 });
+
+it('T-P9l: diagonal slider touch preserves sheet position; ordinary sheet swipes still scroll', async () => {
+  const context = await browser.newContext({ viewport: { width: 400, height: 700 }, isMobile: true, hasTouch: true });
+  try {
+    const page = await context.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(String(error)));
+    if (process.env['PLINTH_PANEL_SEED'] === 'slider-scroll') {
+      await page.addInitScript(() => {
+        addEventListener('DOMContentLoaded', () => {
+          const style = document.createElement('style');
+          style.textContent = '.editor input[type=range] { touch-action:auto!important; }';
+          document.head.append(style);
+        });
+      });
+    }
+    await page.goto(url);
+    await page.waitForSelector('html[data-plinth-ready="1"]', { timeout: 60000 });
+    await page.locator('#settings-open').click();
+    const panel = page.locator('#panel');
+    const slider = page.locator('#control-outputPad');
+    await slider.evaluate(el => el.scrollIntoView({ block: 'center' }));
+    const before = await page.evaluate(() => ({
+      scroll: document.querySelector('#panel')!.scrollTop,
+      settings: window.__plinth.getSettings(), image: window.__plinth.getImage(),
+    }));
+    const box = (await slider.boundingBox())!;
+    const sheet = (await panel.boundingBox())!;
+    const exportBox = (await page.locator('#png-export').boundingBox())!;
+    const cdp = await context.newCDPSession(page);
+    const x = box.x + 8, y = box.y + box.height / 2;
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+    // Initial vertical drift crosses the native pan threshold, followed by a
+    // horizontal adjustment. The finger remains captured by the native slider.
+    for (const [dx, dy] of [[2, 20], [4, 35], [30, 40], [65, 40], [100, 40]]) {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x + dx!, y: y + dy! }] });
+      expect(Math.abs(await panel.evaluate(el => el.scrollTop) - before.scroll)).toBeLessThanOrEqual(1);
+    }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    const after = await page.evaluate(() => window.__plinth.getSettings());
+    expect(after.outputPad).toBeGreaterThan(before.settings.outputPad);
+    expect(after.outputPad).toBeLessThanOrEqual(.25);
+    expect(after.pose).toBe(before.settings.pose);
+    expect(await page.evaluate(() => window.__plinth.getImage())).toEqual(before.image);
+    expect(await panel.boundingBox()).toEqual(sheet);
+    expect(await page.locator('#png-export').boundingBox()).toEqual(exportBox);
+    // Keyboard editing retains the range's native 1% step.
+    await slider.focus();
+    const value = Number(await slider.inputValue());
+    await page.keyboard.press('ArrowRight');
+    expect(Number(await slider.inputValue())).toBe(value + 1);
+    // A fresh touch outside controls must still scroll the settings normally.
+    const scroll = await panel.evaluate(el => el.scrollTop);
+    const sx = sheet.x + 5, sy = sheet.y + sheet.height - 30;
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: sx, y: sy }] });
+    for (let i = 1; i <= 4; i++) {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: sx, y: sy - i * 25 }] });
+    }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await page.waitForFunction(previous => document.querySelector('#panel')!.scrollTop > previous + 20, scroll);
+    expect(errors).toEqual([]);
+  } finally { await context.close(); }
+});
