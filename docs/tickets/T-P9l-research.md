@@ -39,3 +39,41 @@ Local browser setup: pinned Chromium download failed to unzip; an alternate
 Chromium 141 binary downloaded, but launch failed at process_singleton socket()
 with Operation not permitted. No sandbox restriction was bypassed. Browser
 acceptance must be obtained from the existing Linux PR CI; no local browser PASS.
+
+## Follow-up research: settings refresh reveals stale focus (2026-09-28)
+
+The owner reports the same behavior on the offered candidate. Head 1662df0c
+CI 36471216739 also fails the unchanged 1px stability assertion: observed
+movement 625px, 105 other guards pass. PG/PNG succeed; neither proves touch
+behavior. The CSS-only diagnosis and previous browser limitation are incomplete.
+
+- F5: src/main.ts:resize is called by the settings-store subscription for an
+  outputPad input, even when the host viewport has not changed. It always calls
+  scrollIntoView on the active panel element. A native touch range edit can
+  leave document.activeElement on sheet-close. Thus a value edit scrolls back
+  to the close button. In an isolated diagnostic on 1662df0c, scrollTop changes
+  637 → 12 on the first horizontal-first move; the stack is numeric input →
+  attempt → store.apply → emit → resize → sheet-close.scrollIntoView.
+- F6: retain src/ui/panel.ts's focusin reveal and breakpoint focus restoration.
+  The separate actual window/visualViewport resize event needs to reveal the
+  focused field for keyboard/accessibility. Ordinary settings and workspace
+  render updates must not reveal unrelated stale focus. Separate the event
+  adapter from resize rather than removing focus accessibility or moving focus
+  into the slider from a test.
+- F7: the existing real-touch guard already exposes F5 and must stay intact.
+  Add a served-main focus-scroll seed restoring the legacy reveal in resize,
+  and cover a focused field remaining visible after a real viewport shrink.
+  Keep the existing slider-scroll seed and its pan regression independently.
+
+This extends the ticket's write set to src/main.ts's resize/event wiring and
+additive panel guard coverage. The same §§4.5/4.9, P-13(5), P-14(5) authorize
+the correction; TODO(spec): none. No renderer/camera math or layout dimensions
+change. The shared-knowledge revision above remains the consulted revision.
+
+Execution: the already-installed Chromium 141 Headless Shell launches through
+the existing PLINTH_CHROMIUM_PATH override, without a new install or sandbox
+changes. The unchanged candidate guard genuinely FAILS at panel.test.ts:173
+(625 > 1), matching cloud Chromium. Diagnostic instrumentation was temporary,
+not an acceptance test or a source change. Local results are Linux/SwiftShader
+evidence, not physical-phone or Safari acceptance. Full Chromium's earlier
+socket launch failure remains a distinct failed setup attempt.
