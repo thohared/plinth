@@ -156,9 +156,19 @@ it('T-P9l: diagonal slider touch preserves sheet position; ordinary sheet swipes
     const cdp = await context.newCDPSession(page);
     const x = box.x + 8, y = box.y + box.height / 2;
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
-    // Initial vertical drift crosses the native pan threshold, followed by a
-    // horizontal adjustment. The finger remains captured by the native slider.
+    // Initial vertical drift crosses the native pan threshold. Chromium locks
+    // this gesture's native range direction, so test scroll stability here.
     for (const [dx, dy] of [[2, 20], [4, 35], [30, 40], [65, 40], [100, 40]]) {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x + dx!, y: y + dy! }] });
+      expect(Math.abs(await panel.evaluate(el => el.scrollTop) - before.scroll)).toBeLessThanOrEqual(1);
+    }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    expect(await panel.boundingBox()).toEqual(sheet);
+    expect(await page.locator('#png-export').boundingBox()).toEqual(exportBox);
+    // A fresh, horizontal-first diagonal gesture must actually edit the range.
+    // Keep the vertical-first regression above: removing it would miss the bug.
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+    for (const [dx, dy] of [[25, 8], [50, 18], [75, 30], [100, 40]]) {
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x + dx!, y: y + dy! }] });
       expect(Math.abs(await panel.evaluate(el => el.scrollTop) - before.scroll)).toBeLessThanOrEqual(1);
     }

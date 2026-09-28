@@ -16,8 +16,9 @@ dependency, workflow, animation or video work.
 
 ## Acceptance
 
-- A real CDP touch starts on output padding, drifts vertically then adjusts
-  horizontally: scrollTop stays within 1px on every move, padding changes,
+- Real CDP touches start on output padding: first vertical-first, then a fresh
+  horizontal-first diagonal drag. scrollTop stays within 1px on every move;
+  the horizontal-first drag changes padding,
   pose/upload survive, sheet and export button rectangles are unchanged.
 - ArrowRight keeps the native 1% increment; a new swipe outside controls still
   scrolls. Existing panel/resize/focus/input/export guards remain unchanged.
@@ -27,6 +28,26 @@ dependency, workflow, animation or video work.
   cannot launch. Typecheck/unit/build can run locally. No physical Android or
   Safari PASS is claimed; owner confirms the phone behavior after deployment.
 - Independent review is separate. No automatic merge or fixture blessing.
+
+## CI follow-up (2026-09-28)
+
+Head 6fb19081daaebe0b892e66c1dbca5bc56b787c3c: CI run 36464900764
+passed 105 guards and failed the new guard's padding-change assertion (0 > 0).
+The vertical-first gesture passed every 1px scroll-stability assertion. PG and
+PNG capture workflows succeeded on that head.
+
+Chromium's native SliderContainerElement locks the gesture direction on its
+first move; a horizontal range ignores a vertical-first gesture's later moves.
+Source inspected: https://chromium.googlesource.com/chromium/src/+/1c2c691d179d9cc4cb80a819759992cb1eec176b/third_party/blink/renderer/core/html/forms/slider_thumb_element.cc
+(HandleTouchEvent, GetDirection, CanSlide). This explains the observed failure;
+touch-action prevents panel panning but does not replace native range semantics.
+
+Keep the entire original vertical-first gesture and all its stability checks;
+add a separate horizontal-first diagonal gesture before the existing value,
+state and layout assertions. Both gestures enforce the same 1px limit. The
+production fix stays CSS-only. This corrects an invalid combined gesture
+expectation without dropping the regression that should reject the old behavior.
+Fresh-head cloud acceptance and independent seeded review remain required.
 
 ## Fresh review prompt
 
