@@ -131,6 +131,21 @@ it('T-P9l: diagonal slider touch preserves sheet position; ordinary sheet swipes
     const page = await context.newPage();
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(String(error)));
+    let focusSeedReplacements = 0;
+    if (process.env['PLINTH_PANEL_SEED'] === 'focus-scroll') {
+      await page.route('**/src/main.ts*', async route => {
+        const response = await route.fetch();
+        const body = (await response.text()).replace(/function resize\(\) \{/, match => {
+          focusSeedReplacements++;
+          return `${match}
+            const staleFocus = document.activeElement;
+            if (staleFocus instanceof HTMLElement && document.querySelector('#panel')?.contains(staleFocus)) {
+              staleFocus.scrollIntoView({block:'nearest'});
+            }`;
+        });
+        await route.fulfill({ response, body });
+      });
+    }
     if (process.env['PLINTH_PANEL_SEED'] === 'slider-scroll') {
       await page.addInitScript(() => {
         addEventListener('DOMContentLoaded', () => {
@@ -142,6 +157,7 @@ it('T-P9l: diagonal slider touch preserves sheet position; ordinary sheet swipes
     }
     await page.goto(url);
     await page.waitForSelector('html[data-plinth-ready="1"]', { timeout: 60000 });
+    expect(focusSeedReplacements).toBe(process.env['PLINTH_PANEL_SEED'] === 'focus-scroll' ? 1 : 0);
     await page.locator('#settings-open').click();
     const panel = page.locator('#panel');
     const slider = page.locator('#control-outputPad');
@@ -150,6 +166,8 @@ it('T-P9l: diagonal slider touch preserves sheet position; ordinary sheet swipes
       scroll: document.querySelector('#panel')!.scrollTop,
       settings: window.__plinth.getSettings(), image: window.__plinth.getImage(),
     }));
+    // Reproduce touch editing with the opener's old focus still above the view.
+    expect(await page.evaluate(() => document.activeElement?.id)).toBe('sheet-close');
     const box = (await slider.boundingBox())!;
     const sheet = (await panel.boundingBox())!;
     const exportBox = (await page.locator('#png-export').boundingBox())!;
@@ -195,5 +213,48 @@ it('T-P9l: diagonal slider touch preserves sheet position; ordinary sheet swipes
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     await page.waitForFunction(previous => document.querySelector('#panel')!.scrollTop > previous + 20, scroll);
     expect(errors).toEqual([]);
+  } finally { await context.close(); }
+});
+
+it('T-P9l: actual viewport shrink keeps the focused field reachable and keyboard editing intact', async () => {
+  const context = await browser.newContext({ viewport: { width: 400, height: 700 }, isMobile: true, hasTouch: true });
+  try {
+    const page = await context.newPage();
+    let viewportSeedReplacements = 0;
+    if (process.env['PLINTH_PANEL_SEED'] === 'viewport-focus') {
+      await page.route('**/src/main.ts*', async route => {
+        const response = await route.fetch();
+        const body = (await response.text()).replace(/function revealViewportFocus\(\) \{[\s\S]*?\n\s*\}/, () => {
+          viewportSeedReplacements++;
+          return 'function revealViewportFocus() {}';
+        });
+        await route.fulfill({ response, body });
+      });
+    }
+    await page.goto(url);
+    await page.waitForSelector('html[data-plinth-ready="1"]', { timeout: 60000 });
+    expect(viewportSeedReplacements).toBe(process.env['PLINTH_PANEL_SEED'] === 'viewport-focus' ? 1 : 0);
+    await page.locator('#settings-open').click();
+    const slider = page.locator('#control-outputPad');
+    await slider.focus();
+    // Put the focused control near the sheet's bottom, then shrink the host
+    // viewport as a virtual keyboard would. The range itself does not open one.
+    await slider.evaluate(el => el.scrollIntoView({ block: 'end' }));
+    const before = await page.locator('#panel').evaluate(el => el.scrollTop);
+    await page.setViewportSize({ width: 400, height: 420 });
+    await page.waitForFunction(() => document.body.style.height === '420px');
+    const sheet = (await page.locator('#panel').boundingBox())!;
+    const field = (await slider.boundingBox())!;
+    expect(field.y).toBeGreaterThanOrEqual(sheet.y);
+    expect(field.y + field.height).toBeLessThanOrEqual(sheet.y + sheet.height);
+    expect(await page.locator('#panel').evaluate(el => el.scrollTop)).toBeGreaterThan(before);
+    expect(await page.evaluate(() => document.activeElement?.id)).toBe('control-outputPad');
+    const value = Number(await slider.inputValue());
+    await page.keyboard.press('ArrowRight');
+    expect(Number(await slider.inputValue())).toBe(value + 1);
+    await page.keyboard.press('Tab');
+    expect(await page.evaluate(() => document.activeElement?.id)).toBe('control-scene');
+    await page.keyboard.press('Shift+Tab');
+    expect(await page.evaluate(() => document.activeElement?.id)).toBe('control-outputPad');
   } finally { await context.close(); }
 });
