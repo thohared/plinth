@@ -215,6 +215,12 @@ async function boot(): Promise<void> {
     }
     if (stage.camera.aspect !== w / h) stage.setAspect(w / h);
     render();
+  }
+
+  // Only a host viewport change should reveal existing focus. Touch range edits
+  // can leave focus on the sheet's close button while updating the preview.
+  function revealViewportFocus(): void {
+    if (disposed || recoveryState !== 'ready') return;
     const focused = document.activeElement;
     if (focused instanceof HTMLElement && document.querySelector('#panel')?.contains(focused)) focused.scrollIntoView({block:'nearest'});
   }
@@ -398,6 +404,8 @@ async function boot(): Promise<void> {
     window.addEventListener('resize', resize);
     cleanup.push(() => window.removeEventListener('resize', resize));
     window.visualViewport?.addEventListener('resize', resize, { signal });
+    window.addEventListener('resize', revealViewportFocus, { signal });
+    window.visualViewport?.addEventListener('resize', revealViewportFocus, { signal });
     controller = createPoseController(canvas, {
       freeRotate: (horizontal, vertical) => {
         if (!freeView) return false;
