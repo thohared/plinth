@@ -1,4 +1,43 @@
-# Plinth — Build Games release plan
+# Plinth: Build Games release plan
+
+## Current PNG release plan (2026-09-30)
+
+Owner approved the six-part PNG scope/performance proposal on 2026-09-30
+at 01:25 Europe/Belgrade. P-19 transfers it in a separate spec-only commit.
+This update and P-19 become active on main after independent review and
+owner merge. Approval is not a performance PASS or competition submission.
+Research: `tickets/T-P10a-research.md` F4–F6. Application base:
+`6ad29737f947c4e691f68c8b5b416976f3eb9c07`.
+
+The release name is **Plinth**. Deliver the existing screenshot-to-PNG studio;
+defer T-P8a motion preview and T-P8b video export beyond this competition
+release. Keep manual Free view, named-pose transitions and PNG functionality.
+The old plan below is retained as history. Its mandatory animation dependency,
+float segment, clip promise and elapsed milestone dates do not define this
+revised release sequence; the P-19 contract governs when merged.
+
+1. Review and merge the standalone P-19 amendment and this documentation update.
+2. Prepare a measurement ticket that freezes viewport, DPR, coordinates,
+   timing, warm-up and frame-time measurement method for the approved
+   60-second interaction trace. Implement the measurement tooling and obtain
+   five real runs on disclosed target hardware. Keep at least 1,500 samples
+   per run, p50/p99, hitches over 50 ms, CoV, n and all P-19/section 6 budgets.
+   Report insufficient samples, failures and LOW-TRUST honestly. Software-GPU
+   correctness results do not establish physical desktop/phone performance.
+3. Verify Safari on actual supported Apple hardware/browser and retain the
+   existing mobile/PNG/PG requirements. Record unavailable evidence as pending.
+4. Capture representative real exports and a real interaction walkthrough
+   using owned/permitted content. A storyboard or illustration is not a capture.
+5. Verify official terms, deadline, eligibility and form fields before the
+   owner supplies the intended public entrant name and submits. Do not infer
+   current competition rules from the historical dates below.
+
+PR #38 presentation and PR #39 punctuation are merged; their reviews do not
+certify the remaining measurement, Safari, media or submission requirements.
+No runtime/guard/fixture/dependency change belongs to this planning PR.
+See `RELEASE-CHECKLIST.md` for current evidence and remaining work.
+
+## Historical plan (2026-09-11, retained for provenance)
 
 Accepted direction: Novak, 2026-09-11. Document of record:
 [`PLINTH_SPEC.md`, P-10](../PLINTH_SPEC.md).
