@@ -75,7 +75,7 @@ show sharing/manual-copy and keyboard help on desktop and mobile.
 
 Four looks (PLINTH_SPEC §4.4): `soft-studio`, `dark-glass`, `warm-sunset`,
 `clean-white`, selected with `?scene=<id>`. Each is a procedural environment
-(a gradient sky and one soft window, pre-filtered at load — no HDR files), one key
+(a gradient sky and one soft window, pre-filtered at load, no HDR files), one key
 light, a contact shadow under the device and an exposure, tone mapped with AgX
 (ACES selectable in Advanced). The screenshot on the screen is exempt from
 tone mapping, on purpose: it is already a finished picture. Anti-aliasing is an

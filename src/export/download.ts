@@ -28,7 +28,7 @@ export function createDownload(capture: (scale: ExportScale) => CapturedPng,
         const blob = await encode(straightPixels(pixels, width, height, false), width, height, { signal: abort.signal });
         if (disposed || current !== token) return;
         const url = urls.createObjectURL(blob);
-        state = { busy: true, message: `${width} × ${height} — PNG is ready.`, result: { url, width, height, filename } };
+        state = { busy: true, message: `${width} × ${height}: PNG is ready.`, result: { url, width, height, filename } };
       } catch (error) {
         if (current === token && !disposed) state = { busy: true, message: error instanceof Error ? error.message : 'The PNG could not be created.' };
         throw error;
