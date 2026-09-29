@@ -30,7 +30,7 @@ it('T-P9 fresh literal restore wins over queries, retains MSAA and never replays
  const state=await page.evaluate(()=>{const s=window.__plinth.getSettings();return {...s,r:s.custom.rotation.toArray()};});
  expect(state).toMatchObject({device:'laptop',scene:'warm-sunset',tone:'aces',msaa:true,aspect:'3:1',pngScale:2,pose:'lean',spec:{hingeAngle:1.85},composition:null});
  expect(state.r[0]).toBeCloseTo(-Math.sin(Math.PI/18),10);expect(await page.evaluate(()=>window.__plinth.advancePose(0))).toBe(false);
- expect(await page.evaluate(()=>window.__plinth.getImage()?.identity)).toBe('demo');expect(await page.locator('#share-status').innerText()).toContain('images are not included');
+ expect(await page.evaluate(()=>window.__plinth.getImage()?.identity)).toBe('demo');expect(await page.locator('#share-status').innerText()).toBe('Scene loaded. Add your screenshot. Images are not included in links.');
  }finally{await page.close();}
 });
 it('T-P9 validation rejects out-of-range public input without mutating in-tab scene',async()=>{

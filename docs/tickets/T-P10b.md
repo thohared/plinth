@@ -32,8 +32,9 @@ Use `Plinth: Screenshot studio` for all three titles. Use a colon before
 in the README sentence and a colon in the submission heading.
 
 Write set: index.html, src/main.ts, src/export/download.ts, README.md,
-docs/SUBMISSION.md and this ticket. No behavior, CSS, images, fixtures, tests,
-dependencies, workflows or test thresholds change. Research is committed
+docs/SUBMISSION.md, guards/state-share.test.ts and this ticket. The existing
+shared-link assertion is updated as described below. No behavior, CSS, images,
+fixtures, dependencies, workflows or test thresholds change. Research is committed
 before implementation. No new test or guard is needed for this copy edit.
 
 Validate the built titles, remaining literal/encoded product-text occurrences,
@@ -41,3 +42,19 @@ typecheck, existing unit tests and build. Attempt the existing acceptance
 command and disclose any unavailable browser setup. Existing automatic cloud
 CI/PG/PNG and a fresh-session GitHub review remain acceptance gates; no manual
 duplicate workflows, baseline blessing, self-review or release PASS.
+
+## Review fixup: full shared-link notice assertion
+
+Independent PR #39 review of cec1524407f0adf8494865c7c0377122a2c7bdd7
+found one integration defect (finding 1): guards/state-share.test.ts:33
+expected the lowercase substring `images are not included`, whereas the
+approved sentence now starts with `Images`. CI 36629098897 confirmed that
+single failure (106 guards passed); PG 36629098899 and PNG 36629098919 passed.
+
+Replace the stale substring assertion with literal equality to the entire
+intended notice: `Scene loaded. Add your screenshot. Images are not included
+in links.` The expected value is independent of the implementation, preserves
+the privacy check and additionally verifies the scene/add-image sentences.
+Demo-image, restoration, MSAA, pose, privacy and all other assertions remain
+unchanged. No test is added, removed, skipped or made case-insensitive. The
+production copy stays unchanged; no spec amendment is needed for this fixup.
