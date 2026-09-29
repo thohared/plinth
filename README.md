@@ -3,12 +3,13 @@
 [![ci](https://github.com/thohared/plinth/actions/workflows/ci.yml/badge.svg)](https://github.com/thohared/plinth/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> drop a screenshot, get a studio-lit 3D product shot or a 4-second clip, in the browser, free, no account.
+> Turn a screenshot into a studio-lit 3D product image. Export PNG, free, with no account.
 
 **Live:** https://plinth-phi.vercel.app/
 
-**Status:** pre-alpha, Build Games entry. The interactive studio is available;
-PNG downloads and shareable scene settings are implemented; motion/video remain upcoming.
+**Status:** PNG studio available; final release verification is in progress.
+PNG downloads and shareable scene settings are implemented. Motion preview and
+video export are not available in this version. See the [release checklist](docs/RELEASE-CHECKLIST.md).
 
 3D mockup studio in the browser. Devices are parametric generic slabs, never a
 replica of any manufacturer's design. Nothing leaves the tab: no network at
