@@ -19,3 +19,15 @@ Owner requests changing "4h 20m" to "2h 30m" on the starting screenshot.
      Landscape demo and static look thumbnails are outside this starting-phone edit.
      Existing fixtures and thresholds stay unchanged. PG visual differences must
      be evaluated, not blessed automatically.
+
+## F4 — all-device correction (2026-09-29)
+
+Owner clarified the duration must also change on the other four devices and
+explicitly authorized direct raster editing without imagegen. The original
+landscape asset is 2880×1800; both imagegen attempts returned 1586×992 and were
+rejected, never committed. src/scene.ts:bindImage selects landscape for every
+non-phone class (tablet/laptop/browser/card). Extend this ticket write set to
+public/demo-landscape.png. Preserve its canvas, full opacity and all pixels
+outside the two changed digits; retain h, 0, m and other content. No runtime,
+fixture, threshold or spec change is required. Composition thumbnail files
+remain unchanged; these are preset previews, not the loaded device demo bank.
