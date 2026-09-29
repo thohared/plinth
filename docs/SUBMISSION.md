@@ -1,4 +1,4 @@
-# Plinth — submission draft
+# Plinth: submission draft
 
 Status: PREPARED COPY, NOT SUBMITTED. Product language: English.
 

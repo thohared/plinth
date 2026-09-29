@@ -293,7 +293,7 @@ async function boot(): Promise<void> {
           hydrationFailed = true; recoveryState = 'failed'; panel?.setRecovery('failed'); exporter.invalidate('Scene restoration failed. Reload the page to continue.');
           throw error;
         }
-        panel?.showShare({message:hash ? 'Scene loaded. Add your screenshot — images are not included in links.' : 'Default scene restored. Your image stays in this tab.'});
+        panel?.showShare({message:hash ? 'Scene loaded. Add your screenshot. Images are not included in links.' : 'Default scene restored. Your image stays in this tab.'});
         resize();
       },
     });
