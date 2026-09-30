@@ -1,0 +1,61 @@
+name: T-P10f focused upload evidence
+on:
+  push:
+    branches: [evidence/t-p10f-upload-569a9ae]
+permissions:
+  contents: read
+jobs:
+  focused:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 569a9aeabd4b332ecb0fdf74518b0afdc505883c
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with: {node-version: 22, cache: npm}
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Verify pinned source and focused positive/negative probes
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const cp = require('node:child_process');
+          const out = '/tmp/tp10f-evidence';
+          fs.mkdirSync(out,{recursive:true});
+          const git = (...args) => cp.execFileSync('git',args,{encoding:'utf8'}).trim();
+          const expected = {"head":"569a9aeabd4b332ecb0fdf74518b0afdc505883c","tree":"cd551e15acb7cb2d07b14417e3af197cf3482439","lines":{"upload":105,"upload-wait":146,"upload-shared":165}};
+          const actual = {head:git('rev-parse','HEAD'),tree:git('rev-parse','HEAD^{tree}'),dirty:git('status','--porcelain')};
+          fs.writeFileSync(out+'/source.json',JSON.stringify({expected,actual},null,2));
+          if(actual.head!==expected.head||actual.tree!==expected.tree||actual.dirty)throw Error('source mismatch');
+          const results=[];
+          for(const [label,seed] of [['unseeded-before',''],['legacy-wait','upload-wait'],['initial-fill','upload'],['shared-fill','upload-shared'],['unseeded-after','']]){
+            const env={...process.env};
+            if(seed)env.PLINTH_LIVE_SEED=seed;else delete env.PLINTH_LIVE_SEED;
+            const child=cp.spawnSync('npm',['run','guards','--','guards/live-feedback.test.ts','-t','T-P10d every upload','--reporter=json','--outputFile='+out+'/'+label+'.json'],{env,encoding:'utf8',timeout:180000,maxBuffer:8*1024*1024});
+            const log=(child.stdout||'')+(child.stderr||'');
+            fs.writeFileSync(out+'/'+label+'.log',log);
+            let report;try{report=JSON.parse(fs.readFileSync(out+'/'+label+'.json','utf8'));}catch{}
+            const assertions=report?.testResults?.flatMap(x=>x.assertionResults||[])||[];
+            const target=assertions.find(x=>(x.fullName||x.title||'').includes('T-P10d every upload'));
+            const messages=(target?.failureMessages||[]).join('\n').replace(/\x1b\[[0-9;]*m/g,'');
+            const line=seed?expected.lines[seed]:null;
+            const expectedFailure=seed&&target?.status==='failed'&&messages.includes('cover')&&messages.includes('contain')&&new RegExp('live-feedback\\.test\\.ts:'+line+'(?::|\\b)').test(messages)&&(seed!=='upload-wait'||['200','380','320','180'].every(x=>messages.includes(x)));
+            const ok=!child.error&&(seed?child.status===1&&expectedFailure:child.status===0&&target?.status==='passed'&&report.numPassedTests===1&&report.numFailedTests===0);
+            const result={label,seed,exit:child.status,signal:child.signal,error:child.error?.message,ok:!!ok,expectedLine:line,assertion:target,messages};
+            results.push(result);console.log(JSON.stringify(result));
+          }
+          const finalDirty=git('status','--porcelain');
+          const ok=results.every(x=>x.ok)&&!finalDirty;
+          fs.writeFileSync(out+'/summary.json',JSON.stringify({expected,actual,results,finalDirty,ok},null,2));
+          if(!ok)process.exitCode=1;
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tp10f-upload-evidence
+          path: /tmp/tp10f-evidence/
+          if-no-files-found: error
+          retention-days: 14
