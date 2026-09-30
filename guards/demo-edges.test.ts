@@ -26,11 +26,11 @@ it('T-P9d real controls choose full demo screens and retain an uploaded image',a
   const boxes=await page.evaluate(()=>({stage:document.querySelector('#stage')!.getBoundingClientRect().toJSON(),workspace:document.querySelector('#workspace')!.getBoundingClientRect().toJSON()}));
   const y=40;const xs=[2,Math.floor(boxes.stage.x)-1,Math.ceil(boxes.stage.right)+1,Math.floor(boxes.workspace.right)-2];
   for(const x of xs){const offset=(y*screenshot.width+x)*4;expect([...screenshot.data.subarray(offset,offset+3)],`gutter ${x}`).toEqual([233,235,238]);}
-  // Explicit Fit image must survive upload and device changes.
-  await page.locator('#control-fit').selectOption('contain');
+  // Explicit Fit image for the accepted upload must survive device changes.
   const source=new PNG({width:64,height:32});source.data.fill(255);
   await page.locator('#image-file').setInputFiles({name:'user.png',mimeType:'image/png',buffer:PNG.sync.write(source)});
   await page.waitForFunction(()=>window.__plinth.getImage()?.identity==='user');
+  await page.locator('#control-fit').selectOption('contain');
   for(const id of ['tablet','laptop','card','browser','phone'] as const){
    await page.getByLabel('Device',{exact:true}).selectOption(id);
    expect(await page.evaluate(()=>window.__plinth.getImage())).toMatchObject({identity:'user',originalWidth:64,originalHeight:32,fit:'contain'});
