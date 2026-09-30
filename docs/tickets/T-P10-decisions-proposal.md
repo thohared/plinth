@@ -1,8 +1,11 @@
 # Proposed PNG release scope and performance contract
 
-Status: PROPOSAL, not an active P-entry. Author: Codex, 2026-09-29.
-Research: T-P10a F4–F6. Owner already chose to omit animation; the concrete
-replacement performance workload below still needs approval. Do not mark §6 PASS.
+Status: OWNER APPROVED, awaiting independent review and merge of P-19.
+Author: Codex, original proposal 2026-09-29; approval recorded 2026-09-30.
+Research: T-P10a F4–F6. The owner approved this linked six-part proposal with
+“Odobravam” at 01:25 Europe/Belgrade on 2026-09-30. P-19 transfers the contract
+in a standalone spec-only commit and becomes active on main only after merge.
+The numbered proposal is preserved below. Approval is not a §6 PASS.
 
 1. Confirm the existing product name **Plinth** for this release (§10).
 2. Ship the current screenshot-to-PNG workflow. Defer T-P8a motion preview and
@@ -32,7 +35,7 @@ replacement performance workload below still needs approval. Do not mark §6 PAS
    walkthrough. A demonstration recording is not an in-app animation/export
    feature. Never manufacture a recording or present a storyboard as a capture.
 
-After approval, transfer the accepted contract into a standalone spec-only
-P-entry commit and update the release plan. Do not silently edit the original
-requirements inside implementation work. Approval alone is neither test PASS,
-independent review, merge nor competition submission.
+The approved contract is transferred to P-19 and the release plan is updated
+in a separate documentation commit. Do not silently edit original requirements
+inside implementation work. Approval alone is neither test PASS, independent
+review, merge nor competition submission.

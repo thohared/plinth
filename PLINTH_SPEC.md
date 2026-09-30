@@ -885,5 +885,58 @@ resize, settings edits, custom copy/reload and PNG export. Old v1 links remain v
 No fixture edits, tolerance relaxation or baseline blessing. Independent review,
 CI and owner visual approval remain separate gates.
 
+### P-19: Approved PNG competition release contract (2026-09-30)
+
+Planning amendment by Codex (backend identifier not exposed), based on
+`docs/tickets/T-P10a-research.md` F4–F6 and the six-part proposal in
+`docs/tickets/T-P10-decisions-proposal.md` at
+`6ad29737f947c4e691f68c8b5b416976f3eb9c07`.
+The owner approved that linked proposal with “Odobravam” on 2026-09-30
+at 01:25 Europe/Belgrade, after being asked to approve the PNG scope,
+Plinth name and replacement performance workload. This is a standalone
+specification-only planning commit under P-5, not implementation work.
+The amendment becomes active on main after independent review and owner merge.
+
+For this competition release, the confirmed product name is **Plinth**.
+The following approved contract supersedes the incompatible clip promise in
+section 1, mandatory T-P8a/float requirements in P-10(2,5), and corresponding
+section 8 dependencies. Section 4.7 motion/video remains future scope rather
+than a shipped feature or a prerequisite for this PNG release. Section 6's
+workload is changed only as described below; its evidence and budgets remain.
+All section 2 hard rules and section 7 ownership/review requirements remain.
+
+1. Confirm the existing product name **Plinth** for this release (§10).
+2. Ship the current screenshot-to-PNG workflow. Defer T-P8a motion preview and
+   T-P8b video export beyond this competition release, including Space/Shift+V.
+   Preserve manual Free view and existing pose transitions. Replace the §1
+   release promise with screenshot-to-studio-lit-3D-image plus PNG export.
+3. Replace only the missing float step of §6 with a named, repeated interaction
+   workload using shipped features. The approved 60-second measured segment after
+   explicit shader warm-up: 0–10s cycle all five devices at 2-second intervals;
+   10–18s cycle four scene presets at 2-second intervals; 18–24s select Front,
+   Top and Lean at 2-second intervals; 24–60s enable Free view and alternate
+   horizontal and vertical drags every 3 seconds, on laptop, with the default
+   demo. Specify exact coordinates, viewport, DPR and timestamps in the later
+   measurement ticket before collecting results; freeze that trace for all runs.
+4. Retain five runs, ≥1,500 measured frame samples per run, p50/p99, hitches
+   above 50ms, CoV, sample counts and hardware/browser/viewport/DPR disclosure.
+   Keep §6 desktop 8.3/16.7ms and phone 16.7/33.3ms budgets, zero hitches,
+   and LOW-TRUST for CoV >20% or n<3. Report insufficient-frame runs explicitly;
+   do not fill samples, remove slow frames or substitute software GPU results
+   for physical hardware evidence. Document the frame-time measurement method
+   separately from displayed refresh cadence before making a budget verdict.
+5. Preserve PNG/PG acceptance and real browser/mobile checks. Linux automated
+   correctness is not physical-device performance or Safari verification.
+   Unperformed checks stay pending. A measured failure requires remediation or
+   an explicit owner release decision; changing the workload is not a waiver.
+6. T-P10 media may use a static product image and a recorded real interaction
+   walkthrough. A demonstration recording is not an in-app animation/export
+   feature. Never manufacture a recording or present a storyboard as a capture.
+
+Approval and this amendment are not an implementation, measurement PASS,
+independent review, merge or competition submission. The later measurement
+ticket must freeze the concrete trace and measurement method before runs;
+missing evidence remains open. All other specification provisions are preserved.
+
 ## §10 Open TODO(spec)
-- Codename/product name before T-P10 (README, OG title).
+- Product-name question resolved by P-19: **Plinth**, effective when that amendment merges.
