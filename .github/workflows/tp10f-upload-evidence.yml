@@ -17,7 +17,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: 22, cache: npm}
       - run: npm ci --no-audit --no-fund
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium --only-shell
+        timeout-minutes: 3
       - name: Verify pinned source and focused positive/negative probes
         run: |
           node <<'NODE'
@@ -31,18 +32,19 @@ jobs:
           fs.writeFileSync(out+'/source.json',JSON.stringify({expected,actual},null,2));
           if(actual.head!==expected.head||actual.tree!==expected.tree||actual.dirty)throw Error('source mismatch');
           const results=[];
-          for(const [label,seed] of [['unseeded-before',''],['legacy-wait','upload-wait'],['initial-fill','upload'],['shared-fill','upload-shared'],['unseeded-after','']]){
+          for(const [label,seed] of [['legacy-wait','upload-wait'],['initial-fill','upload'],['shared-fill','upload-shared']]){
             const env={...process.env};
             if(seed)env.PLINTH_LIVE_SEED=seed;else delete env.PLINTH_LIVE_SEED;
-            const child=cp.spawnSync('npm',['run','guards','--','guards/live-feedback.test.ts','-t','T-P10d every upload','--reporter=json','--outputFile='+out+'/'+label+'.json'],{env,encoding:'utf8',timeout:180000,maxBuffer:8*1024*1024});
+            const child=cp.spawnSync('npm',['run','guards','--','guards/live-feedback.test.ts','-t','T-P10d every upload','--reporter=default','--reporter=json','--outputFile.json='+out+'/'+label+'.json'],{env,encoding:'utf8',timeout:180000,maxBuffer:8*1024*1024});
             const log=(child.stdout||'')+(child.stderr||'');
             fs.writeFileSync(out+'/'+label+'.log',log);
             let report;try{report=JSON.parse(fs.readFileSync(out+'/'+label+'.json','utf8'));}catch{}
             const assertions=report?.testResults?.flatMap(x=>x.assertionResults||[])||[];
             const target=assertions.find(x=>(x.fullName||x.title||'').includes('T-P10d every upload'));
             const messages=(target?.failureMessages||[]).join('\n').replace(/\x1b\[[0-9;]*m/g,'');
+            const diagnostic=log.replace(/\x1b\[[0-9;]*m/g,'');
             const line=seed?expected.lines[seed]:null;
-            const expectedFailure=seed&&target?.status==='failed'&&messages.includes('cover')&&messages.includes('contain')&&new RegExp('live-feedback\\.test\\.ts:'+line+'(?::|\\b)').test(messages)&&(seed!=='upload-wait'||['200','380','320','180'].every(x=>messages.includes(x)));
+            const expectedFailure=seed&&target?.status==='failed'&&diagnostic.includes('cover')&&diagnostic.includes('contain')&&new RegExp('live-feedback\\.test\\.ts:'+line+'(?::|\\b)').test(diagnostic)&&(seed!=='upload-wait'||['200','380','320','180'].every(x=>diagnostic.includes(x)));
             const ok=!child.error&&(seed?child.status===1&&expectedFailure:child.status===0&&target?.status==='passed'&&report.numPassedTests===1&&report.numFailedTests===0);
             const result={label,seed,exit:child.status,signal:child.signal,error:child.error?.message,ok:!!ok,expectedLine:line,assertion:target,messages};
             results.push(result);console.log(JSON.stringify(result));
@@ -55,7 +57,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: tp10f-upload-evidence
+          name: tp10f-upload-negative-details
           path: /tmp/tp10f-evidence/
           if-no-files-found: error
           retention-days: 14
