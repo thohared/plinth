@@ -152,10 +152,11 @@ always select another format. Resizing keeps your chosen format. Ready-made
 looks keep that format and start with zero extra space; Clean view uses a tablet.
 Shared scene links retain their saved settings.
 
-New uploads initially Fill screen, which can crop an image with different
-proportions. Choose Fit image to show the complete screenshot with margins.
-Explicit image-fit choices and restored settings take precedence. Pointer
-rotation slows near the legal view limits; it does not rotate under the floor.
+Every newly accepted screenshot starts with Fill screen, which can crop an image
+with different proportions. Choose Fit image to show the complete screenshot
+with margins. Manual fitting and restored settings apply to the current image;
+the next upload selects Fill screen again and keeps your image padding and color.
+Pointer rotation slows near the legal view limits; it does not rotate under the floor.
 
 ### Viewing every side
 
@@ -165,3 +166,11 @@ ports, speakers and the laptop underside. **Reset view** returns to Three-quarte
 selecting a named angle or a ready-made look also leaves Free view. The resulting
 custom orientation is included in scene links and PNGs; the interaction toggle
 itself is not saved. All details are generic procedural geometry and work offline.
+
+## Release and performance evidence
+
+See [the release checklist](docs/RELEASE-CHECKLIST.md) for reviewed changes and
+remaining acceptance work, and [performance testing](docs/PERFORMANCE-TESTING.md)
+for physical-desktop prerequisites, collection commands and diagnostic limits.
+Automated correctness checks and partial CPU/GPU timings do not establish a
+complete-frame performance PASS or physical Safari support.

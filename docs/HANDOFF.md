@@ -1,5 +1,35 @@
 # Plinth — handoff brief for any model (Claude or ChatGPT)
 
+## Current entry point: 2026-09-30
+
+Fetched application main: `8577219ff16358820770fdd658931feda44b4c06`, PR #42
+merged and deployed. Start with [RELEASE-CHECKLIST.md](RELEASE-CHECKLIST.md),
+[PERFORMANCE-TESTING.md](PERFORMANCE-TESTING.md) and
+[SUBMISSION.md](SUBMISSION.md), then the current specification and ticket.
+
+Plinth currently exports PNG with five devices, four lighting presets,
+responsive controls, scene links and manual Free view. Every newly accepted
+screenshot starts at Fill screen; current-image manual fitting still works.
+P-19 is the active PNG competition contract. Motion preview/video export are
+deferred. T-P10c's diagnostic collector and T-P10d's upload fix are reviewed and
+merged. Full-frame performance evidence, physical desktop/phone measurements,
+actual Safari verification and the real walkthrough remain open. The recorded
+physical preflight collected 0/5 runs because it ran in a cloud container.
+Post-merge CI 36769509852 subsequently failed the T-P10d shared-state/upload
+browser assertion (106 guards passed, one failed); the checklist records the
+unresolved result. Earlier successful runs do not close that later failure.
+
+Do not restart the old T-P5 sequence or treat the historical statements below
+as current implementation status. Fetch and verify current head/checks before
+new work. All research, single-writer, independent-review, baseline ownership,
+Linux-default and no-paid-API rules remain in force. The owner submits the entry.
+
+## Historical September 11 handoff
+
+The remainder is the dated original handoff, preserved for provenance. Its old
+feature/status/milestone statements are superseded by P-19 and the current
+entry point above; its process rules are not waived.
+
 Code snapshot 2026-09-11 from `main` @
 `8aa37c65ca14e32fd37986cd05d2aab44aee6373` (T-P3 v2 merged).
 Release direction: P-10 and [`RELEASE-PLAN.md`](RELEASE-PLAN.md), accepted

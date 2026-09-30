@@ -1,11 +1,14 @@
 # Plinth: submission draft
 
 Status: PREPARED COPY, NOT SUBMITTED. Product language: English.
+Application snapshot: `8577219ff16358820770fdd658931feda44b4c06`, 2026-09-30.
+Required release evidence remains tracked in [RELEASE-CHECKLIST.md](RELEASE-CHECKLIST.md).
 
 - Product: Plinth
 - Public demo: https://plinth-phi.vercel.app/
 - Public repository: https://github.com/thohared/plinth
 - Entrant: owner to supply the intended public name; do not infer legal identity.
+- Contact email: owner to supply; do not infer it from a Git author address.
 
 ## Short description (under 200 characters)
 
@@ -36,10 +39,32 @@ Safari/video claim. The storyboard is not a produced recording.
 
 ## Submission checks
 
-The official builders page, read 2026-09-29, describes a public demo/repository
-and entrant name: https://canivibecodeit.com/thebuildgames/builders . The terms
-page could not be retrieved during this pass:
-https://canivibecodeit.com/thebuildgames/terms . Recheck official terms, deadline,
-eligibility and current form fields before the owner submits. The internal
-200-character copy target is not claimed to be a freshly verified form limit.
-See RELEASE-CHECKLIST.md for remaining performance/browser evidence.
+The [official entry page](https://canivibecodeit.com/thebuildgames), read on
+2026-09-30, displays these fields:
+
+| Field | Prepared value / owner action |
+| --- | --- |
+| Name | Owner supplies intended public name. |
+| Handle (optional) | Owner chooses whether to include one. |
+| Public demo URL | https://plinth-phi.vercel.app/ |
+| Public GitHub repository | https://github.com/thohared/plinth |
+| What you built (optional, up to 200 characters) | Short description above. |
+| Email | Owner supplies contact email. |
+| Results/winners email option | Owner chooses the preference. |
+| Terms acceptance | Owner reads the current terms and decides; not accepted here. |
+
+The page states September 30, midnight New York. For the end-of-day 2026-09-30
+boundary, that is **2026-10-01 06:00 Europe/Belgrade**. Recheck the live page
+before submission; do not rely on a cached countdown. Entry is described as
+free, one per person/team, with a public demo and repository.
+
+The separate [terms page](https://canivibecodeit.com/thebuildgames/terms) could
+not be retrieved. This pass therefore does not verify all eligibility/contract
+conditions or accept them for the owner. The visible form and
+[builders guidance](https://canivibecodeit.com/thebuildgames/builders) do not
+replace the terms.
+
+Before the owner submits: confirm public access and the final deployment,
+review remaining release evidence, supply the name/email, inspect actual demo
+media and confirm the current form/terms. Preserve the submission confirmation
+afterwards. Do not label this copy, the storyboard, or a merged PR as submission.
