@@ -4,10 +4,10 @@ import { createStage } from './scene';
 import { createSettingsStore } from './settings';
 import { compositionSettings } from './ui/compositions';
 import { latestImageLoader } from './screen/load';
-function setup() {
+function setup(fillUploads = false) {
   const stage = createStage('phone','soft-studio',.8);
   const studio = { getToneMapping: () => 'agx', prepareSettings: vi.fn((value: {scene: ReturnType<typeof stage.getScene>}) => ({ commit: vi.fn(() => stage.setScene(value.scene)), dispose: vi.fn() })) };
-  const store = createSettingsStore(stage,studio as never,{immediate:false,msaa:false});
+  const store = createSettingsStore(stage,studio as never,{immediate:false,msaa:false,fillUploads});
   return {stage,studio,store};
 }
 describe('T-P6 shared settings', () => {
@@ -70,4 +70,63 @@ it('T-P9 hydration reports GPU application failure without a successful state em
 it('T-P9 composition identity is derived only from all matching fields and a settled pose',()=>{
   const {stage,store}=setup();store.compose('warm-card');expect(store.get().composition).toBeNull();stage.advancePose(1);expect(store.get().composition).toBe('warm-card');
   store.apply({pngScale:3});expect(store.get().composition).toBe('warm-card');store.apply({pad:.01});expect(store.get().composition).toBeNull();store.apply({pad:0});expect(store.get().composition).toBe('warm-card');store.reset();expect(store.get().composition).toBe('studio-phone');expect(stage.isTransitioning()).toBe(false);store.dispose();stage.dispose();
+});
+
+describe('T-P10d new screenshot fitting', () => {
+  it('fills every accepted upload while retaining manual fitting until the next image', () => {
+    const {stage,store} = setup(true);
+    const upload = (width: number) => {
+      store.prepareUpload();
+      stage.setImage({close:vi.fn()} as never,{identity:'user',width,height:80,originalWidth:width,originalHeight:80,downscaled:false,cap:8192});
+    };
+    try {
+      upload(40);
+      expect(store.get().fit).toBe('cover');
+      for (const width of [60,100]) {
+        store.apply({fit:'contain',pad:.1,padColor:'#123456'});
+        store.setDevice(width === 60 ? 'tablet' : 'phone');
+        expect(stage.getImage()).toMatchObject({fit:'contain',pad:.1,padColor:'#123456'});
+        upload(width);
+        expect(store.get()).toMatchObject({fit:'cover',pad:.1,padColor:'#123456'});
+        expect(stage.getImage()).toMatchObject({fit:'cover',pad:.1,padColor:'#123456',width,height:80});
+      }
+    } finally {store.dispose();stage.dispose();}
+  });
+  it('restores a shared fit exactly until a new upload, without resetting other settings', async () => {
+    const {snapshotState} = await import('./state/codec');
+    const {stage,store} = setup(true);
+    try {
+      stage.setImage({close:vi.fn()} as never,{identity:'user',width:40,height:80,originalWidth:40,originalHeight:80,downscaled:false,cap:8192});
+      store.hydrate({...snapshotState(store.get(),false),fit:'contain',pad:.1,padColor:'#123456',pngScale:2});
+      const restored = store.get();
+      expect(stage.getImage()).toMatchObject({fit:'contain',pad:.1,padColor:'#123456'});
+      store.prepareUpload();
+      expect(store.get()).toEqual({...restored,fit:'cover'});
+      expect(stage.getImage()).toMatchObject({fit:'cover',pad:.1,padColor:'#123456'});
+    } finally {store.dispose();stage.dispose();}
+  });
+  it('changes fit only when the latest decode succeeds, never for stale or failed loads', async () => {
+    const {stage,store} = setup(true);
+    type Loaded = Parameters<Parameters<typeof latestImageLoader>[1]>[0];
+    const pending: {resolve: (value: Loaded) => void; reject: (error: Error) => void}[] = [];
+    const loader = latestImageLoader(() => new Promise((resolve,reject) => pending.push({resolve,reject})),value => {
+      store.prepareUpload();stage.setImage(value.bitmap,value.meta);
+    },()=>{});
+    const meta = {identity:'user' as const,width:40,height:80,originalWidth:40,originalHeight:80,downscaled:false,cap:8192};
+    const staleBitmap = {close:vi.fn()};
+    try {
+      store.apply({fit:'contain'});
+      const stale = loader('stale'), latest = loader('latest');
+      expect(store.get().fit).toBe('contain');
+      pending[1]!.resolve({bitmap:{close:vi.fn()} as never,meta});await latest;
+      expect(stage.getImage()?.fit).toBe('cover');
+      store.apply({fit:'contain'});
+      pending[0]!.resolve({bitmap:staleBitmap as never,meta});await stale;
+      expect(staleBitmap.close).toHaveBeenCalledTimes(1);
+      expect(stage.getImage()?.fit).toBe('contain');
+      const failed = loader('invalid');const rejection = expect(failed).rejects.toThrow('decode failed');
+      pending[2]!.reject(new Error('decode failed'));await rejection;
+      expect(stage.getImage()?.fit).toBe('contain');
+    } finally {store.dispose();stage.dispose();}
+  });
 });

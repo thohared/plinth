@@ -36,7 +36,6 @@ function clone(value: Settings): Settings {
 }
 export function createSettingsStore(stage: Stage, studio: Studio, options: { immediate: boolean; msaa: boolean; fixedAspect?: number; defaultAspect?: OutputAspect; fillUploads?: boolean; onHydrationFailure?: (error: unknown) => void }): SettingsStore {
   const defaultAspect = options.defaultAspect ?? '4:5';
-  let automaticUploadFit = options.fillUploads ?? false;
   let state: Settings = { ...stage.snapshot(), aspect: defaultAspect, scene: stage.getScene(), tone: studio.getToneMapping(),
     msaa: options.msaa, background: defaultBackground(), composition: null, pngScale: 1 };
   const identify = (): CompositionId | null => stage.isTransitioning() ? null : COMPOSITIONS.find(row => {
@@ -81,7 +80,6 @@ export function createSettingsStore(stage: Stage, studio: Studio, options: { imm
         state = { ...next, custom: stage.snapshot().custom };
       } finally { applying = false; stageCandidate.dispose(); studioCandidate?.dispose(); }
       state.composition = identify();
-      if (Object.hasOwn(patch, 'fit') && !composition) automaticUploadFit = false;
       emit(composition ? 'compose' : 'apply');
     },
     hydrate(value) {
@@ -102,16 +100,14 @@ export function createSettingsStore(stage: Stage, studio: Studio, options: { imm
       try {
         api.apply({...compositionSettings('studio-phone', defaultAspect),pngScale:1,
           ...(options.fillUploads && stage.getImage()?.identity === 'user' ? {fit:'cover' as const} : {})},'studio-phone');
-        automaticUploadFit = options.fillUploads ?? false;
       } finally { hydrating = prior; }
     },
-    prepareUpload() { if (automaticUploadFit) api.apply({fit:'cover'}); },
+    // Each accepted screenshot starts at Fill screen; manual fitting applies to
+    // the current image. PG retains its explicit fit through fillUploads=false.
+    prepareUpload() { if (options.fillUploads) api.apply({fit:'cover'}); },
     setDevice(id) {
       if (id === state.device) return;
-      const uploadFit = automaticUploadFit;
       api.apply({ device: id, spec: presetSpec(id), ...(stage.getImage()?.identity === 'demo' ? { fit: demoFit(id) } : {}) });
-      // Demo framing is internal, not an explicit user choice of image fitting.
-      automaticUploadFit = uploadFit;
     },
     subscribe(listener) { listeners.add(listener); return () => { listeners.delete(listener); }; },
     dispose() { if (disposed) return; disposed = true; unsubscribe(); listeners.clear(); },
