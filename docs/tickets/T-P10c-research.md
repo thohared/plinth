@@ -66,3 +66,31 @@ stay pending. Cloud/software results cannot certify desktop or phone budgets.
 TODO(spec): none for diagnostic tooling. A release verdict is out of scope
 until the complete frame-time method is established and reviewed; F2 is an
 explicit remaining measurement task, not permission to redefine §6.
+
+## Focused review follow-up (2026-09-30, before fix implementation)
+
+Base: PR #41 head `1848dcfd706ba8712ddcbdeeafa95b0e89ab88c8`.
+Independent review: https://github.com/thohared/plinth/pull/41#pullrequestreview-5366806869.
+Same clauses and diagnostic-only scope as F1–F6; no specification amendment.
+
+F7. The documented 4:5 workload was not applied: normal desktop defaults
+select 16:9 (`src/ui/defaults.ts`), and artifact 11096600652 records 960×540.
+Explicitly select 4:5 through `#control-aspect` before warm-up and retain it
+through reset/measurement. Freeze the resolved canvas at x=160, y=0,
+640×800 CSS/backing pixels for 1280×800/DPR1. Assert control value, viewport,
+DPR and canvas before warm-up, before measurement and after the trace. Record
+expected and observed values. Use trace v2 to distinguish corrected collection;
+the old smoke remains a mismatched v1 diagnostic, never a retroactive 4:5 run.
+
+F8. A document-level pointermove is not drag evidence. The old predicate
+accepts Free view button hover even after all stage receipts are removed.
+Record trusted pointer identity/buttons, Free view state and displayed rotation
+at capture; associate a render only with a pointermove currently dispatching.
+Require stage pointerdown followed by nonzero movement of that pressed pointer,
+Free view enabled, and a render from that exact event with changed rotation.
+The isolated transform can observe `stage.snapshot().custom.rotation` and
+`freeView`; it must not call setters or add production instrumentation. Preserve
+cancel/release receipts, slow samples, skipped inputs and all LOW-TRUST rules.
+Regressions must reject hover/reposition, missing down/stage/move/render,
+unpressed/wrong pointer, disabled Free view, unchanged rotation and unrelated
+later renders. Snapshot observations add diagnostic overhead; disclose it.
