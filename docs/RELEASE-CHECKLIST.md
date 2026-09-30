@@ -1,6 +1,6 @@
 # PNG release checklist
 
-Snapshot: 2026-09-30, application base 6ad29737f947c4e691f68c8b5b416976f3eb9c07.
+Snapshot: 2026-09-30, main base 2b54ce0aad8c344c5d4f112185f767df702330d0.
 This checklist replaces no specification requirement and is not a release PASS.
 
 ## Existing evidence
@@ -34,14 +34,31 @@ This checklist replaces no specification requirement and is not a release PASS.
   and video, the replacement workload with preserved budgets and evidence,
   continued browser/PNG/PG acceptance and truthful demo media.
 - P-19 is a standalone spec-only commit; release-plan synchronization is a
-  separate documentation commit. Independent review and owner merge remain
-  pending. The original main contract applies until P-19 merges.
+  separate documentation commit. PR #40 received independent MERGE review and
+  owner-authorized merge at 2b54ce0aad8c344c5d4f112185f767df702330d0;
+  its automatic deployment succeeded. P-19 is now the active release contract.
+
+## T-P10c diagnostic preparation
+
+- Desktop trace, warm-up and separate CPU/GPU measurement limits are frozen in
+  tickets/T-P10c.md. The optional instrumented build leaves production source alone.
+- Collector preserves actual renders, raw input timings, GPU gaps, slow samples
+  and five-run distributions. Every diagnostic summary remains LOW-TRUST with
+  the release gate pending; no partial metric is a full-frame budget verdict.
+- Local regression cases: 8 passed. Existing unit tests: 236 passed. Typecheck,
+  normal build and instrumented build passed. Normal build contains no probe.
+- Local npm run ci was blocked: 15 browser suites could not launch missing
+  Chromium; 18 tests passed and 89 could not run. Browser installation failed
+  with a truncated archive. Existing CI now includes the collector smoke and
+  retains raw JSON. Its result and independent PR review must be checked on
+  the candidate head; neither is claimed here in advance.
 
 ## Still open
 
-- Review and merge the approved P-19 contract and synchronized release plan.
-- Freeze and implement the approved measurement trace and collect/report five real runs on
-  disclosed hardware. No reports/ artifact or physical-GPU PASS is claimed.
+- Review and merge T-P10c diagnostic preparation after existing CI succeeds.
+- Establish the complete frame/presentation measurement, then collect/report
+  five real runs on disclosed target hardware. Freeze the actual-phone trace
+  separately. No physical desktop/phone performance PASS is claimed.
 - Verify Safari on actual supported Apple hardware/browser; emulation is not proof.
 - Record a real production walkthrough and representative exports using owned
   content. Do not treat the social illustration as a working-product screenshot.
