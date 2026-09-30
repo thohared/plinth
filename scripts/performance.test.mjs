@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
-import { distribution, cov, summarize, installProbe } from './performance-metrics.mjs';
-import { instrument } from './performance.mjs';
+import { distribution, cov, summarize, installProbe, assertDragEvidence } from './performance-metrics.mjs';
+import { instrument, assertWorkload, prepareWorkload } from './performance.mjs';
 
 const run = samples => ({ samples, cadenceMs: [16.7], errors: [], interruptions: [], actions: [], skippedInputs: 0 });
 test('a slow tail survives quantiles and hitch counting', () => {
@@ -51,7 +51,9 @@ test('instrumentation rejects drift and ambiguous anchors', () => {
 
 function probeHarness(supported = true) {
   let clock = 0, nextRaf = 0, disjoint = false;
-  const rafs = new Map(), queries = [], deleted = [];
+  let view = { freeView: true, rotation: [0, 0, 0, 1] };
+  const readView = () => structuredClone(view);
+  const rafs = new Map(), queries = [], deleted = [], listeners = new Map();
   const ext = { TIME_ELAPSED_EXT: 1, GPU_DISJOINT_EXT: 2 };
   const gl = {
     RENDERER: 3, VENDOR: 4, QUERY_RESULT_AVAILABLE: 5, QUERY_RESULT: 6,
@@ -63,16 +65,22 @@ function probeHarness(supported = true) {
     deleteQuery: q => deleted.push(q),
   };
   const context = vm.createContext({ window: {}, navigator: {}, devicePixelRatio: 1, innerWidth: 1280, innerHeight: 800,
-    document: { hidden: false, addEventListener() {} }, performance: { now: () => clock },
+    document: { hidden: false, addEventListener(type, listener) { listeners.set(type, listener); } }, performance: { now: () => clock },
     requestAnimationFrame: fn => { rafs.set(++nextRaf, fn); return nextRaf; },
     cancelAnimationFrame: id => rafs.delete(id),
     setTimeout: fn => { clock += 16; queueMicrotask(fn); },
   });
   vm.runInContext(`(${installProbe.toString()})()`, context);
   const probe = context.window.__plinthPerf;
-  probe.measure(() => {}, gl); // Normal pre-measurement initialization is not a sample.
+  probe.measure(() => {}, gl, readView); // Normal pre-measurement initialization is not a sample.
   return { probe, gl, queries, deleted,
-    render(ms) { probe.measure(() => { clock += ms; }, gl); },
+    render(ms) { probe.measure(() => { clock += ms; }, gl, readView); },
+    setView(next) { view = next; },
+    dispatch(type, details, action = () => {}) {
+      const event = { type, eventPhase: 1, ...details };
+      listeners.get(type)(event);
+      event.eventPhase = 2; action(); event.eventPhase = 0;
+    },
     advance(ms) { clock += ms; const callbacks = [...rafs.values()]; rafs.clear(); callbacks.forEach(fn => fn(clock)); },
     disjoint() { disjoint = true; },
   };
@@ -108,4 +116,84 @@ test('idle callbacks and out-of-window renders do not inflate actual sample coun
   assert.equal(result.samples[0].cpuMs, 80);
   assert.equal(result.samples[0].gpuStatus, 'unsupported');
   assert.equal(result.cadenceMs.length, 1);
+});
+
+const portraitWorkload = () => ({ aspect: '4:5', dpr: 1,
+  viewport: { width: 1280, height: 800 }, canvas: { x: 160, y: 0, width: 640, height: 800 },
+  buffer: { width: 640, height: 800 } });
+test('workload preparation explicitly replaces desktop 16:9 through the aspect control', async () => {
+  let selected = false;
+  const page = {
+    locator(selector) {
+      assert.equal(selector, '#control-aspect');
+      return { async selectOption(value) { assert.equal(value, '4:5'); selected = true; } };
+    },
+    async evaluate() {
+      assert.equal(selected, true, 'aspect must be set before reading the canvas');
+      return portraitWorkload();
+    },
+  };
+  assert.deepEqual(await prepareWorkload(page), portraitWorkload());
+});
+test('frozen workload rejects the old 16:9 smoke and canvas/DPR drift', () => {
+  assert.doesNotThrow(() => assertWorkload(portraitWorkload()));
+  for (const patch of [
+    { aspect: '16:9', canvas: { x: 0, y: 130, width: 960, height: 540 }, buffer: { width: 960, height: 540 } },
+    { aspect: '16:9' }, { dpr: 2 }, { viewport: { width: 1279, height: 800 } },
+    { canvas: { x: 161, y: 0, width: 640, height: 800 } }, { buffer: { width: 1280, height: 1600 } },
+  ]) assert.throws(() => assertWorkload({ ...portraitWorkload(), ...patch }), /Frozen 4:5 workload mismatch/);
+});
+
+async function recordedDrag() {
+  const h = probeHarness(false); h.probe.begin(6000); h.advance(2400);
+  const pointer = { target: { id: 'stage' }, pointerId: 7, button: 0, buttons: 1,
+    clientX: 288, clientY: 400, isTrusted: true };
+  h.dispatch('pointerdown', pointer); h.advance(10);
+  h.dispatch('pointermove', { ...pointer, clientX: 300 }, () => {
+    h.setView({ freeView: true, rotation: [0, Math.sin(.025), 0, Math.cos(.025)] });
+    h.render(80);
+  });
+  // A later render must not inherit the input attribution once dispatch ends.
+  h.render(2);
+  return h.probe.finish();
+}
+test('probe records pressed canvas input and links only its synchronous changed-view render', async () => {
+  const data = await recordedDrag();
+  assert.equal(data.events[0].pointerId, 7);
+  assert.equal(data.events[1].buttons, 1);
+  assert.equal(data.events[1].view.rotation[1], 0);
+  assert.ok(data.samples[0].view.rotation[1] > 0);
+  assert.equal(data.samples[0].pointerEventId, data.events[1].id);
+  assert.equal(data.samples[0].cpuMs, 80, 'slow drag render remains included');
+  assert.equal(data.samples[1].pointerEventId, null);
+  assert.doesNotThrow(() => assertDragEvidence(data, portraitWorkload().canvas, 2400));
+});
+test('drag acceptance rejects hover, absent canvas/down/render, unpressed and unchanged-view receipts', async () => {
+  const original = await recordedDrag();
+  const mutations = [
+    d => { d.events = d.events.filter(e => e.target !== 'stage'); },
+    d => { d.events = d.events.filter(e => e.type !== 'pointerdown'); },
+    d => { d.events = d.events.filter(e => e.type !== 'pointermove'); },
+    d => { d.events[1].target = 'free-view'; },
+    d => { d.events[1].buttons = 0; },
+    d => { d.events[1].pointerId = 8; },
+    d => { d.events[1].trusted = false; },
+    d => { d.events[1].view.freeView = false; },
+    d => { d.events[0].view.freeView = false; },
+    d => { d.events[1].x = d.events[0].x; },
+    d => { d.events[1].x = 1000; },
+    d => { d.samples = []; },
+    d => { d.samples[0].pointerEventId = null; },
+    d => { d.samples[0].view = structuredClone(d.events[1].view); },
+    d => { d.samples[0].view.rotation = [0, 0, 0, -1]; },
+    d => { d.events.splice(1, 0, { ...d.events[0], type: 'pointercancel' }); },
+    d => { d.events.splice(1, 0, { ...d.events[0], type: 'pointerup' }); },
+    d => { d.events.splice(1, 0, { ...d.events[0], type: 'lostpointercapture' }); },
+  ];
+  for (const mutate of mutations) {
+    const data = structuredClone(original); mutate(data);
+    // The reviewed artifact's button-hover false positive must never rescue a failed drag.
+    data.events.push({ id: 99, type: 'pointermove', target: 'free-view', atMs: 3564.3, buttons: 0 });
+    assert.throws(() => assertDragEvidence(data, portraitWorkload().canvas, 2400), /Missing measured canvas drag/);
+  }
 });

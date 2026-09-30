@@ -7,10 +7,11 @@ import { pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import os from 'node:os';
-import { installProbe, summarize } from './performance-metrics.mjs';
+import { installProbe, summarize, assertDragEvidence } from './performance-metrics.mjs';
 
 export const TRACE = {
-  id: 'P19-desktop-diagnostic-v1', viewport: { width: 1280, height: 800 }, dpr: 1,
+  id: 'P19-desktop-diagnostic-v2', viewport: { width: 1280, height: 800 }, dpr: 1,
+  aspect: '4:5', canvas: { x: 160, y: 0, width: 640, height: 800 },
   durationMs: 60000, runs: 5, warmup: 'one full trace, reset, 2000 ms settle',
   devices: ['phone', 'tablet', 'laptop', 'browser', 'card'],
   scenes: ['soft-studio', 'dark-glass', 'warm-sunset', 'clean-white'],
@@ -25,7 +26,33 @@ const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
 export function instrument(code) {
   const anchor = '    studio.render();\n    if (!ready)';
   if (code.split(anchor).length !== 2) throw new Error('Expected exactly one main render anchor');
-  return code.replace(anchor, '    window.__plinthPerf.measure(() => studio.render(), renderer.getContext());\n    if (!ready)');
+  return code.replace(anchor, '    window.__plinthPerf.measure(() => studio.render(), renderer.getContext(), () => ({ rotation: stage.snapshot().custom.rotation.toArray(), freeView }));\n    if (!ready)');
+}
+
+export function assertWorkload(actual) {
+  const same = (a, b, keys) => keys.every(key => a?.[key] === b[key]);
+  if (actual.aspect !== TRACE.aspect || actual.dpr !== TRACE.dpr ||
+      !same(actual.viewport, TRACE.viewport, ['width', 'height']) ||
+      !same(actual.canvas, TRACE.canvas, ['x', 'y', 'width', 'height']) ||
+      !same(actual.buffer, TRACE.canvas, ['width', 'height'])) {
+    throw new Error(`Frozen 4:5 workload mismatch: ${JSON.stringify(actual)}`);
+  }
+  return actual;
+}
+
+async function readWorkload(page) {
+  return assertWorkload(await page.evaluate(() => {
+    const canvas = document.querySelector('#stage'), box = canvas.getBoundingClientRect();
+    return { aspect: document.querySelector('#control-aspect').value, dpr: devicePixelRatio,
+      viewport: { width: innerWidth, height: innerHeight },
+      canvas: { x: box.x, y: box.y, width: box.width, height: box.height },
+      buffer: { width: canvas.width, height: canvas.height } };
+  }));
+}
+
+export async function prepareWorkload(page) {
+  await page.locator('#control-aspect').selectOption(TRACE.aspect);
+  return readWorkload(page);
 }
 
 async function treeHashes(root, prefix = '') {
@@ -124,8 +151,8 @@ async function main() {
       try {
         await page.goto('http://127.0.0.1:4175/', { waitUntil: 'networkidle' });
         await page.waitForFunction(() => document.documentElement.dataset.plinthReady === '1', null, { timeout: 120000 });
-        const box = await page.locator('canvas').first().boundingBox();
-        if (!box || box.width <= 0 || box.height <= 0) throw new Error('No visible canvas');
+        const workload = { beforeWarmup: await prepareWorkload(page) };
+        const box = workload.beforeWarmup.canvas;
         console.log(`Run ${i + 1}: explicit warm-up`);
         warmup = await trace(page, box, scale, performance.now());
         await page.locator('#free-view').click();
@@ -134,6 +161,7 @@ async function main() {
         await page.locator('#control-pose').selectOption('hero');
         await sleep(2000);
         if (errors.length) throw new Error('Page errors during warm-up');
+        workload.beforeMeasurement = await readWorkload(page);
         const beforeStart = performance.now();
         await page.evaluate(ms => window.__plinthPerf.begin(ms), TRACE.durationMs * scale);
         const start = performance.now(), startHandshakeMs = start - beforeStart;
@@ -142,15 +170,17 @@ async function main() {
         await trace(page, box, scale, start, inputs);
         const data = await page.evaluate(() => window.__plinthPerf.finish());
         measured = false;
-        runs.push({ ...data, ...inputs, warmup, errors, canvas: box, startHandshakeMs });
+        runs.push({ ...data, ...inputs, warmup, errors, canvas: box, workload, startHandshakeMs });
         await save(`run-${i + 1}.json`, runs.at(-1));
         await save('summary.json', summarize(runs, !!values.smoke));
+        workload.afterMeasurement = await readWorkload(page);
+        await save(`run-${i + 1}.json`, runs.at(-1));
         if (!data.samples.length) throw new Error('Probe collected no actual render samples');
         for (const [control, expected] of [['device', TRACE.devices], ['scene', TRACE.scenes], ['pose', TRACE.poses]]) {
           const observed = new Set(data.events.filter(e => e.type === 'change' && e.target === `control-${control}`).map(e => e.value));
           if (expected.some(value => !observed.has(value))) throw new Error(`Missing measured ${control} input receipts`);
         }
-        if (!data.events.some(e => e.type === 'pointermove' && e.atMs >= 24000 * scale)) throw new Error('Missing measured drag input receipts');
+        assertDragEvidence(data, box, 24000 * scale);
         if (errors.length || data.interruptions.length) throw new Error('Run has page errors or lifecycle interruptions');
       } catch (error) {
         if (measured) {

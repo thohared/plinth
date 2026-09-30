@@ -11,11 +11,15 @@ and retain raw smoke JSON as an artifact; do not create a second workflow.
 This is measurement preparation, not the
 completed release gate. No PASS/FAIL against §6 from partial CPU/GPU metrics.
 
-## Frozen desktop trace v1 (before collection)
+## Frozen desktop trace v2 (before corrected collection)
 
-Normal UI, default demo, 1280×800 CSS viewport, DPR 1, default 4:5 output,
+Normal UI, default demo, 1280×800 CSS viewport, DPR 1, explicitly selected 4:5 output,
 default SMAA. No pg mode, QA setters, clock mocking or continuous render loop.
-Fresh page/context for each of five runs. Wait for plinthReady, then execute
+Fresh page/context for each of five runs. Wait for plinthReady, select 4:5
+through the product aspect control, and assert canvas x=160, y=0, width=640,
+height=800 CSS pixels and 640×800 backing pixels. Record these resolved values,
+aspect, viewport and DPR and assert them again before and after measurement.
+The manifest records the same frozen expectations. Then execute
 one complete unmeasured trace below, restore phone/soft-studio/hero with Free
 view off, and settle for 2 seconds. This explicit warm-up includes device,
 scene, pose and Free view paths, in addition to studio.ready shader warm-up.
@@ -40,6 +44,12 @@ Do not replay missed points in a burst: record skipped input slots and actual
 host timestamps/lateness. Browser event timestamps are recorded separately.
 The host/browser start handshake duration bounds clock alignment uncertainty.
 
+Review 5366806869 found that v1's first smoke (artifact 11096600652) actually
+used the normal desktop 16:9 default, 960×540. That historical evidence is
+retained as a mismatched v1 smoke; it is not relabeled as a 4:5 run. F7–F8 in
+the research follow-up govern these corrections. All other timings and drag
+equations remain the same; the v2 identifier separates corrected collection.
+
 Smoke mode scales all trace times by 0.1 and uses one run; it is explicitly
 not P-19 evidence. Headed hardware Chrome is the default. Headless or forced
 SwiftShader requires explicit flags and is diagnostic evidence only.
@@ -59,6 +69,13 @@ SwiftShader requires explicit flags and is diagnostic evidence only.
 - Save raw samples, event receipts, errors, visibility/context-loss events,
   scheduled/actual input, source SHA/tree, dirty status, probe/build hashes,
   browser, renderer strings, host description, viewport/DPR and canvas size.
+- Drag acceptance requires a trusted stage pointerdown followed by a nonzero
+  move with the same pointer and primary button held, while Free view is active.
+  Record pointer/button state and displayed rotation before the input handler.
+  A matching render must occur during that exact move's dispatch and observe a
+  changed rotation afterwards. Hover, reposition, cancellation, unchanged views
+  and unrelated later renders do not qualify. This proves at least one measured
+  drag, not completion of every planned input; skipped/late slots stay visible.
 - Report per-run count/p50/p99/hitches and median of run p50/p99, sample CoV
   (sample standard deviation / mean) for each metric, n and missing counts.
   Nearest-rank quantiles; preserve all outliers and incomplete runs. Flag
@@ -68,7 +85,9 @@ SwiftShader requires explicit flags and is diagnostic evidence only.
   diagnostic numbers look fast. The complete frame/presentation method and
   actual desktop/mid-tier-phone reports require later work (research F2/F5).
 - Instrumentation has overhead: two clocks per render, timer query commands,
-  input/event logging and rAF polling. No overhead subtraction. Do not compare
+  input/event logging, view snapshots and rAF polling. View snapshots are outside
+  the CPU timer/query bracket but still add work to the instrumented workload.
+  No overhead subtraction. Do not compare
   instrumented partial metrics directly with a production budget.
 
 ## Use and acceptance
@@ -80,7 +99,7 @@ From repo root:
 node scripts/performance.mjs --build-only --out /tmp/plinth-perf-build
 node --test scripts/performance.test.mjs
 node scripts/performance.mjs --smoke --headless --software --out /tmp/plinth-perf-smoke --hardware 'cloud software diagnostic'
-node scripts/performance.mjs --out reports/perf/desktop-v1 --hardware 'physical desktop: CPU, GPU, RAM, display Hz, power mode' --channel chrome
+node scripts/performance.mjs --out reports/perf/desktop-v2 --hardware 'physical desktop: CPU, GPU, RAM, display Hz, power mode' --channel chrome
 ```
 
 Use an otherwise idle physical host, foreground window and disclosed display
@@ -96,3 +115,13 @@ Local unavailable-browser evidence must be recorded; it does not replace CI.
 No new guard. Independent fresh-session GitHub review required. PNG/PG/Safari
 and physical performance requirements remain unchanged. TODO(spec): none for
 this diagnostic-only scope; no release verdict authorized by this ticket.
+
+## PR #41 focused fixup validation
+
+Review 5366806869 findings 1–2 are addressed by explicit aspect preparation and
+the pressed-canvas/changed-render receipt check. Local Linux: 12 diagnostic
+regressions, 236 unit tests, typecheck, normal build and instrumented build pass.
+The smoke attempt stops at browser launch because Playwright Chromium is absent;
+no local browser/guard PASS is claimed. The new head still requires the existing
+remote CI/PG jobs, a newly inspected v2 smoke artifact and independent re-review.
+No duplicate workflow dispatch, production edit, fixture or threshold change.
