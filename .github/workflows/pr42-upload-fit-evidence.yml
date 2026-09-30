@@ -1,0 +1,69 @@
+name: PR42 upload fit evidence
+on:
+  push:
+    branches: [evidence/pr42-upload-fit-91fa2f6]
+permissions:
+  contents: read
+jobs:
+  focused-browser-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 91fa2f67b2581c352b4796db78093115936ce011
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - name: Verify immutable tested source
+        run: |
+          test "$(git rev-parse HEAD)" = 91fa2f67b2581c352b4796db78093115936ce011
+          test "$(git rev-parse HEAD^{tree})" = a8db74c3142b738bf0d6fda6583fab8facbf171d
+          mkdir -p /tmp/plinth-pr42-proof
+          git rev-parse HEAD HEAD^{tree} > /tmp/plinth-pr42-proof/source.txt
+          uname -a > /tmp/plinth-pr42-proof/environment.txt
+          node --version >> /tmp/plinth-pr42-proof/environment.txt
+          npm --version >> /tmp/plinth-pr42-proof/environment.txt
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium --only-shell
+      - name: Seed must fail on Cover versus Contain
+        shell: bash
+        run: |
+          set +e
+          PLINTH_LIVE_SEED=upload npm run guards -- guards/live-feedback.test.ts -t 'T-P10d every upload' > /tmp/plinth-pr42-proof/seeded.log 2>&1
+          result=$?
+          set -e
+          cat /tmp/plinth-pr42-proof/seeded.log
+          echo "$result" > /tmp/plinth-pr42-proof/seeded-exit-code.txt
+          test "$result" = 1
+          python3 - <<'PY'
+          import pathlib, re
+          text = pathlib.Path('/tmp/plinth-pr42-proof/seeded.log').read_text()
+          text = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', text)
+          assert 'T-P10d every upload' in text
+          assert 'AssertionError' in text
+          assert 'guards/live-feedback.test.ts:77:' in text
+          assert re.search(r'^-\s+"fit": "cover",?$', text, re.M), text
+          assert re.search(r'^\+\s+"fit": "contain",?$', text, re.M), text
+          assert re.search(r'Tests\s+1 failed', text), text
+          print('Seed reached the upload assertion: expected Cover, actual Contain.')
+          PY
+      - name: Same source must pass without the seed
+        shell: bash
+        run: |
+          set +e
+          npm run guards -- guards/live-feedback.test.ts -t 'T-P10d every upload' > /tmp/plinth-pr42-proof/unseeded.log 2>&1
+          result=$?
+          set -e
+          cat /tmp/plinth-pr42-proof/unseeded.log
+          echo "$result" > /tmp/plinth-pr42-proof/unseeded-exit-code.txt
+          test "$result" = 0
+          git diff --exit-code HEAD
+          git status --porcelain > /tmp/plinth-pr42-proof/final-status.txt
+          test ! -s /tmp/plinth-pr42-proof/final-status.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pr42-upload-fit-proof-91fa2f6
+          path: /tmp/plinth-pr42-proof/
+          if-no-files-found: error
