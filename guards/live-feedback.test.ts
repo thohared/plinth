@@ -21,6 +21,37 @@ async function ready(page:Page){
   await page.goto(url);await page.waitForSelector('html[data-plinth-ready="1"]',{timeout:60000});
 }
 async function capture(page:Page,name:string){const out=process.env['PLINTH_LIVE_EVIDENCE'];if(out){await mkdir(out,{recursive:true});await page.screenshot({path:`${out}/${name}.png`});}}
+async function waitForUpload(page:Page,width:number,height:number){
+  // Completion is image identity/dimensions, never the fit that the test asserts.
+  await page.waitForFunction(({width,height})=>{
+    const image=window.__plinth.getImage();
+    return image?.identity==='user'&&image.originalWidth===width&&image.originalHeight===height;
+  },{width,height});
+}
+async function disableUploadFill(page:Page){
+  await page.route('**/src/settings.ts',async route=>{
+    const response=await route.fetch(),source=await response.text(),body=source.replace('if (options.fillUploads) api.apply', 'if (false && options.fillUploads) api.apply');
+    expect(body).not.toBe(source);await route.fulfill({response,body});
+  });
+}
+type UploadGateWindow=Window & {uploadDecodeGate:{started:boolean;release():void}};
+async function holdUploadDecode(page:Page,name:string){
+  await page.evaluate(name=>{
+    const native=window.createImageBitmap;
+    let release!:()=>void;
+    const pending=new Promise<void>(resolve=>{release=resolve;});
+    const state:UploadGateWindow['uploadDecodeGate']={started:false,release};
+    (window as unknown as UploadGateWindow).uploadDecodeGate=state;
+    window.createImageBitmap=((...args:unknown[])=>{
+      const decode=()=>Reflect.apply(native,window,args) as Promise<ImageBitmap>;
+      if(args[0] instanceof File&&args[0].name===name){
+        window.createImageBitmap=native;state.started=true;
+        return pending.then(decode);
+      }
+      return decode();
+    }) as typeof createImageBitmap;
+  },name);
+}
 for(const host of [
   {name:'phone',width:400,height:800,touch:true,aspect:'1:1'},
   {name:'phone-landscape',width:800,height:400,touch:true,aspect:'1:1'},
@@ -62,25 +93,22 @@ for(const host of [{name:'phone',width:400,height:800},{name:'tablet',width:1024
   }finally{await page.close();}
 });
 it('T-P10d every upload fills the screen while current-image Fit image and shared settings retain their meaning',async()=>{
-  const page=await browser.newPage({viewport:{width:1024,height:768},hasTouch:true});try{
+  const context=await browser.newContext({viewport:{width:1024,height:768},hasTouch:true});
+  const page=await context.newPage();try{
+    if(process.env['PLINTH_LIVE_SEED']==='upload')await disableUploadFill(page);
     await ready(page);
-    if(process.env['PLINTH_LIVE_SEED']==='upload')await page.route('**/src/settings.ts',async route=>{
-      const response=await route.fetch(),source=await response.text(),body=source.replace('if (options.fillUploads) api.apply', 'if (false && options.fillUploads) api.apply');
-      expect(body).not.toBe(source);await route.fulfill({response,body});
-    });
-    if(process.env['PLINTH_LIVE_SEED']==='upload')await ready(page);
     // Picking demo devices must not count as an explicit Fit image preference.
     for(const id of ['tablet','laptop','card','browser','phone'])await page.locator('#control-device').selectOption(id);
     const png=new PNG({width:200,height:380});for(let i=0;i<png.data.length;i+=4){png.data[i]=20;png.data[i+1]=30;png.data[i+2]=40;png.data[i+3]=255;}
     const file={name:'test-upload.png',mimeType:'image/png',buffer:PNG.sync.write(png)};
-    await page.locator('#image-file').setInputFiles(file);await page.waitForFunction(()=>window.__plinth.getImage()?.identity==='user');
+    await page.locator('#image-file').setInputFiles(file);await waitForUpload(page,200,380);
     expect(await page.evaluate(()=>window.__plinth.getImage())).toMatchObject({fit:'cover',pad:0,width:200,height:380});
     expect(await page.locator('#control-fit').inputValue()).toBe('cover');
     await page.locator('#control-fit').selectOption('contain');
     expect(await page.evaluate(()=>window.__plinth.getImage()?.fit)).toBe('contain');
     const replacement=new PNG({width:320,height:180});replacement.data.fill(255);
     await page.locator('#image-file').setInputFiles({name:'replacement.png',mimeType:'image/png',buffer:PNG.sync.write(replacement)});
-    await page.waitForFunction(()=>window.__plinth.getImage()?.originalWidth===320);
+    await waitForUpload(page,320,180);
     expect(await page.evaluate(()=>window.__plinth.getImage())).toMatchObject({fit:'cover',pad:0,width:320,height:180});
     expect(await page.locator('#control-fit').inputValue()).toBe('cover');
     await page.locator('#control-fit').selectOption('contain');
@@ -93,15 +121,52 @@ it('T-P10d every upload fills the screen while current-image Fit image and share
         return saved.fit==='contain'&&saved.device==='laptop';
       } catch {return false;}
     });
-    const shared=page.url();await page.goto(shared);await page.waitForSelector('html[data-plinth-ready="1"]',{timeout:60000});
+    const shared=page.url();
+    // Force a real hash transition: P-14 retains this tab's existing upload.
+    await page.locator('#control-fit').selectOption('cover');
+    await page.waitForFunction(()=>{
+      try{return JSON.parse(atob(location.hash.slice(3).replace(/-/g,'+').replace(/_/g,'/'))).fit==='cover';}
+      catch{return false;}
+    });
+    expect(await page.goto(shared)).toBeNull();
+    await page.waitForFunction(()=>window.__plinth.getSettings().fit==='contain');
     expect(await page.evaluate(()=>window.__plinth.getSettings().fit)).toBe('contain');
     expect(await page.locator('#control-fit').inputValue()).toBe('contain');
-    await page.locator('#image-file').setInputFiles(file);await page.waitForFunction(()=>window.__plinth.getImage()?.identity==='user');
+    expect(await page.evaluate(()=>window.__plinth.getImage())).toMatchObject({identity:'user',width:320,height:180,fit:'contain'});
+    // A controlled pending decode reproduces the stale-image precondition without sleeps.
+    await holdUploadDecode(page,file.name);
+    await page.locator('#image-file').setInputFiles(file);
+    await page.waitForFunction(()=>(window as unknown as UploadGateWindow).uploadDecodeGate.started);
+    await page.waitForFunction(()=>window.__plinth.getImage()?.identity==='user');
+    const pendingImage=await page.evaluate(()=>window.__plinth.getImage());
+    expect(pendingImage).toMatchObject({identity:'user',width:320,height:180,fit:'contain',pad:0});
+    console.log('T-P10f legacy wait resolved while the requested decode was held',pendingImage);
+    if(process.env['PLINTH_LIVE_SEED']==='upload-wait'){
+      // Negative probe of the old assertion boundary: must fail on the prior image.
+      expect(pendingImage).toMatchObject({fit:'cover',pad:0,width:200,height:380});
+    }
+    await page.evaluate(()=>(window as unknown as UploadGateWindow).uploadDecodeGate.release());
+    await waitForUpload(page,200,380);
     expect(await page.evaluate(()=>window.__plinth.getImage())).toMatchObject({fit:'cover',pad:0,width:200,height:380});
     expect(await page.locator('#control-fit').inputValue()).toBe('cover');
     await page.locator('#control-fit').selectOption('contain');
     expect(await page.evaluate(()=>window.__plinth.getImage()?.fit)).toBe('contain');
-  }finally{await page.close();}
+
+    // A fresh recipient is a different document and must start with the demo.
+    const recipient=await context.newPage();
+    if(process.env['PLINTH_LIVE_SEED']==='upload-shared')await disableUploadFill(recipient);
+    expect((await recipient.goto(shared))?.ok()).toBe(true);
+    await recipient.waitForSelector('html[data-plinth-ready="1"]',{timeout:60000});
+    expect(await recipient.evaluate(()=>window.__plinth.getImage())).toMatchObject({identity:'demo',fit:'contain'});
+    expect(await recipient.evaluate(()=>window.__plinth.getSettings())).toMatchObject({fit:'contain',device:'laptop'});
+    expect(await recipient.locator('#control-fit').inputValue()).toBe('contain');
+    expect(await recipient.locator('#share-status').innerText()).toBe('Scene loaded. Add your screenshot. Images are not included in links.');
+    await recipient.locator('#image-file').setInputFiles(file);await waitForUpload(recipient,200,380);
+    expect(await recipient.evaluate(()=>window.__plinth.getImage())).toMatchObject({identity:'user',fit:'cover',pad:0,width:200,height:380});
+    expect(await recipient.locator('#control-fit').inputValue()).toBe('cover');
+    await recipient.locator('#control-fit').selectOption('contain');
+    expect(await recipient.evaluate(()=>window.__plinth.getImage()?.fit)).toBe('contain');
+  }finally{await context.close();}
 });
 it('T-P9f dark and warm thumbnails have their own scene color at every outer edge',async()=>{
   for(const [id,expected] of [['dark-laptop',[15,17,21]],['warm-card',[242,205,169]]] as const){

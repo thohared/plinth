@@ -58,6 +58,13 @@ The remaining `npm run ci` stages and diagnostic smoke were not reached.
 Retain this failure and resolve it through focused investigation/review before
 final acceptance. Do not manually dispatch duplicate full checks.
 
+T-P10f investigates this failure without changing the application. Its guarded
+candidate separates fresh recipient loading from in-tab hash navigation and
+waits for the requested image's dimensions. A controlled pending decode tests
+the stale-image mechanism, with negative probes for the old wait and disabled
+Fill behavior. See [T-P10f](tickets/T-P10f.md). The historical failure remains
+recorded; closure requires published execution evidence and independent review.
+
 ## Still open for final release acceptance
 
 1. Resolve the post-merge CI failure above, distinguishing application behavior
