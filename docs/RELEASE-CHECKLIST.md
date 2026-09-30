@@ -1,70 +1,77 @@
 # PNG release checklist
 
-Snapshot: 2026-09-30, main base 2b54ce0aad8c344c5d4f112185f767df702330d0.
-This checklist replaces no specification requirement and is not a release PASS.
+Application snapshot: 2026-09-30, merged main
+`8577219ff16358820770fdd658931feda44b4c06`, tree
+`a8db74c3142b738bf0d6fda6583fab8facbf171d`. This is an evidence inventory,
+not a release PASS. Refresh live statuses before the final release decision.
 
-## Existing evidence
+## Shipped scope
 
-- Five-device PNG studio, responsive controls, sharing and manual Free view
-  are merged. Owner reported checking all five devices and downloads.
-- PR #37 independent MERGE review: 5356638036, head 6d936675.
-- CI 36598798664 and PG 36598798757 passed for that head. PNG 36584449640
-  passed on parent 28abb335; reviewer accepted reuse for the fixture-only delta.
-- Production deployment for merge 4506c7f succeeded. Check current main jobs
-  separately; this is not a claim that every later commit has passed.
-- PR #39 final independent review is MERGE for
-  cb540a4a68b7a4d9d180b015a430b1d3868aa589. CI 36634995499,
-  PG 36634995438 and PNG 36634995407 passed for that reviewed content.
-  Merge 6ad29737f947c4e691f68c8b5b416976f3eb9c07 was deployed successfully.
-  These results are not a new run on this documentation PR or a perf/Safari PASS.
+- Five generic devices, four lighting presets/looks, responsive controls,
+  named poses, manual Free view, backgrounds, scene links and PNG at 1×/2×/3×.
+- Every accepted normal-editor screenshot starts with Fill screen. Manual
+  fitting applies to the current image; a later upload selects Fill again.
+  Explicit image padding and color remain. Shared settings restore before
+  further editing; images are excluded from links.
+- Plinth name and PNG-only competition scope are approved by P-19 (PR #40,
+  merge `2b54ce0aad8c344c5d4f112185f767df702330d0`). Motion preview and video
+  export are deferred, not hidden shipped features.
+- README, English interface, favicon, local social card and submission copy
+  exist. The social card is an original illustration, not a captured export.
+- Owner previously reported checking all five devices and downloads, including
+  Android 1×/2×/3×. These observations are not five-run performance measurements
+  or proof of physical Safari support.
 
-## Merged presentation and copy
+## Reviewed and merged work
 
-- Accurate current-feature README, favicon and social metadata/card.
-- Submission copy and demo storyboard in SUBMISSION.md; nothing submitted.
-- Original vector social artwork is a brand illustration, not a captured export.
-- PR #38 presentation and PR #39 punctuation completed independent review
-  and were merged. The name/tab/social titles now read Plinth with no em dash
-  in user-facing copy; product-name confirmation is recorded in P-19.
+| Work | Independent review / merge | Evidence boundary |
+| --- | --- | --- |
+| Presentation / punctuation | PR #38 and #39; #39 final review for `cb540a4`; merge `6ad2973` | Current-feature copy, metadata and prepared submission text; no entry submitted. |
+| PNG release contract | PR #40, merge `2b54ce0` | Approved P-19 plan, not measured acceptance. |
+| Desktop diagnostics | [PR #41 review 5367979960](https://github.com/thohared/plinth/pull/41#pullrequestreview-5367979960), merge `cb47c39` | Corrected 4:5 v2 trace and real-drag receipts; partial CPU/GPU metrics remain LOW-TRUST/pending. |
+| New-upload Fill screen | [PR #42 review 5371175772](https://github.com/thohared/plinth/pull/42#pullrequestreview-5371175772), merge `8577219` | Both evidence findings closed; reviewed head `91fa2f67b2581c352b4796db78093115936ce011`. |
 
-## Approved planning amendment
+PR #42's reviewed head and its merge have the same tree recorded above. Its
+three existing acceptance runs also used that tree (test-merge `4b088622`).
 
-- Owner approved all six parts of tickets/T-P10-decisions-proposal.md on
-  2026-09-30 at 01:25 Europe/Belgrade: name Plinth, PNG release, deferred motion
-  and video, the replacement workload with preserved budgets and evidence,
-  continued browser/PNG/PG acceptance and truthful demo media.
-- P-19 is a standalone spec-only commit; release-plan synchronization is a
-  separate documentation commit. PR #40 received independent MERGE review and
-  owner-authorized merge at 2b54ce0aad8c344c5d4f112185f767df702330d0;
-  its automatic deployment succeeded. P-19 is now the active release contract.
+| Existing run | Final result |
+| --- | --- |
+| [CI 36760505174](https://github.com/thohared/plinth/actions/runs/36760505174) | SUCCESS: 107 guards, typecheck, 239 unit tests, 12 diagnostic regressions and software diagnostic smoke. |
+| [PG 36760505168](https://github.com/thohared/plinth/actions/runs/36760505168) | SUCCESS: 73 captures, 0 missing baselines, 0 failures; all 20 comparisons within unchanged thresholds. Artifact 11119484483. |
+| [PNG 36760505158](https://github.com/thohared/plinth/actions/runs/36760505158) | SUCCESS: 15 sizes and 400 matrix cases; manifest success=true, probe=false, errors=[]; RGB max 1.811764705882382, alpha max 1. Artifact 11119654354. |
+| [Focused browser proof 36766187781](https://github.com/thohared/plinth/actions/runs/36766187781) | SUCCESS: seeded expected Cover/actual Contain failure, then unseeded pass. Artifact 11121685392 records tested head `91fa2f6` and clean source. |
 
-## T-P10c diagnostic preparation
+The focused proof's workflow is on evidence commit `2a67f52`, but explicitly
+checks out the reviewed application head/tree. That evidence branch is not
+part of the product and must not be merged. The independent reviewer verified
+this distinction, raw artifacts and hashes. No baseline blessing was added.
 
-- Desktop trace, warm-up and separate CPU/GPU measurement limits are frozen in
-  tickets/T-P10c.md. The optional instrumented build leaves production source alone.
-- Collector preserves actual renders, raw input timings, GPU gaps, slow samples
-  and five-run distributions. Every diagnostic summary remains LOW-TRUST with
-  the release gate pending; no partial metric is a full-frame budget verdict.
-- Local regression cases: 8 passed. Existing unit tests: 236 passed. Typecheck,
-  normal build and instrumented build passed. Normal build contains no probe.
-- Local npm run ci was blocked: 15 browser suites could not launch missing
-  Chromium; 18 tests passed and 89 could not run. Browser installation failed
-  with a truncated archive. Existing CI now includes the collector smoke and
-  retains raw JSON. Its result and independent PR review must be checked on
-  the candidate head; neither is claimed here in advance.
+Vercel reported successful production deployment for merge `8577219`.
+Automatic post-merge [PG 36769509786](https://github.com/thohared/plinth/actions/runs/36769509786)
+completed successfully. [CI 36769509852](https://github.com/thohared/plinth/actions/runs/36769509852)
+was still in progress when this documentation pass checked it. Its live link,
+not the earlier source-equivalent result, determines its eventual status.
+Do not manually dispatch duplicate full checks.
 
-## Still open
+## Still open for final release acceptance
 
-- Review and merge T-P10c diagnostic preparation after existing CI succeeds.
-- Establish the complete frame/presentation measurement, then collect/report
-  five real runs on disclosed target hardware. Freeze the actual-phone trace
-  separately. No physical desktop/phone performance PASS is claimed.
-- Verify Safari on actual supported Apple hardware/browser; emulation is not proof.
-- Record a real production walkthrough and representative exports using owned
-  content. Do not treat the social illustration as a working-product screenshot.
-- Verify current official competition terms, deadline, eligibility and actual
-  form fields with the owner before submission; historical dates are not proof.
-- Owner confirms public entrant name and submits the entry after final review.
+1. Define and review complete frame/presentation measurement separately from
+   the existing partial CPU/GPU timers and rAF cadence. Freeze the physical-phone
+   trace. Preserve §6/P-19 budgets, sample counts, hitches and variability rules.
+2. Collect and review five actual desktop runs and the required physical-phone
+   evidence. The saved `Plinth-fizicka-provera-BLOCKED-2026-09-30.txt` reports
+   **0/5**, no collector invocation and no access to the owner's physical GPU.
+   It is an environment preflight, neither measured PASS nor measured FAIL.
+   Follow [PERFORMANCE-TESTING.md](PERFORMANCE-TESTING.md); native-Windows
+   collector compatibility needs its documented preflight/targeted follow-up.
+3. Verify save/open and interaction behavior in Safari on actual Apple hardware.
+   Linux WebKit and emulated viewports do not establish this result.
+4. Record a real production walkthrough and representative owned-content
+   exports. The storyboard and social illustration are not a completed video.
+5. Owner reviews the current competition terms/eligibility and final entry
+   fields, supplies the intended public name/email, and makes the submission
+   decision after the required final review. The visible form was checked on
+   September 30; the separate terms page was inaccessible to the retrieval tool.
 
-No motion/video functionality, benchmark success, prize outcome or unrestricted
-support for every GPU is promised by the presentation work.
+Prepared entry copy and exact remaining submission inputs are in
+[SUBMISSION.md](SUBMISSION.md). No entry has been submitted by this work.

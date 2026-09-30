@@ -17,6 +17,10 @@ float segment, clip promise and elapsed milestone dates do not define this
 revised release sequence; the merged P-19 contract governs.
 
 1. Completed: independent review and owner-authorized merge of P-19 (PR #40).
+   T-P10c diagnostic preparation (PR #41) and T-P10d per-upload Fill screen
+   (PR #42) are also reviewed, merged and deployed. The application snapshot is
+   `8577219ff16358820770fdd658931feda44b4c06`. See
+   [RELEASE-CHECKLIST.md](RELEASE-CHECKLIST.md) for exact evidence identities.
 2. Prepare a measurement ticket that freezes viewport, DPR, coordinates,
    timing, warm-up and frame-time measurement method for the approved
    60-second interaction trace. Implement the measurement tooling and obtain
@@ -25,7 +29,10 @@ revised release sequence; the merged P-19 contract governs.
    Report insufficient samples, failures and LOW-TRUST honestly. Software-GPU
    correctness results do not establish physical desktop/phone performance.
    T-P10c freezes the desktop diagnostic trace and adds an instrumented collector,
-   regressions and a smoke step in the existing CI job. Its partial CPU/GPU metrics
+   regressions and a smoke step in the existing CI job. The collector is merged;
+   the saved physical preflight has 0/5 runs, so physical evidence is still open.
+   [PERFORMANCE-TESTING.md](PERFORMANCE-TESTING.md) describes collection and
+   the native-Windows portability preflight. Its partial CPU/GPU metrics
    do not certify the full-frame budget. Complete frame/presentation measurement,
    five physical desktop runs and the separate actual-phone trace remain open.
 3. Verify Safari on actual supported Apple hardware/browser and retain the
