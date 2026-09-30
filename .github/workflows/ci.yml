@@ -17,3 +17,14 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
       - run: npm run ci
+      - name: Performance diagnostic regressions
+        run: node --test scripts/performance.test.mjs
+      - name: Performance collector smoke (software GPU, no budget verdict)
+        run: node scripts/performance.mjs --smoke --headless --software --out /tmp/plinth-perf-smoke --hardware 'GitHub Linux runner, software GPU, diagnostic only'
+      - name: Preserve performance smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-smoke
+          path: /tmp/plinth-perf-smoke/*.json
+          if-no-files-found: ignore

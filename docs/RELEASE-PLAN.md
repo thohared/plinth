@@ -3,9 +3,9 @@
 ## Current PNG release plan (2026-09-30)
 
 Owner approved the six-part PNG scope/performance proposal on 2026-09-30
-at 01:25 Europe/Belgrade. P-19 transfers it in a separate spec-only commit.
-This update and P-19 become active on main after independent review and
-owner merge. Approval is not a performance PASS or competition submission.
+at 01:25 Europe/Belgrade. P-19 was independently reviewed and merged in
+PR #40 at 2b54ce0aad8c344c5d4f112185f767df702330d0. It is active on main.
+Approval is not a performance PASS or competition submission.
 Research: `tickets/T-P10a-research.md` F4–F6. Application base:
 `6ad29737f947c4e691f68c8b5b416976f3eb9c07`.
 
@@ -14,9 +14,9 @@ defer T-P8a motion preview and T-P8b video export beyond this competition
 release. Keep manual Free view, named-pose transitions and PNG functionality.
 The old plan below is retained as history. Its mandatory animation dependency,
 float segment, clip promise and elapsed milestone dates do not define this
-revised release sequence; the P-19 contract governs when merged.
+revised release sequence; the merged P-19 contract governs.
 
-1. Review and merge the standalone P-19 amendment and this documentation update.
+1. Completed: independent review and owner-authorized merge of P-19 (PR #40).
 2. Prepare a measurement ticket that freezes viewport, DPR, coordinates,
    timing, warm-up and frame-time measurement method for the approved
    60-second interaction trace. Implement the measurement tooling and obtain
@@ -24,6 +24,10 @@ revised release sequence; the P-19 contract governs when merged.
    per run, p50/p99, hitches over 50 ms, CoV, n and all P-19/section 6 budgets.
    Report insufficient samples, failures and LOW-TRUST honestly. Software-GPU
    correctness results do not establish physical desktop/phone performance.
+   T-P10c freezes the desktop diagnostic trace and adds an instrumented collector,
+   regressions and a smoke step in the existing CI job. Its partial CPU/GPU metrics
+   do not certify the full-frame budget. Complete frame/presentation measurement,
+   five physical desktop runs and the separate actual-phone trace remain open.
 3. Verify Safari on actual supported Apple hardware/browser and retain the
    existing mobile/PNG/PG requirements. Record unavailable evidence as pending.
 4. Capture representative real exports and a real interaction walkthrough
@@ -34,7 +38,7 @@ revised release sequence; the P-19 contract governs when merged.
 
 PR #38 presentation and PR #39 punctuation are merged; their reviews do not
 certify the remaining measurement, Safari, media or submission requirements.
-No runtime/guard/fixture/dependency change belongs to this planning PR.
+The T-P10c tooling does not change production source, guards, fixtures or dependencies.
 See `RELEASE-CHECKLIST.md` for current evidence and remaining work.
 
 ## Historical plan (2026-09-11, retained for provenance)
