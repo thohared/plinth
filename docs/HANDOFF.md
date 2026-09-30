@@ -15,6 +15,9 @@ deferred. T-P10c's diagnostic collector and T-P10d's upload fix are reviewed and
 merged. Full-frame performance evidence, physical desktop/phone measurements,
 actual Safari verification and the real walkthrough remain open. The recorded
 physical preflight collected 0/5 runs because it ran in a cloud container.
+Post-merge CI 36769509852 subsequently failed the T-P10d shared-state/upload
+browser assertion (106 guards passed, one failed); the checklist records the
+unresolved result. Earlier successful runs do not close that later failure.
 
 Do not restart the old T-P5 sequence or treat the historical statements below
 as current implementation status. Fetch and verify current head/checks before

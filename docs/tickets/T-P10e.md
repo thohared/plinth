@@ -41,8 +41,14 @@ merge, self-review or manual duplicate workflow dispatch.
 - Source, scripts, tests, fixtures, specification, dependencies and workflows
   are unchanged. Existing PR #42 PNG/diagnostic evidence remains applicable to
   those unchanged files; no duplicate full workflow was dispatched.
-- Base post-merge PG 36769509786 succeeded; CI 36769509852 was in progress at
-  the documentation snapshot. PR automatic checks and independent review are
-  separate publication gates, not claimed complete by this ticket.
+- Base post-merge PG 36769509786 succeeded. CI 36769509852 finished with
+  failure during publication: 106 guards passed, one failed at the T-P10d
+  shared-state/upload assertion (`guards/live-feedback.test.ts:100`, job
+  110072030623). Its expected new 200×380/Cover image differed from the observed
+  prior 320×180/Contain image. Cause remains unconfirmed; the checklist and
+  handoff retain this open follow-up without changing or waiving the guard.
+- PR automatic checks and independent review are separate publication gates,
+  not claimed complete by this ticket. Both local documentation commit hooks
+  passed typechecking before publication; the final status update is docs-only.
 
 TODO(spec): none; no acceptance requirement is waived.

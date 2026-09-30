@@ -49,26 +49,33 @@ this distinction, raw artifacts and hashes. No baseline blessing was added.
 Vercel reported successful production deployment for merge `8577219`.
 Automatic post-merge [PG 36769509786](https://github.com/thohared/plinth/actions/runs/36769509786)
 completed successfully. [CI 36769509852](https://github.com/thohared/plinth/actions/runs/36769509852)
-was still in progress when this documentation pass checked it. Its live link,
-not the earlier source-equivalent result, determines its eventual status.
-Do not manually dispatch duplicate full checks.
+finished with **FAILURE**: 106 guards passed and one failed. In job 110072030623,
+the T-P10d browser assertion at `guards/live-feedback.test.ts:100` expected
+the new 200×380 image with Cover after shared-state restore/upload, but observed
+the prior 320×180 image with Contain. The cause is not established by this log;
+do not dismiss it as timing or treat earlier green evidence as its resolution.
+The remaining `npm run ci` stages and diagnostic smoke were not reached.
+Retain this failure and resolve it through focused investigation/review before
+final acceptance. Do not manually dispatch duplicate full checks.
 
 ## Still open for final release acceptance
 
-1. Define and review complete frame/presentation measurement separately from
+1. Resolve the post-merge CI failure above, distinguishing application behavior
+   from test synchronization with evidence; preserve the guard's requirements.
+2. Define and review complete frame/presentation measurement separately from
    the existing partial CPU/GPU timers and rAF cadence. Freeze the physical-phone
    trace. Preserve §6/P-19 budgets, sample counts, hitches and variability rules.
-2. Collect and review five actual desktop runs and the required physical-phone
+3. Collect and review five actual desktop runs and the required physical-phone
    evidence. The saved `Plinth-fizicka-provera-BLOCKED-2026-09-30.txt` reports
    **0/5**, no collector invocation and no access to the owner's physical GPU.
    It is an environment preflight, neither measured PASS nor measured FAIL.
    Follow [PERFORMANCE-TESTING.md](PERFORMANCE-TESTING.md); native-Windows
    collector compatibility needs its documented preflight/targeted follow-up.
-3. Verify save/open and interaction behavior in Safari on actual Apple hardware.
+4. Verify save/open and interaction behavior in Safari on actual Apple hardware.
    Linux WebKit and emulated viewports do not establish this result.
-4. Record a real production walkthrough and representative owned-content
+5. Record a real production walkthrough and representative owned-content
    exports. The storyboard and social illustration are not a completed video.
-5. Owner reviews the current competition terms/eligibility and final entry
+6. Owner reviews the current competition terms/eligibility and final entry
    fields, supplies the intended public name/email, and makes the submission
    decision after the required final review. The visible form was checked on
    September 30; the separate terms page was inaccessible to the retrieval tool.
