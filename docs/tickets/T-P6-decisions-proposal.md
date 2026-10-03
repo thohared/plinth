@@ -1,6 +1,6 @@
 # T-P6/T-P7 — konkretan predlog odluka za P-13
 
-Status: **NOVAK JE ODOBRIO ODLUKE 1–6 u nastavnom razgovoru.**
+Status: **THOHARED JE ODOBRIO ODLUKE 1–6 u nastavnom razgovoru.**
 Odobreni tekst je prenet u zaseban P-13 spec commit; planning PR još nije spojen.
 Donji tekst čuva originalni predlog i značenje odobrenja.
 Autor: Codex. Osnova aplikacije: e98c99e680f2692d4c6e4b2003f1d83d120bc005.
@@ -139,7 +139,7 @@ puni ostali Advanced rasponi i četiri kompozicije pripadaju T-P6 ticketu.
 
 ## Šta znači odobrenje
 
-Novak odobrava **odluke 1–6**, ne slike, test PASS, production implementaciju
+Thohared odobrava **odluke 1–6**, ne slike, test PASS, production implementaciju
 ili merge PR #14. Zbog P-5/P-10(4), nakon odobrenja pripremiti zaseban commit
 koji menja samo PLINTH_SPEC.md i upisuje ove odluke kao P-entry. Potom se
 sastavlja T-P6 ticket sa potpunim acceptance-om i disposition-om nalaza.

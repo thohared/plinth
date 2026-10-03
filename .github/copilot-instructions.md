@@ -10,7 +10,7 @@ then the ticket or issue you were given and its research pass.
   `TODO(spec)` in the PR description and a stop; never edit the spec to
   match the code. Amendments are P-entries (§9), each in its own commit
   that touches nothing else.
-- `fixtures/pg/**` is read-only: baselines are blessed by Novak alone,
+- `fixtures/pg/**` is read-only: baselines are blessed by Thohared alone,
   from the CI `pg-candidates` artifact, in a standalone commit. Fix the
   implementation, never the baseline or the test.
 - `guards/` is additive under order, never subtractive. Never weaken,
@@ -42,10 +42,10 @@ need Playwright Chromium, which `copilot-setup-steps.yml` installs. Run it
 yourself before pushing. A change under `src/` triggers `pg-capture.yml`
 on the PR: read its `pg-candidates` artifact and the contact sheet, and
 say in the PR what changed visually. `DIFF` or `MISSING` against
-`fixtures/pg/` is a human-in-the-loop signal for Novak, not something to
+`fixtures/pg/` is a human-in-the-loop signal for Thohared, not something to
 route around.
 
-## Things only Novak does
+## Things only Thohared does
 
 Blessing PG baselines; naming the product (§10); submitting the entry;
 merging.

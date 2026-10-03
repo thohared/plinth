@@ -137,7 +137,7 @@ def publish(root, run_id, runner_token, write_token, runner_sha, expected_ticket
             '- Base and candidate: npm ci, pinned Chromium installation, npm run ci, npm run build passed.\n'
             f'- Draft only. PR CI and {capture_requirement}, '
             'contact-sheet inspection, complete ticket evidence, '
-            'Novak baseline blessing and independent fresh-context review remain required.\n'
+            'Thohared baseline blessing and independent fresh-context review remain required.\n'
             '- No merge or baseline change performed.\n')
     result = api(REPOSITORY, '/pulls', write_token, 'POST',
                  {'title': profile.title, 'head': branch, 'base': 'main', 'body': body, 'draft': True})

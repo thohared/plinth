@@ -40,7 +40,7 @@ baselines and a measured perf gate visible in the public repo from day one.
    memory. Nothing the user uploads leaves the tab.
 4. **MIT licence** on the repo. Every dependency's licence is recorded in
    `LICENSES.md` at the point it is added (vault rule: respect licences at point of use).
-5. **Builder does not grade itself.** PG baselines (§7) are blessed by Novak in a
+5. **Builder does not grade itself.** PG baselines (§7) are blessed by Thohared in a
    separate commit. Fixtures and baselines are read-only to the implementing agent
    (`protect-files.py` ported from Gearfall).
 6. **One agent per ticket, one deliverable, review in a fresh context.** No parallel
@@ -64,7 +64,7 @@ baselines and a measured perf gate visible in the public repo from day one.
 - Deploy: Cloudflare Pages or Netlify from `main`, configured in T-P1. The live URL is
   a deliverable of the first ticket, not the last.
 - Assets: **zero external files.** Environment lighting is generated procedurally
-  (§4.4). The demo screenshot in the empty state is Novak's own image committed to the
+  (§4.4). The demo screenshot in the empty state is Thohared's own image committed to the
   repo.
 
 ## §4 Product scope — v1 (everything a ticket may cite)
@@ -277,13 +277,13 @@ Most Creative weakens. Do not cut T-P4 or T-P10 under any schedule.
   T-P3 v1 F5.) (3) EXIF orientation is applied at decode through `createImageBitmap`
   with `imageOrientation: 'from-image'`; no manual rotation UI in v1. This is a spec
   fact because it defines the orientation of imported images and the boundary of the
-  v1 controls. (F10; T-P3 v1 F8.) (4) The demo is `public/demo.png`, Novak's own
+  v1 controls. (F10; T-P3 v1 F8.) (4) The demo is `public/demo.png`, Thohared's own
   image (§3), committed in a standalone human commit before T-P3 v2 opens; the empty
   state mounts it before the first frame (§4.1.3). This is a spec fact because it
   fixes the required asset's provenance and availability and the first-frame
   promise. (F6, F8; T-P3 v1 F6.)
 
-- P-10 — Competition release plan (2026-09-11; Novak accepted the direction;
+- P-10 — Competition release plan (2026-09-11; Thohared accepted the direction;
   planning research: `docs/tickets/RELEASE-PLAN-research.md`, F1–F15):
   1. **Positioning (§1; F1/F12).** Prioritise a finished, reliable product for
      Most Polished and a complete screenshot-to-promotional-image workflow for
@@ -336,7 +336,7 @@ Most Creative weakens. Do not cut T-P4 or T-P10 under any schedule.
      mobile controls by September 17, video decision on September 19, and a
      stable video implementation by September 23 if retained. The existing
      first cut remains T-P8b video export: if it threatens the complete PNG/mobile
-     flow or release verification, Novak chooses the already permitted
+     flow or release verification, Thohared chooses the already permitted
      PNG-only release. T-P8a remains required, including `float` for the
      unchanged §6 segment; the cut does not remove the three on-screen
      motion presets. Reflect the selected
@@ -356,10 +356,10 @@ Most Creative weakens. Do not cut T-P4 or T-P10 under any schedule.
      success rate. T-P3 v2 is merged with an explicitly recorded owner merge
      exception, not a retroactive fresh review or fixture bless. Obtain a
      fresh-session post-merge audit and prepare the CI contact sheet for
-     Novak's first bless after T-P5, or earlier at his direction. Only Novak
+     Thohared's first bless after T-P5, or earlier at his direction. Only Thohared
      blesses fixtures. Prepare the submission for September 28, ahead of the
      published September 30 New York deadline; submission and merge remain
-     Novak's decisions. No prize outcome is guaranteed by this plan.
+     Thohared's decisions. No prize outcome is guaranteed by this plan.
   7. **Environment gate before T-P5 implementation (F15).** Verify scoped
      Git read/write access, the supported Node/dependency installation and
      Chromium in the selected build surface. Record a then-current main
@@ -376,7 +376,7 @@ Most Creative weakens. Do not cut T-P4 or T-P10 under any schedule.
 - P-11 — Predlog ugovora kamere i poziranja (2026-09-11, planska Codex sesija;
   tačan backend identifikator nije izložen; `docs/tickets/T-P5-research.md`,
   F1–F3/F6–F7/F10–F13). **Predlog na PR grani; postaje važeći tek posle
-  Novakove odluke i merge-a.** Ne predstavlja implementaciju ili potvrdu slika.
+  Thoharedove odluke i merge-a.** Ne predstavlja implementaciju ili potvrdu slika.
   1. **Izvor i koordinatni ugovor (§4.3; F10–F12).** Referenca za damp/aspectFix
      je `threejs-technique-vault` Entry 6 F, ne Entry 2 E. Prenosi se matematički
      princip; kage kod bez odobrene licence se ne kopira. World jedinica ostaje
@@ -408,7 +408,7 @@ Most Creative weakens. Do not cut T-P4 or T-P10 under any schedule.
      (24° široki, 32° phone/laptop) i postojeću `frame()` udaljenost na osnovi
      `67afe76b`, osim ako dokaz projekcije zahteva dodatno udaljavanje.
      To nije dopuštenje da se ponovo iskrive široke ivice: CI kontaktni list
-     svih poza i širokih uređaja ide Novaku na vizuelnu potvrdu pre prihvatanja.
+     svih poza i širokih uređaja ide Thoharedu na vizuelnu potvrdu pre prihvatanja.
   3. **Responzivno uokviravanje (§4.3/§4.5; F1/F2/F12).** Za pozitivan konačan
      aspekt a, r=clamp(a0/a-1,0,1), FOV=FOV0+4°*r. FOV0 je navedena vrednost
      klase uređaja; zato široki ekrani ostaju u rasponu 24–28°, a ostali 32–36°.
@@ -463,11 +463,11 @@ Most Creative weakens. Do not cut T-P4 or T-P10 under any schedule.
      izmenjenih render/scene stanja i njihovo vraćanje u finally važe i kada
      depth/blur baci izuzetak. Greška ne ostavlja lažan uspešan capture ili
      sakrivenu ravan. P-6/P-7 boja, materijali, pipeline i postojeći guardovi
-     ostaju; P-10(7), nezavisan review, Novakova PG potvrda i merge nisu ovim
+     ostaju; P-10(7), nezavisan review, Thoharedova PG potvrda i merge nisu ovim
      predlogom zamenjeni ili odobreni.
 
 - P-12 — Numerički neizvodljiv aspekt (2026-09-12; T-P5, F14;
-  `docs/tickets/T-P5-research.md`; Novak je odobrio konkretan tekst u razgovoru):
+  `docs/tickets/T-P5-research.md`; Thohared je odobrio konkretan tekst u razgovoru):
   Ulazni aspekt mora biti pozitivan konačan broj. Uslovi uokviravanja iz
   P-11(3), uključujući NDC marginu, near/far, propisani FOV, očuvanje slike
   i minimalnu referentnu udaljenost, ostaju obavezni. Ako se za zahtev ne
@@ -482,7 +482,7 @@ Most Creative weakens. Do not cut T-P4 or T-P10 under any schedule.
 
 ### P-13 — Izlazni okvir, alpha i PNG ugovor (2026-09-12)
 
-Novak je u razgovoru izričito odobrio odluke 1–6 iz
+Thohared je u razgovoru izričito odobrio odluke 1–6 iz
 `docs/tickets/T-P6-decisions-proposal.md` na commitu
 `da8c54cb7dbdad29e414cfb3971a6b8d41f0f26e`. Ova dopuna prenosi taj
 ugovor u specifikaciju; odobrenje nije test PASS, visual bless ili merge.
@@ -621,7 +621,7 @@ puni ostali Advanced rasponi i četiri kompozicije pripadaju T-P6 ticketu.
 
 ### P-14 — Shareable state, shortcuts and mobile contract (2026-09-13)
 
-Novak approved the complete six-part proposal in
+Thohared approved the complete six-part proposal in
 `docs/tickets/T-P9-decisions-proposal.md` at PR #20 head
 `49d4fc2b08ad547c3c3facfedfafba9c064fda29` with “Odobravam”.
 This standalone planning amendment transfers those approved sections unchanged
@@ -845,7 +845,7 @@ T-P9g-research F1–F9. This commit contains only the specification.
 
 ### P-17 — Symmetric Browser Hero perspective (2026-09-26)
 
-Owner direction: Novak identified the Browser right edge appearing taller
+Owner direction: Thohared identified the Browser right edge appearing taller
 than the left in the T-P9h candidate and requested “E to. Ispravi”.
 Author: Codex; planning amendment based on T-P9i research F1–F6.
 This narrow exception to P-11(2) centers only the `browser` class's named

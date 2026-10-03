@@ -1,6 +1,6 @@
 # T-P9e — owner-approved final references
 
-PG-3(b): Novak approved the final Plinth images and asked to resolve the pending
+PG-3(b): Thohared approved the final Plinth images and asked to resolve the pending
 PRs: “Odobravam one slike. Treba da se rese isto ono pr-ovi” (2026-09-18).
 This follows his earlier acceptance, “To je to. Odobravam ovako. Ako nadjem u
 buducnosti nesto dsto treba da se popravi, javljam”. The images reviewed in
@@ -105,7 +105,7 @@ fix is claimed by this baseline transfer.
 
 ## PG-3(b) — Owner approval, 2026-09-27
 
-Novak explicitly approved the 13 inherited visual differences after PR #35's
+Thohared explicitly approved the 13 inherited visual differences after PR #35's
 independent review: “Odobravam” (20:13 Europe/Belgrade). Codex mechanically
 transfers only these 13 approved candidates, byte-for-byte, without rerendering
 or changing thresholds. This standalone commit touches only fixtures/pg/.

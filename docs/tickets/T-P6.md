@@ -209,7 +209,7 @@ ne postaje product download. PNG byte/dimenzije/download acceptance ostaje T-P7.
   je kompletan pet-run §6 release gate završen. T-P10 ga zadržava.
 - PR opis: model, base/head SHA, svaka cited klauzula sa file:line, F1–F15
   disposition, komande/rezultati, test matrica i ograničenja, CI/PG linkovi,
-  svaki TODO(spec), šta tačno Novak treba da pregleda. Nedostajući dokaz nije PASS.
+  svaki TODO(spec), šta tačno Thohared treba da pregleda. Nedostajući dokaz nije PASS.
 - Research/planning PR se ne koristi za runtime build. Pre implementacije spojiti
   pregledani planning paket, a za Astra route zasebno pripremiti T-P6 profil sa
   tačnim pinovima/write set-om. Direktni lokalni put mora imati puni pre-push CI.
@@ -332,7 +332,7 @@ remain additive regression coverage. No physical phone/iPad GPU claim.
 Composition apply durations are observations from one Linux/SwiftShader
 sequence, not a §6 performance PASS; the full five-run T-P10 gate is unchanged.
 
-**Novak reviews:** the four composition shots, transparent edge/shadow and
+**Thohared reviews:** the four composition shots, transparent edge/shadow and
 gradient shots, desktop controls and open/closed mobile sheet in the CI contact
 sheet. Approval of that appearance does not by itself bless new baselines or
 merge the implementation. Builder does not issue its own review verdict.

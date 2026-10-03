@@ -270,7 +270,7 @@ class TP5Tests(unittest.TestCase):
                        'files': [{'path': 'src/main.ts', 'content': 'export const legacy = true;\n'}]}
         body = self.publish_fixture('T-P3-v2', 'astra/t-p3-v2-12-1', 'T-P3 v2: screenshot to screen')
         self.assertIn('- Draft only. PR CI and all twenty pg-candidates, contact-sheet inspection, '
-                      'complete ticket evidence, Novak baseline blessing and independent fresh-context '
+                      'complete ticket evidence, Thohared baseline blessing and independent fresh-context '
                       'review remain required.\n', body)
         self.assertNotIn('pose/aspect', body)
 
