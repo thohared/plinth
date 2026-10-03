@@ -1,6 +1,6 @@
 # T-P9j — Stop Free view distance pumping
 
-Owner: Novak. Builder: Codex. Base: e17cf5c. Research committed before P-18,
+Owner: Thohared. Builder: Codex. Base: e17cf5c. Research committed before P-18,
 which is a separate specification-only commit. Cites P-11/P-16/P-18,
 §2.1–2.7, §4.2–4.4, §4.8–4.9 and §7.
 

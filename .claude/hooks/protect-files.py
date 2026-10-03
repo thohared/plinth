@@ -62,7 +62,7 @@ PROTECTED: list[tuple[str, str]] = [
     (
         "fixtures/*",
         "§2.5 / §7: fixtures/ and PG baselines are read-only to an implementing "
-        "agent. A baseline is blessed by Novak in a standalone commit carrying "
+        "agent. A baseline is blessed by Thohared in a standalone commit carrying "
         "the PG-3(b) rationale line. Leave your candidates in the CI artifact "
         "and say so in your summary. Fix the implementation, never the test.",
     ),

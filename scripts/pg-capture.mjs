@@ -4,7 +4,7 @@ import { captureDeviceDetails } from './device-details-capture.mjs';
 // no-network guard uses (SwiftShader: the CI runner is the reference GPU), and
 // writes one PNG per pair to pg-out/. If fixtures/pg/<device>-<scene>.png exists
 // it is a hard diff gate; if it does not, the candidate is uploaded and a
-// warning is emitted — blessing a baseline is Novak's own commit (§2.5), never
+// warning is emitted — blessing a baseline is Thohared's own commit (§2.5), never
 // this script's.
 //
 //   npm run pg:capture            # all devices × scenes

@@ -1,6 +1,6 @@
 # T-P9 — proposed public state contract
 
-Status: **approved by Novak after PR #20 head `49d4fc2`; adopted as P-14 in a separate spec-only commit.**
+Status: **approved by Thohared after PR #20 head `49d4fc2`; adopted as P-14 in a separate spec-only commit.**
 Author: Codex. Base `ade7c25e6e7e84ee1ffe653a8495a7ed9efcdedd`.
 Research: `T-P9-research.md`, F1–F12, committed before this proposal.
 Cites §2, §4.1–4.6, §4.8–4.9, P-9/P-10/P-11/P-12/P-13.
