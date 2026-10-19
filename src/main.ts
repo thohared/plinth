@@ -1,3 +1,4 @@
+import { inject } from '@vercel/analytics';
 import { demoFit, loadDemoImages } from './screen/demo';
 import { SCENE_PRESETS } from './scene/presets';
 import { decodeHash, encodeHash, snapshotState } from './state/codec';
@@ -24,6 +25,9 @@ import { COMPOSITIONS, type CompositionId } from './ui/compositions';
 import { hostDefaultAspect } from './ui/defaults';
 import { directionToOrbit } from './camera/poses';
 import type { FitMode, ImageState } from './screen/types';
+
+// Initialize Vercel Web Analytics
+inject();
 
 /**
  * Entry point. Query params are dev/capture affordances (P-4), not user state

@@ -19,6 +19,7 @@
     "png:acceptance": "node scripts/png-acceptance.mjs"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "three": "0.185.1"
   },
   "devDependencies": {
