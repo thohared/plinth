@@ -141,7 +141,7 @@ capture workflow that produces five candidate baselines as a CI artifact, one PR
    Always upload `pg-out/` as an artifact named `pg-candidates`. Runs on
    `pull_request` and `push` to `main`. You do not create `fixtures/pg/`.
 9. **`README.md`** — one "PG baselines" paragraph: what `?pg=1` is, where candidates
-   come from, that a bless is Novak's own commit with a PG-3(b) rationale line.
+   come from, that a bless is Thohared's own commit with a PG-3(b) rationale line.
 
 ### Out of scope
 

@@ -7,7 +7,7 @@ Author: Codex planning session (exact backend identifier not exposed).
 Base inspected: `ade7c25e6e7e84ee1ffe653a8495a7ed9efcdedd`, T-P7 PR #19 merged.
 Document of record: PLINTH_SPEC §2–§3, §4.1–§4.6, §4.8–§4.9, §6–§7;
 P-4/P-5/P-6/P-7/P-9/P-10/P-11/P-12/P-13 and **P-14(1–6)**.
-P-14 was authorized by Novak's “Odobravam” on the complete proposal at
+P-14 was authorized by Thohared's “Odobravam” on the complete proposal at
 `49d4fc2b08ad547c3c3facfedfafba9c064fda29`; its commit changes only the spec.
 The builder names its actual model/base/head. Review is a separate fresh session.
 
@@ -227,7 +227,7 @@ changes. No duplicate manual dispatches while automatic jobs exist; no new paid
 runner/macOS workflow for this ticket. Do not change workflow filters to avoid gates.
 
 Independent fresh-session review is required; the builder does not issue its own
-MERGE verdict. Merge remains Novak's decision. Safari save/open is owner-deferred
+MERGE verdict. Merge remains Thohared's decision. Safari save/open is owner-deferred
 until final release (PR #19), not passed. Android 1×/2×/3× save/open is owner-reported
 T-P7 evidence, not a measured T-P9 usability study. Record available first-use
 observations honestly; no invented participants or success rate. The full five-run

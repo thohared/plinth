@@ -18,7 +18,7 @@ Raniji cloud CI FAIL ostaje FAIL. Ti dokazi ne zamenjuju nov standardni
 
 Novi standardni run još nije pokrenut u trenutku pakovanja. Tek posle njegovog
 prolaza zaseban publisher sme otvoriti draft PR za tačan testirani commit.
-PR CI/PG, nezavisan review i Novakova vizuelna/baseline odluka ostaju otvoreni.
+PR CI/PG, nezavisan review i Thoharedova vizuelna/baseline odluka ostaju otvoreni.
 Stariji odeljci ispod beleže prethodna stanja; navodi da P-12 nije na main-u
 ili da browser dokaz još ne postoji više nisu aktuelni.
 
@@ -101,7 +101,7 @@ Drugi Linux pokušaj `34696153078/2` potvrdio je osnovu: 40 guardova, typecheck,
 pre završetka guardova; to nije PASS. PG je snimio svih 45 PNG-a, ali su dva
 uspravna snimka bila odsečena i nisu prihvatljiv vizuelni dokaz.
 
-Novak je zatim odobrio P-12 i 1200 s samo za ukupnu T-P5 `npm run ci` komandu
+Thohared je zatim odobrio P-12 i 1200 s samo za ukupnu T-P5 `npm run ci` komandu
 na osnovi i kandidatu. Svi pojedinačni timeout-i, assertion-i, tolerancije,
 provere identiteta i obaveza pune komande ostaju. T-P3 profil se ne menja.
 Korekcija viewport-a i dodatna provera punog uspravnog snimka su pripremljene

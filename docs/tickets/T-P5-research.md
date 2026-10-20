@@ -106,7 +106,7 @@ površinu kroz Stage/QA hook, bez najavljivanja nepostojećeg PNG/video izvoza.
 Warm-up svih scene preset-a na jednom uređaju nije warm-up svih pet uređaja.
 PG skripta može završiti uz upozorenje kada baseline nedostaje: to je capture,
 ne uspešno poređenje. Nema kompletnog §6 izveštaja. P-10 traži kontaktni list
-za prvu Novakovu potvrdu i zaseban post-merge audit T-P3 v2.
+za prvu Thoharedovu potvrdu i zaseban post-merge audit T-P3 v2.
 
 ### F10 — Pogrešna referenca u §4.3
 
@@ -183,7 +183,7 @@ Autor: Codex, nastavna sesija; tačan backend identifikator nije izložen.
 Osnova je ponovo potvrđen main `b0634fc78156a5f487f0ae1a663bc973c1b994fa`.
 Posmatrani T-P5 kandidat je `a77769c3c95e6e3484fc9ddb021ebfda233faec0`.
 Ova dopuna prethodi zasebnom P-12 spec-only commit-u i korekciji kandidata.
-Novak je 2026-09-12 odgovorio „Moze,nastavi” na konkretan predlog P-12 i
+Thohared je 2026-09-12 odgovorio „Moze,nastavi” na konkretan predlog P-12 i
 spoljašnjeg T-P5 CI limita od 1200 s, uz nepromenjene limite pojedinačnih testova.
 
 ### F14 — Pozitivan konačan aspekt može zahtevati nepredstavljivu kameru
@@ -196,7 +196,7 @@ preflight-u. To sprečava nevažeće stanje, ali je spec-u nedostajalo eksplicit
 pravilo numeričke neizvodljivosti. Nalaz je već bio otvoren kao TODO(spec) F14
 u kandidatskom ticketu, a ovde dobija research zapis pre normativne dopune.
 
-Novak je odobrio zaseban P-12: odbiti numerički neizvodljiv zahtev pre mutacije,
+Thohared je odobrio zaseban P-12: odbiti numerički neizvodljiv zahtev pre mutacije,
 bez stezanja ili zaokruživanja aspekta. NDC ±0,9, near/far, FOV, referentna
 udaljenost i svih pet propisanih aspekata ostaju obavezni. Broj iteracija ili
 spor algoritam nisu sami po sebi numerička neizvodljivost. Ovo ne rešava F5
@@ -231,7 +231,7 @@ potvrđuje da osnova prolazi `npm run ci` za 879,126 s: 40 guardova, typecheck,
 T-P5 browser slučaja su prošla i trajala ukupno 118,249 s; na osnovi je do
 spoljašnjeg limita ostalo samo 20,874 s. Kandidat nema CI PASS.
 
-Novak je odobrio 1200 s isključivo za ukupnu `npm run ci` komandu T-P5
+Thohared je odobrio 1200 s isključivo za ukupnu `npm run ci` komandu T-P5
 profila/probe, na osnovi i kandidatu. Vitest/Playwright limiti pojedinačnih
 testova, assertion-i, tolerancije i pun obuhvat ostaju isti. T-P3 profil se ne
 menja. Novi limit i ugovorni pinovi zahtevaju zasebnu proveru runner-a;

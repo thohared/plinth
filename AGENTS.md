@@ -17,7 +17,7 @@ Non-negotiable, whoever you are:
   `TODO(spec)` in the PR description and a stop. Amendments are P-entries
   in §9, each in its own commit that touches nothing else (P-5).
 - `fixtures/pg/**` is read-only to every agent: baselines are blessed by
-  Novak alone, from the CI `pg-candidates` artifact, in a standalone
+  Thohared alone, from the CI `pg-candidates` artifact, in a standalone
   commit with a PG-3(b) rationale line (§7).
 - `guards/` is additive under order, never subtractive. Never weaken,
   skip or narrow a guard, a baseline or a test to get green.

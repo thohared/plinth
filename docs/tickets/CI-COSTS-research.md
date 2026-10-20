@@ -1,6 +1,6 @@
 # CI-COSTS — research, 2026-09-12
 
-Requested by Novak: implement the proposed Actions savings without weakening
+Requested by Thohared: implement the proposed Actions savings without weakening
 Plinth acceptance. Base: Plinth `14a88e247c7b65134c19180e0a35e8f04054d7bf`;
 runner main `0f59cef4edbd078214c35f648f596e7cf3239cec`, proposed Linux PR #7
 head `767ed637f9acc41bc62b43c458b961fd4d42a20d`.

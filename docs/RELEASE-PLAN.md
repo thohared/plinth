@@ -50,7 +50,7 @@ See `RELEASE-CHECKLIST.md` for current evidence and remaining work.
 
 ## Historical plan (2026-09-11, retained for provenance)
 
-Accepted direction: Novak, 2026-09-11. Document of record:
+Accepted direction: Thohared, 2026-09-11. Document of record:
 [`PLINTH_SPEC.md`, P-10](../PLINTH_SPEC.md).
 Research: [`RELEASE-PLAN-research.md`](tickets/RELEASE-PLAN-research.md), F1–F15.
 Authoring agent: Codex (exact backend model identifier not exposed).
@@ -104,7 +104,7 @@ of an existing check. One writer, one ticket, one PR remains the rule.
 | 22–23 | T-P8b — video export, if retained | Proven encoder/fallback behaviour using T-P8a's clock, exact frame-count acceptance, honest progress, Shift+V and export capability messages. Research must justify fitting the remaining window, including review. |
 | 24–25 | T-P10 — release verification | Full performance report, supported-browser checks, final visual evidence, dependency licences, accurate README/demo media/metadata and submission material. |
 | 26–28 | T-P11 — repair buffer | Close blocking fresh-review findings and rerun affected checks on the final commit; retain all three days. |
-| 28, after T-P11 acceptance | Submission decision | Novak submits the verified public demo/repo and prepared form only after blocking findings are closed and final evidence is current. |
+| 28, after T-P11 acceptance | Submission decision | Thohared submits the verified public demo/repo and prepared form only after blocking findings are closed and final evidence is current. |
 | 29–30 | Contingency | Recover a missed target within the official window; no planned features or permission to skip verification. |
 
 T-P8a and T-P8b replace the original combined T-P8 ticket. Each has its
@@ -119,7 +119,7 @@ triggers reassessment and a recommendation to cut video export first.
 ## Decision points
 
 1. **PNG/mobile by September 17.** If the full download workflow is not
-   stable, recommend the already permitted PNG-only release to Novak.
+   stable, recommend the already permitted PNG-only release to Thohared.
 2. **Video-export go/no-go on September 19.** Proceed with T-P8b only after the PNG/mobile
    core passes and research demonstrates a bounded implementation with
    sufficient time for independent review and cross-browser evidence
@@ -127,10 +127,10 @@ triggers reassessment and a recommendation to cut video export first.
    if research cannot justify it, recommend cutting T-P8b. T-P8a research
    and its implementation remain required either way.
 3. **Video export stable by September 23.** An unfinished encoder/fallback must
-   not consume the release pass or repair buffer. Novak chooses the cut;
+   not consume the release pass or repair buffer. Thohared chooses the cut;
    update the feature claims honestly and retain the T-P8a motion scope.
 4. **Public submission ready by September 28.** Prepare the complete form
-   and evidence for Novak's final submission decision after T-P11 closes
+   and evidence for Thohared's final submission decision after T-P11 closes
    blocking findings and the final commit passes affected checks. Do not
    submit ahead of unresolved blockers to preserve a target date. The official page
    states September 30, midnight New York; do not use the boundary as the
@@ -148,7 +148,7 @@ triggers reassessment and a recommendation to cut video export first.
 | F7 | T-P6/T-P7 research: transparent preview and an export path preserving P-6/P-7 colour behaviour. |
 | F8 | T-P5 timing contract, T-P6 in-memory settings, T-P9 validated/versioned hash encoding. |
 | F9 | T-P8b research; preserve exact acceptance or obtain a separate ruling before implementation. |
-| F10 | Fresh-session T-P3 audit and Novak's first CI-derived PG bless; not performed by this planning PR. |
+| F10 | Fresh-session T-P3 audit and Thohared's first CI-derived PG bless; not performed by this planning PR. |
 | F11 | This handoff update records current status and capability limits. |
 | F12 | Usability target and early performance observations; T-P10 retains the full §6 gate. |
 | F13 | P-10 splits mandatory T-P8a motion from conditional T-P8b export; T-P10 always depends on T-P8a. |
@@ -214,7 +214,7 @@ deliverable; do not start implementation against unmerged spec changes.
 ## Release evidence
 
 Preserve CI, independent review and CI-derived visual candidates per
-ticket. Baselines are Novak's separate commit. Target a small first-use
+ticket. Baselines are Thohared's separate commit. Target a small first-use
 study: at least four of five participants download a usable PNG within
 one minute after readiness. Record device/browser, task, time, success
 and failure causes; report unavailable observations as missing. This
@@ -231,7 +231,7 @@ multiple projects as a workaround.
 ## Working method
 
 Reuse GitHub/Astra evidence and the existing deployment. Publish review
-images and links directly when possible so Novak can work from a phone.
+images and links directly when possible so Thohared can work from a phone.
 Extend the runner/control tooling only through its own scoped work when
 needed; its existing T-P3 packet profile is not permission to send files
 for another ticket. Recheck local authentication/browser capabilities;

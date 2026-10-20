@@ -45,7 +45,7 @@ Stari screen mesh na `build.ts:209` sada je na `src/devices/build.ts:302`; `Devi
 `src/main.ts:34` samo pominje budući `setImage`. Stvarni API je `setScreenColor` (:118), koji direktno menja `material.emissive`, i `screenCentrePx` (:123). `guards/screen-exempt.test.ts:80` koristi taj API, pa današnji testovi proveravaju jednobojni emissive izlaz, ne dekodiranje i uzorkovanje sRGB teksture. Uvođenje demo teksture zahteva usklađivanje ovog testnog puta uz očuvanje postojećih provera AgX/ACES, glare granice, highlight preciznosti i MSAA. Guard potrošač.
 
 **F8 — Demo slika ostaje eksplicitan blokator iz postojećeg tiketa.**
-U stablu cd26c94 nema `public/demo.png`. Stari F6 (`docs/tickets/T-P3.md:66`) zato i dalje važi: slika je Novakova prema §3; implementacija staje sa TODO(spec), bez zamenskog generisanog sadržaja. Prazan image pipeline potvrđuju i `main.ts:136` i placeholder u `build.ts:200`. Postojeći stop uslov.
+U stablu cd26c94 nema `public/demo.png`. Stari F6 (`docs/tickets/T-P3.md:66`) zato i dalje važi: slika je Thoharedova prema §3; implementacija staje sa TODO(spec), bez zamenskog generisanog sadržaja. Prazan image pipeline potvrđuju i `main.ts:136` i placeholder u `build.ts:200`. Postojeći stop uslov.
 
 **F9 — PG očekivanja tiketa su zastarela.**
 „Bless #2 — all five change” (`docs/tickets/T-P3.md:152`) više ne opisuje stanje. `fixtures/pg/` ne postoji; capture sada obuhvata 5 uređaja × 4 scene = 20 kandidata (`scripts/pg-capture.mjs:21`, :43). Prvi bless tek predstoji. `guards/pg-mode.test.ts:73` proverava laptop/warm-sunset, ali nema predloženu 9000×2000 image/downscale proveru niti potvrdu montiranog demo sadržaja. Capture matrica.

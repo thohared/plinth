@@ -62,7 +62,7 @@ all 5 devices × 4 presets in the PR, guards green, 20 PG candidates, one PR.
    file name `<device>-<scene>.png`, 20 captures. `guards/pg-mode.test.ts` runs its
    byte-identical case on `laptop` × `warm-sunset` and adds `setScene` to the hook
    assertions. The five `*-flat.png` baselines (if blessed by then) are retired by
-   Novak in the bless commit, not by you.
+   Thohared in the bless commit, not by you.
 8. **Critic loop (§8 T-P4 row).** Before opening the PR, run the capture, tile the 20
    candidates into one `pg-out/contact-sheet.png` (5 columns × 4 rows, labelled by
    filename in the sheet's own pixels — no fonts from outside the repo; a 5×7 bitmap

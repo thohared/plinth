@@ -33,7 +33,7 @@ entry point above; its process rules are not waived.
 Code snapshot 2026-09-11 from `main` @
 `8aa37c65ca14e32fd37986cd05d2aab44aee6373` (T-P3 v2 merged).
 Release direction: P-10 and [`RELEASE-PLAN.md`](RELEASE-PLAN.md), accepted
-by Novak on 2026-09-11 and active in the repo once the planning PR lands.
+by Thohared on 2026-09-11 and active in the repo once the planning PR lands.
 Dated facts age; `PLINTH_SPEC.md` §8–§10 and the merged PR list are the
 live truth. Where this brief and the spec disagree, the spec wins.
 
@@ -69,7 +69,7 @@ time and hitches > 50 ms, median across 5 runs with CoV and n, verdict
 PASS / FAIL / LOW-TRUST). §7 is the evidence rule: `?pg=1` deterministic
 mode (fixed camera, motion frozen, demo image, DPR 1, 1280×800), one
 baseline per device × scene preset in `fixtures/pg/`, read-only to the
-agent, blessed only by Novak from the CI `pg-candidates` artifact with a
+agent, blessed only by Thohared from the CI `pg-candidates` artifact with a
 PG-3(b) rationale line.
 
 ## 3. The paper trail (P-5, `docs/tickets/README.md`)
@@ -100,7 +100,7 @@ numbered F1..Fn and cited by number in the ticket and in the PR's
 - **T-P3 v2 is implemented:** `src/screen/` loads and maps images with
   sRGB, contain/cover, padding and the SDF mask; `src/main.ts` mounts the
   committed `public/demo.png` before readiness and provides picker/drop/
-  paste input. PR #7 also contains Novak's requested perspective correction
+  paste input. PR #7 also contains Thohared's requested perspective correction
   for tablet/browser/card. Its final head was `9c011b3`; merge is `8aa37c6`.
   The old statement that T-P3 is unbuilt is superseded, not a new task.
 - **Evidence:** main CI
@@ -108,7 +108,7 @@ numbered F1..Fn and cited by number in the ticket and in the PR's
   and PG capture
   [34540164887](https://github.com/thohared/plinth/actions/runs/34540164887)
   succeeded; Vercel reports a successful deployment for the merge commit.
-  Novak approved PR #7 after image inspection and explicit disclosure of
+  Thohared approved PR #7 after image inspection and explicit disclosure of
   the missing fresh review/standalone bless. That exception is recorded in
   the PR; a fresh-session post-merge audit remains outstanding.
 - **Next:** T-P5 research, then its ticket. No T-P5 through T-P11 research
@@ -120,7 +120,7 @@ numbered F1..Fn and cited by number in the ticket and in the PR's
 - **No PG baseline is blessed yet:** `fixtures/pg/` does not exist.
   Candidates come from `npm run pg:capture` on CI (SwiftShader is the
   reference GPU; a local machine never produces a candidate);
-  `npm run pg:sheet` tiles a contact sheet. The first bless is Novak's.
+  `npm run pg:sheet` tiles a contact sheet. The first bless is Thohared's.
 - **Branches:** `astra/t-p3-v2-34520755112-1` and the earlier scaffold,
   handoff, P-9 and T-P3 research/ticket branches are merged. The
   `evidence/t-p3-v2-pr-7-f1a2b59` branch stores review images and is not
@@ -139,7 +139,7 @@ numbered F1..Fn and cited by number in the ticket and in the PR's
 | T-P7 | PNG: offscreen RT, `setPixelRatio(1)`, 1×/2×/3×, alpha, naming and dimension/diff tests | §4.6, P-10 | complete desktop/mobile download; dimensions/threshold require a ruling first |
 | T-P9 core | Validated/versioned URL hash state without image bytes, non-video shortcuts, remaining mobile polish | §4.8, §4.9, P-10 | **before video**; video-dependent integration assigned to T-P8 |
 | T-P8a | Virtual clock, all 3 motion presets, preview controls, Space and validated motion-state integration | §4.7–§4.8, §6, P-10 | required even for PNG-only; includes `float` for the unchanged release gate |
-| T-P8b | MP4 + researched fallback, progress, Shift+V/export capability messages; muxer licence | §4.7–§4.9, P-10 | conditional; only video export is the first cut, chosen by Novak |
+| T-P8b | MP4 + researched fallback, progress, Shift+V/export capability messages; muxer licence | §4.7–§4.9, P-10 | conditional; only video export is the first cut, chosen by Thohared |
 | T-P10 | Release pass: Gate-5b segment + 5-run report, no-network assertion, README with GIF, OG tags, favicon, submission fields; report committed to `reports/` | §2, §6, §7 | never cut |
 | T-P11 | Fixups from fresh-context review of T-P7–T-P10 | — | September 26–28; full 3-day buffer before submission |
 
@@ -149,7 +149,7 @@ T-P8a/T-P8b each require separate research, ticket, PR and fresh review.
 Target T-P10 on September 24–25, T-P11 on September 26–28 and submission
 only after blocking findings close and affected checks pass on the final
 commit. September 29–30 is contingency, not planned feature work.
-On Novak, not on an agent: the first PG bless (after T-P5 or whenever the
+On Thohared, not on an agent: the first PG bless (after T-P5 or whenever the
 contact sheet reads right), the video cut decision, the product name
 (§10), merging and the submission itself. Resolve the hinge-control
 question before the corresponding panel control is built.
@@ -172,7 +172,7 @@ exception counts as this gate. See RELEASE-PLAN for its complete exit.
 - Roles are tiers fillable by either vendor (Gearfall SHELL_PLAN S-35 /
   ECON_SPEC C29, 2026-09-07): ruling and spec prep — Fable 5.1 or GPT-6
   Astra; ticket authoring and review — Opus 5 or GPT-5.6 Sol;
-  implementing — Sonnet 5 or GPT-5.6 Terra, or whatever Novak selects in
+  implementing — Sonnet 5 or GPT-5.6 Terra, or whatever Thohared selects in
   the Copilot coding agent; validator-gated fills — Haiku 4.5 or GPT-5.6
   Luna. The constraints bind the role, not the model. Name the model in
   the ticket, the PR description and the review.
@@ -237,4 +237,4 @@ exception counts as this gate. See RELEASE-PLAN for its complete exit.
    outlined in RELEASE-PLAN. Research is its own read-only pass and is
    committed before the implementation ticket (P-5). Do not treat the
    release-plan research as the completed T-P5 research pass.
-4. Answer in the language Novak writes.
+4. Answer in the language Thohared writes.
