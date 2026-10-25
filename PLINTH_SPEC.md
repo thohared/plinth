@@ -938,5 +938,43 @@ independent review, merge or competition submission. The later measurement
 ticket must freeze the concrete trace and measurement method before runs;
 missing evidence remains open. All other specification provisions are preserved.
 
+### P-20 — Narrow production Web Analytics exception (2026-10-25)
+
+Owner approved retaining Vercel Web Analytics with a narrow spec/implementation/
+test exception after the three network-guard failures were explained ("moze").
+Planning amendment based on T-P10g research F1–F10; this commit changes only
+the specification under P-5.
+
+1. Exception to §2.2 and P-2: permit Vercel Web Analytics for basic visits to
+   the root page of `https://plinth-phi.vercel.app`, only in a production build.
+   Local development, localhost, preview/alternate origins, non-root paths and
+   URLs carrying any query parameters (including PG/QA/performance flags) do
+   not initialize Analytics. Shared scene hashes may open the production editor.
+2. Pageviews may contain only the canonical root URL, never query/fragment,
+   scene settings, image data, filenames or custom event properties. Reject
+   custom events. No explicit interaction/export/image tracking is authorized.
+   Provider-generated browser/device, coarse location and origin-level referrer
+   statistics remain part of the visit service. This is not a claim that no
+   visitor metadata is processed. Suppress initialization for incoming referrers
+   carrying credentials, a non-root path, query or fragment.
+3. Load the production script from the page's `/_vercel/insights/script.js`
+   path, with explicit production mode. Use the provider's same-origin intake.
+   Set no-referrer for outgoing HTTP requests, so query-bearing page URLs
+   cannot become Referer headers. A failed or blocked analytics script must
+   not stop input, editing, sharing or PNG export.
+4. §2.3 remains: user uploads never leave the tab; there is no application
+   backend, account, remote image service, persistent user identifier added by
+   Plinth, session replay or additional telemetry provider. Dependency 2.0.1
+   is pinned and its MIT licence recorded (§2.4). No broader network exception.
+5. Preserve every existing guard and fixture. Add production-origin browser
+   coverage using the real bundled SDK and a local collector double, plus
+   independent unit fixtures and seeded violations of the privacy/gating rules.
+   Tests must cover a real image input, copied scene link and downloaded PNG.
+   Report SDK-contract tests separately from live collector/dashboard evidence.
+   Linux CI, existing PG/PNG gates and a fresh-context review remain required.
+
+This authorization is not a baseline bless, test PASS, review, merge or release.
+All unrelated specification requirements remain unchanged.
+
 ## §10 Open TODO(spec)
 - Product-name question resolved by P-19: **Plinth**, effective when that amendment merges.
