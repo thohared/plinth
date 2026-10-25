@@ -1,4 +1,4 @@
-import { inject } from '@vercel/analytics';
+import { initAnalytics } from './analytics';
 import { demoFit, loadDemoImages } from './screen/demo';
 import { SCENE_PRESETS } from './scene/presets';
 import { decodeHash, encodeHash, snapshotState } from './state/codec';
@@ -26,8 +26,7 @@ import { hostDefaultAspect } from './ui/defaults';
 import { directionToOrbit } from './camera/poses';
 import type { FitMode, ImageState } from './screen/types';
 
-// Initialize Vercel Web Analytics
-inject();
+initAnalytics();
 
 /**
  * Entry point. Query params are dev/capture affordances (P-4), not user state
@@ -448,3 +447,4 @@ void boot().catch((error: unknown) => {
   earlyInput.abort();
   showNote(error instanceof Error ? error.message : 'The stage could not start.');
 });
+

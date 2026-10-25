@@ -12,8 +12,14 @@ PNG downloads and shareable scene settings are implemented. Motion preview and
 video export are not available in this version. See the [release checklist](docs/RELEASE-CHECKLIST.md).
 
 3D mockup studio in the browser. Devices are parametric generic slabs, never a
-replica of any manufacturer's design. Nothing leaves the tab: no network at
-runtime, no backend, no accounts. Document of record: [`PLINTH_SPEC.md`](PLINTH_SPEC.md). Any agent, any model,
+replica of any manufacturer's design. Uploaded images stay in the tab; there is
+no application backend or account. The production site uses Vercel Web Analytics
+for basic visit statistics (including browser/device and coarse location).
+Pageview URLs exclude query parameters and scene hashes; no image, filename,
+scene settings or custom interaction events are sent. Analytics is disabled on
+local/preview sites, query-bearing QA URLs and visits with detailed referrers.
+Blocking Analytics does not prevent editing or export. See P-20 in the
+document of record: [`PLINTH_SPEC.md`](PLINTH_SPEC.md). Any agent, any model,
 starts at [`AGENTS.md`](AGENTS.md); the brief is [`docs/HANDOFF.md`](docs/HANDOFF.md).
 
 ## Develop
@@ -38,7 +44,7 @@ Backgrounds can follow the lighting scene, use a solid colour or vertical
 gradient, or be transparent. The checkerboard only belongs to the editor.
 Advanced controls expose geometry, hinge angle, materials, AgX/ACES and preview
 MSAA. **Reset look** restores the Studio composition while keeping
-your uploaded image. Nothing is uploaded or saved to a server.
+your uploaded image. Your image is never uploaded or saved to a server.
 
 In **Save image**, choose 1×, 2× or 3× with the displayed dimensions,
 then **Export PNG**. When the file is ready, use **Download PNG**. The file
@@ -174,3 +180,4 @@ remaining acceptance work, and [performance testing](docs/PERFORMANCE-TESTING.md
 for physical-desktop prerequisites, collection commands and diagnostic limits.
 Automated correctness checks and partial CPU/GPU timings do not establish a
 complete-frame performance PASS or physical Safari support.
+

@@ -5,12 +5,14 @@
 // appendix is grouped by licence so a non-permissive entry stands out.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = new URL('..', import.meta.url).pathname;
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
 const lock = JSON.parse(readFileSync(join(ROOT, 'package-lock.json'), 'utf8'));
 
 const ROLE = {
+  '@vercel/analytics': 'runtime — production visit statistics (P-20)',
   three: 'runtime — the stage renderer (§3, pinned as P-1)',
   '@types/three': 'dev — type definitions for three',
   '@types/node': 'dev — type definitions for the guard scripts',
@@ -59,7 +61,7 @@ Repository licence: **MIT** (see \`LICENSE\`).
 PLINTH_SPEC §2.4: every dependency's licence is recorded here at the point it
 is added. Regenerate with \`npm run licenses\` after any \`package.json\` change;
 review the diff before committing. Nothing here ships to the user at runtime
-except \`three\` — everything else is build and test tooling.
+except \`three\` and \`@vercel/analytics\` — everything else is build and test tooling.
 
 ## Direct dependencies
 
@@ -74,5 +76,7 @@ for (const lic of [...transitive.keys()].sort()) {
   const list = transitive.get(lic).sort();
   md += `### ${lic} (${list.length})\n\n${list.map((n) => `- \`${n}\``).join('\n')}\n\n`;
 }
+// Keep the attribution for the in-tree shader adaptation when regenerating.
+md += "## T-P6 alpha-aware SMAA adapter\n\n`src/scene/alphaSmaa.ts` adapts the neighborhood blend expressions from\nThree.js **0.185.1** `examples/jsm/shaders/SMAAShader.js` (SMAABlendShader),\nunder the same Three.js MIT licence recorded above. Original source and licence\nship in the pinned dependency (`node_modules/three/LICENSE`). The adapter\npreserves the existing gamma-2.2 opaque interpolation and adds coverage-aware\nalpha handling. No new dependency is introduced.\n";
 writeFileSync(join(ROOT, 'LICENSES.md'), md);
 console.log(`LICENSES.md: ${rows.length} direct, ${[...transitive.values()].flat().length} transitive`);
