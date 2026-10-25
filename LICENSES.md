@@ -5,7 +5,7 @@ Repository licence: **MIT** (see `LICENSE`).
 PLINTH_SPEC §2.4: every dependency's licence is recorded here at the point it
 is added. Regenerate with `npm run licenses` after any `package.json` change;
 review the diff before committing. Nothing here ships to the user at runtime
-except `three` — everything else is build and test tooling.
+except `three` and `@vercel/analytics` — everything else is build and test tooling.
 
 ## Direct dependencies
 
@@ -14,6 +14,7 @@ except `three` — everything else is build and test tooling.
 | `@types/node` | 22.20.1 | MIT | dev — type definitions for the guard scripts |
 | `@types/pngjs` | 6.0.5 | MIT | dev — type definitions for pngjs |
 | `@types/three` | 0.185.4 | MIT | dev — type definitions for three |
+| `@vercel/analytics` | 2.0.1 | MIT | runtime — production visit statistics (P-20) |
 | `lefthook` | 2.1.12 | MIT | dev — pre-commit typecheck (§3) |
 | `pixelmatch` | 7.2.0 | ISC | dev — PG baseline diff (§7) |
 | `playwright` | 1.63.0 | Apache-2.0 | dev — no-network guard (§2.2), later PG capture (§7) |
@@ -137,7 +138,6 @@ except `three` — everything else is build and test tooling.
 - `lightningcss-win32-arm64-msvc@1.33.0`
 - `lightningcss-win32-x64-msvc@1.33.0`
 - `lightningcss@1.33.0`
-
 
 ## T-P6 alpha-aware SMAA adapter
 
