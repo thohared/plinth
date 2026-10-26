@@ -68,3 +68,25 @@ da tekst dodat iza poslednje kontrole potiskuje tu kontrolu van panela kada
 korisnik skroluje do kraja nakon izvoza. Vodič je zato premešten pre završnih
 utility komandi. Postojeći test i njegova očekivanja ostali su neizmenjeni.
 Taj prvi rezultat nije PASS za konačnu isporuku; potreban je novi kompletni CI.
+
+## T-P10i: verifikacioni tagovi, 2026-10-26
+
+T-P10h je objavljen kroz PR #48; produkcioni HTTP/metadata/robots/sitemap i
+desktop/mobilni upload → PNG download pregled prošli su posle objave.
+Dokazi su zabeleženi u opisu tog PR-a.
+
+Vlasnik je potom potvrdio Microsoft prijavu, a Bing je za tačan HTTPS root
+izdao `msvalidate.01` tag. Google Search Console je za isti URL-prefix
+property izdao `google-site-verification` tag. T-P10i dodaje oba stvarna
+izdata taga u početni HTML head. Tagovi služe proveri vlasništva; ne izvršavaju
+JavaScript i ne dodaju praćenje posetilaca. Nalozi i kodovi za prijavu se ne
+objavljuju. Tagove zadržati i posle uspešne verifikacije.
+
+U trenutku pripreme ove izmene, potvrda vlasništva u oba servisa i slanje
+sitemap-a još čekaju objavu tagova. Posle merge-a prvo proveriti tagove na
+javnom root-u, zatim kliknuti Verify u oba naloga i poslati postojeći
+`https://plinth-phi.vercel.app/sitemap.xml`. Stvarni status zabeležiti u PR
+handoff-u. Build ili deploy uspeh ne predstavljaju potvrdu verifikacije,
+indeksiranja ili rasta poseta. P-20 Analytics i privatnost uploada ostaju isti.
+
+Research i acceptance: [T-P10i](tickets/T-P10i.md).
