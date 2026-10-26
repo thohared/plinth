@@ -137,6 +137,10 @@ body.editor[data-theme=dark] {
 .editor summary { font-weight:600; }
 .editor #panel-utilities { margin-top:26px; padding-top:22px; border-top:1px solid var(--line); }
 .editor #panel-utilities section { margin-bottom:20px; }
+.editor #about-plinth { color:var(--muted); font-size:.75rem; line-height:1.6; }
+.editor #about-plinth :is(h2,h3) { color:var(--ink); font-size:.8125rem; line-height:1.4; }
+.editor #about-plinth ol { padding-left:20px; }
+.editor #about-plinth li + li { margin-top:8px; }
 .editor #png-actions { background:var(--surface); height:238px; padding:18px 18px max(18px,env(safe-area-inset-bottom)); border-top:1px solid var(--line); }
 .editor #png-export,.editor #png-download { background:var(--accent); color:#fff; border:1px solid transparent; min-height:48px; font-weight:650; border-radius:6px; box-shadow:0 3px 10px #0f3d2e1a; }
 .editor #png-export:hover:not(:disabled),.editor #png-download:hover { background:#19583f; border-color:transparent; }
@@ -145,6 +149,11 @@ body.editor[data-theme=dark] {
 .editor #note,.editor #settings-error { color:#6b351f; background:#fff0df; }
 .editor[data-theme=dark] #note,.editor[data-theme=dark] #settings-error { color:#ffd5b5; background:#443222; }
 #mobile-actions { display:none; }
+/* Readable product information while scripting is unavailable or still loading. */
+html:has(body:not(.editor):not(.pg)),body:not(.editor):not(.pg) { height:auto; overflow:auto; }
+body:not(.editor):not(.pg) { font:1rem/1.6 system-ui,sans-serif; }
+body:not(.editor):not(.pg) #workspace { display:none; }
+body:not(.editor):not(.pg) #panel { max-width:640px; margin:auto; }
 @media(max-width:899px) {
   .editor #panel { border-radius:12px 12px 0 0; padding:16px 18px 20px; background:var(--surface); }
   @supports (backdrop-filter:blur(12px)) {

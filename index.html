@@ -5,28 +5,55 @@
     <meta name="referrer" content="no-referrer" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel="stylesheet" href="/src/ui/panel.css" />
-    <title>Plinth: Screenshot studio</title>
-    <meta name="description" content="Turn screenshots into studio-lit 3D device mockups. Choose your view, lighting and background, then export PNG. Free, no account; your image stays in your browser." />
+    <title>Plinth: Free 3D Mockup Generator for Screenshots</title>
+    <meta name="description" content="Create free 3D phone, tablet, laptop and browser mockups from screenshots. Customize lighting and backgrounds, then export PNG. No account needed." />
+    <link rel="canonical" href="https://plinth-phi.vercel.app/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Plinth" />
-    <meta property="og:title" content="Plinth: Screenshot studio" />
-    <meta property="og:description" content="Your screenshot. A studio-lit 3D mockup. Export PNG, free, with no account." />
+    <meta property="og:title" content="Plinth: Free 3D Mockup Generator for Screenshots" />
+    <meta property="og:description" content="Create free 3D phone, tablet, laptop and browser mockups from screenshots. Customize lighting and backgrounds, then export PNG. No account needed." />
     <meta property="og:url" content="https://plinth-phi.vercel.app/" />
     <meta property="og:image" content="https://plinth-phi.vercel.app/social-card.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Plinth screenshot studio: turn screenshots into studio-lit 3D mockups. Export PNG. Free. No account." />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Plinth: Screenshot studio" />
-    <meta name="twitter:description" content="Your screenshot. A studio-lit 3D mockup. Export PNG, free, with no account." />
+    <meta name="twitter:title" content="Plinth: Free 3D Mockup Generator for Screenshots" />
+    <meta name="twitter:description" content="Create free 3D phone, tablet, laptop and browser mockups from screenshots. Customize lighting and backgrounds, then export PNG. No account needed." />
     <meta name="twitter:image" content="https://plinth-phi.vercel.app/social-card.png" />
     <meta name="twitter:image:alt" content="Plinth screenshot studio: turn screenshots into studio-lit 3D mockups. Export PNG. Free. No account." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Plinth",
+        "url": "https://plinth-phi.vercel.app/",
+        "description": "Free 3D mockup generator for screenshots. Create phone, tablet, laptop, browser window and card mockups, then export PNG without an account.",
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript and WebGL 2.",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
   </head>
   <body>
     <main id="workspace"><canvas id="stage" aria-label="Plinth stage"></canvas></main>
-    <aside id="panel" aria-label="Image settings"></aside>
+    <aside id="panel" aria-label="Image settings">
+      <section id="about-plinth" aria-labelledby="about-plinth-title">
+        <h2 id="about-plinth-title">Free 3D mockups from your screenshots</h2>
+        <p>Plinth turns screenshots into studio-lit 3D mockups for portfolios, app presentations and social posts. Choose a generic phone, tablet, laptop, browser window or card. It is free to use, with no account required.</p>
+        <h3>How to create a mockup</h3>
+        <ol>
+          <li>Choose, drop or paste a PNG, JPG or WebP screenshot.</li>
+          <li>Pick a device and a ready-made look. Adjust the angle, lighting, background and output shape.</li>
+          <li>Choose an export size, prepare the PNG, then select Download PNG.</li>
+        </ol>
+        <p>Your image stays in your browser. Scene links share the settings, never your uploaded image. PNG export supports transparent backgrounds; available export sizes depend on your device.</p>
+        <noscript><p>Enable JavaScript in a browser with WebGL 2 support to use the interactive studio.</p></noscript>
+      </section>
+    </aside>
     <button id="settings-open" type="button" aria-expanded="false" aria-controls="panel">Settings</button>
     <button id="pick" type="button" disabled>Choose image</button>
     <input id="image-file" type="file" accept="image/png,image/jpeg,image/webp" hidden />
