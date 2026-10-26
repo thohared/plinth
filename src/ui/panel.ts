@@ -44,6 +44,8 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   let recovery: RecoveryState = 'ready';
   let free = false;
   let setFree = (_active: boolean): void => {};
+  // Keep the server-delivered product guide available to people after startup.
+  const about = root.querySelector<HTMLElement>('#about-plinth');
   root.innerHTML = '<header><div><h1>Plinth<span class="brand-dot" aria-hidden="true">.</span></h1><p class="studio-subtitle">Screenshot studio</p></div><div class="header-actions"><button type="button" id="interface-theme" aria-label="Use dark interface" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3a9 9 0 0 0 0 18Z" fill="currentColor"/></svg></button><button type="button" id="sheet-close" aria-label="Close settings">×</button></div></header>';
   const theme = root.querySelector<HTMLButtonElement>('#interface-theme')!;
   theme.addEventListener('click', () => {
@@ -228,6 +230,7 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   const msaaLabel = label(advanced, 'MSAA preview smoothing', 'control-msaa'); const msaa = document.createElement('input'); msaa.id = 'control-msaa'; msaa.type = 'checkbox'; msaaLabel.prepend(msaa);
   msaa.addEventListener('change', () => attempt(msaa, () => store.apply({ msaa: msaa.checked })), { signal }); refreshers.push(s => { msaa.checked = s.msaa; });
   const reset = document.createElement('button'); reset.type = 'button'; reset.id = 'reset'; reset.textContent = 'Reset look'; reset.addEventListener('click', () => attempt(reset, () => { store.reset(); setFree(false); }), { signal }); root.append(reset, error, utilities);
+  if (about) utilities.append(about);
   let previousPose = store.get().pose;
   const refresh = (state: Settings, reason?: string): void => {
     if (state.pose !== null && (state.pose !== previousPose || ['compose', 'reset', 'hydrate', 'setPose'].includes(reason ?? ''))) setFree(false);
