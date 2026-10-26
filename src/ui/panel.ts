@@ -230,7 +230,8 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   const msaaLabel = label(advanced, 'MSAA preview smoothing', 'control-msaa'); const msaa = document.createElement('input'); msaa.id = 'control-msaa'; msaa.type = 'checkbox'; msaaLabel.prepend(msaa);
   msaa.addEventListener('change', () => attempt(msaa, () => store.apply({ msaa: msaa.checked })), { signal }); refreshers.push(s => { msaa.checked = s.msaa; });
   const reset = document.createElement('button'); reset.type = 'button'; reset.id = 'reset'; reset.textContent = 'Reset look'; reset.addEventListener('click', () => attempt(reset, () => { store.reset(); setFree(false); }), { signal }); root.append(reset, error, utilities);
-  if (about) utilities.append(about);
+  // Keep the final utility control reachable at the bottom of the scroll area.
+  if (about) utilities.prepend(about);
   let previousPose = store.get().pose;
   const refresh = (state: Settings, reason?: string): void => {
     if (state.pose !== null && (state.pose !== previousPose || ['compose', 'reset', 'hydrate', 'setPose'].includes(reason ?? ''))) setFree(false);

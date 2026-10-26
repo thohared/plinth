@@ -7,7 +7,8 @@ Kanonski sajt: https://plinth-phi.vercel.app/
 
 Opisni title/description i OG/Twitter metapodaci; jedan canonical root;
 robots.txt i sitemap.xml; JSON-LD WebApplication; kratak čitljiv opis i
-uputstvo u početnom HTML-u, sačuvano pri dnu panela posle inicijalizacije.
+uputstvo u početnom HTML-u, sačuvano pri dnu panela posle inicijalizacije,
+iznad završnih Share scene/Keyboard shortcuts komandi.
 Sadržaj opisuje postojeći besplatni PNG tok sa generičkim uređajima.
 Nema novih zavisnosti, mrežnih poziva, posebnih stranica za botove, izmišljenih
 recenzija, novih Analytics događaja ili promene javnog URL-a.
@@ -58,3 +59,12 @@ ne kupuje domen niti menja hosting.
 
 Primarni izvori i tačno pregledana baza: [istraživanje](tickets/T-P10h-research.md).
 Acceptance i write set: [ticket](tickets/T-P10h.md).
+
+## Nalaz tokom provere
+
+Prvi kompletni lokalni CI na implementaciji `dd23f2b` imao je 118/120 guard
+prolaza. Dve postojeće light/dark provere u `review-polish.test.ts` otkrile su
+da tekst dodat iza poslednje kontrole potiskuje tu kontrolu van panela kada
+korisnik skroluje do kraja nakon izvoza. Vodič je zato premešten pre završnih
+utility komandi. Postojeći test i njegova očekivanja ostali su neizmenjeni.
+Taj prvi rezultat nije PASS za konačnu isporuku; potreban je novi kompletni CI.

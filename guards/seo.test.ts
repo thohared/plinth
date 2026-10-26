@@ -17,7 +17,7 @@ beforeAll(async () => {
     name: 'seo-content-negative-seed', enforce: 'pre',
     transform(code, id) {
       if (!id.replaceAll('\\', '/').endsWith('/src/ui/panel.ts')) return;
-      const statement = 'if (about) utilities.append(about);';
+      const statement = 'if (about) utilities.prepend(about);';
       if (!code.includes(statement)) throw new Error('SEO content seed did not match');
       return code.replace(statement, '');
     },

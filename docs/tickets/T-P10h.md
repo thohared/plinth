@@ -12,7 +12,8 @@ P-2/P-5/P-10(1)/P-14/P-19/P-20. Zahtev vlasnika: bolji SEO za postojeći studio.
    Sitemap navodi samo kanonski root, bez demo/QA/query/hash URL-ova, izmišljenog
    lastmod-a ili učestalosti promene (F2/F6).
 3. Kratak engleski opis i stvarni upload → uređaj/izgled → PNG tok nalaze se u
-   početnom HTML-u i ostaju čitljivi pri dnu panela posle inicijalizacije.
+   početnom HTML-u i ostaju čitljivi pri dnu panela posle inicijalizacije,
+   pre završnih Share scene/Keyboard shortcuts komandi, koje ostaju poslednje.
    Isti tekst dobija svaki posetilac; bez bot detekcije, skrivenog keyword teksta
    ili uvodne stranice koja blokira rad. Bez JS-a jasno navesti zahtev za JS/WebGL
    i omogućiti čitanje teksta (F3/F4).
