@@ -1,0 +1,39 @@
+{
+  "browser": "153.0.8010.0",
+  "captures": [
+    "desktop-light-guide.png",
+    "desktop-light-faq.png",
+    "desktop-dark-guide.png",
+    "desktop-dark-faq.png",
+    "mobile-light-guide.png",
+    "mobile-light-faq.png",
+    "mobile-dark-guide.png",
+    "mobile-dark-faq.png"
+  ],
+  "checks": [
+    {
+      "mobile": false,
+      "upload": "180x320 accepted",
+      "png": [
+        1080,
+        1080
+      ],
+      "download": true,
+      "finalUtility": true,
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "mobile": true,
+      "upload": "180x320 accepted",
+      "png": [
+        1080,
+        1080
+      ],
+      "download": true,
+      "finalUtility": true,
+      "errors": [],
+      "overflow": false
+    }
+  ]
+}
