@@ -141,6 +141,11 @@ body.editor[data-theme=dark] {
 .editor #about-plinth :is(h2,h3) { color:var(--ink); font-size:.8125rem; line-height:1.4; }
 .editor #about-plinth ol { padding-left:20px; }
 .editor #about-plinth li + li { margin-top:8px; }
+#about-plinth figure { margin:16px 0 20px; }
+#about-plinth figure img { display:block; width:100%; height:auto; border-radius:6px; }
+#about-plinth figcaption { margin-top:8px; }
+#about-plinth .guide-faq h4 { margin:16px 0 4px; font-size:inherit; color:var(--ink); }
+#about-plinth .guide-faq p { margin:0 0 12px; }
 .editor #png-actions { background:var(--surface); height:238px; padding:18px 18px max(18px,env(safe-area-inset-bottom)); border-top:1px solid var(--line); }
 .editor #png-export,.editor #png-download { background:var(--accent); color:#fff; border:1px solid transparent; min-height:48px; font-weight:650; border-radius:6px; box-shadow:0 3px 10px #0f3d2e1a; }
 .editor #png-export:hover:not(:disabled),.editor #png-download:hover { background:#19583f; border-color:transparent; }

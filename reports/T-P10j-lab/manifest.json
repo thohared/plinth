@@ -1,0 +1,38 @@
+{
+  "base": "de73a9d334f55ce71fa7030ad2df9d792a16ac2a",
+  "node": "v24.22.1",
+  "os": "linux 6.18.55",
+  "cpu": "AMD EPYC 9V74 80-Core Processor",
+  "logicalCpus": 8,
+  "memoryBytes": 10451439616,
+  "browser": "Chromium 153.0.8010.0 from @sparticuz/chromium 153.0.0",
+  "lighthouse": "13.5.0",
+  "renderer": "SwiftShader (software); cloud host, not a phone",
+  "source": {
+    "index.html": "55600267fdc46b59c93c2e9c9e8594d6f0b68475cc729dcf5c904bb539a415ce",
+    "src/ui/panel.ts": "7aba4e21e84d50ab591b5638ee760b9bf973cff5be3489e7636c966f37e9fb95",
+    "src/ui/panel.css": "b4d784fd47597dfc5caebcda880a394bc7614ce573aed5c68102e448d1efa4ed",
+    "guards/seo.test.ts": "74d76c1de83bdcb602e4102160567ef6131e1f151d8383779f93afc12a43fcb6"
+  },
+  "build": {
+    "index.html": {
+      "bytes": 6538,
+      "sha256": "47e2a43865525abc9edfb13fea41d4a6c6ab2149e1e787c02bfd3211209d4297"
+    },
+    "assets/index-CZe1_XGi.css": {
+      "bytes": 14913,
+      "sha256": "e8b3744257f9ddc582c5262284a92d954f0d1980b9fc9a7eddd18d0dd1dee5f3"
+    },
+    "assets/index-DC4azIJE.js": {
+      "bytes": 720732,
+      "sha256": "b18615dda39f8d5f246921c9631bd0e541195b384104fee4dfa13914aae137a6"
+    }
+  },
+  "notes": [
+    "Local HTTP Vite preview; production CDN, TLS and real network latency not measured.",
+    "Lighthouse default mobile 412x823 DPR1.75, simulated slow4G and 4x CPU; three alternating base/candidate runs.",
+    "No concurrent browser tests during the six measured Lighthouse runs.",
+    "Initial CLI preflight failed to reach a separate preview process; no valid metrics from that attempt. collect.mjs owns both live preview servers and all six valid runs.",
+    "Pinned Playwright browser download failed as an invalid ZIP. The separately installed npm browser is an environment fallback, not a repository dependency change."
+  ]
+}

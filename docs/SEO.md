@@ -3,6 +3,43 @@
 T-P10h, 2026-10-26. Autor: Codex (GPT-6).
 Kanonski sajt: https://plinth-phi.vercel.app/
 
+## Aktuelno stanje — 27. oktobar 2026.
+
+- PR #49 je spojen kao `de73a9d334f55ce71fa7030ad2df9d792a16ac2a` i objavljen.
+  Oba servisa potvrđuju vlasništvo; Google sitemap je obrađen sa statusom
+  Success i jednom otkrivenom stranicom.
+- Bing URL Submission je prihvatio javni root. Naknadni URL Inspection
+  pokazuje **Indexed successfully / URL can appear on Bing**. To ne dokazuje
+  konkretan rang, klikove ili povećanje saobraćaja.
+- Bing sitemap formular vraća serversku grešku i u agentovom i u vlasnikovom
+  pregledaču. **Vlasnik je odložio ovu stavku:** nema novih pokušaja, support
+  prijava ili izmene XML-a u T-P10j. Robots već referiše ispravan sitemap.
+- T-P10j prenosi postojeći brand H1 u početni HTML i čuva ga pri pokretanju,
+  dopunjuje vodič primerima za portfolio i prezentaciju aplikacije i FAQ-om.
+  Društvene mreže su izostavljene iz vodiča prema zahtevu vlasnika. Postojeći
+  OG/Twitter metapodaci ostaju, kao i aplikaciono deljenje podešavanja scene.
+  Implementacija na grani nije dokaz objave; datum produkcione objave upisati
+  po merge-u i potvrdi deployment-a.
+
+### Merenje rezultata
+
+Pre poređenja proveriti Google URL Inspection i Search results izveštaj za
+tačan URL-prefix property. Koristiti Web, isti URL i iste country/device
+filtere; porediti puna 28-dnevna razdoblja, odvojeno mobilni/desktop prikaz.
+Zabeležiti impressions, clicks, CTR, average position i najčešće upite, kao i
+datum poslednjih dostupnih podataka. Male uzorke i odložene podatke nazvati
+nedovoljnim dokazom. Prosečna pozicija nije stabilan rang za sve korisnike.
+
+Čitanje privatnog Google performance izveštaja u ovoj sesiji nije izvršeno:
+automatska provera pristupa traži izričito vlasnikovo odobrenje. Nema izmišljenog
+baseline-a, raspoređenog automatskog pristupa nalogu ili novog tracker-a.
+Podsetnik za pregled za nekoliko nedelja može da se odvoji od samog čitanja
+naloga. Vercel posete nisu zamena za search impressions i upite.
+
+Mobilno laboratorijsko poređenje za T-P10j čuva metod i sirove rezultate u
+`reports/T-P10j-lab/`; taj test nije field Core Web Vitals, fizički telefon,
+Safari ili §6/P-19 release PASS. Ne snižavati kvalitet 3D prikaza radi skora.
+
 ## Šta ova promena isporučuje
 
 Opisni title/description i OG/Twitter metapodaci; jedan canonical root;
@@ -19,6 +56,9 @@ sitemap i strukturirani opis nisu postojali. Bing posete je prijavio vlasnik;
 broj, upiti, impresije i rang nisu nezavisno provereni.
 
 ## Posle merge-a i produkcione objave
+
+Za izvršene korake i trenutno odloženi Bing sitemap važi gornji datirani
+status; sledeća lista čuva opšti postupak, nije nalog da se koraci ponove.
 
 1. Proveriti HTTP 200 za root, robots.txt i sitemap.xml, MIME tipove, source
    HTML canonical i odsustvo `noindex` u produkcionom HTML-u/zaglavlju. Otvoriti

@@ -12,7 +12,7 @@ const canonical = 'https://plinth-phi.vercel.app/';
 beforeAll(async () => {
   outDir = await mkdtemp(join(tmpdir(), 'plinth-seo-'));
   const seed = process.env['PLINTH_SEO_SEED'];
-  if (seed && !['canonical', 'sitemap', 'content'].includes(seed)) throw new Error('Unknown SEO seed');
+  if (seed && !['canonical', 'sitemap', 'content', 'heading'].includes(seed)) throw new Error('Unknown SEO seed');
   await build({ logLevel: 'silent', build: { outDir, emptyOutDir: true }, plugins: seed === 'content' ? [{
     name: 'seo-content-negative-seed', enforce: 'pre',
     transform(code, id) {
@@ -23,6 +23,11 @@ beforeAll(async () => {
     },
   }] : [] });
   originalHtml = await readFile(join(outDir, 'index.html'), 'utf8');
+  if (seed === 'heading') {
+    const changed = originalHtml.replace(/<h1\b[^>]*>[\s\S]*?<\/h1>/, '');
+    if (changed === originalHtml) throw new Error('SEO heading seed did not match');
+    await writeFile(join(outDir, 'index.html'), changed);
+  }
   if (seed === 'canonical') {
     const changed = originalHtml.replace('rel="canonical" href="https://plinth-phi.vercel.app/"', 'rel="canonical" href="https://example.invalid/"');
     if (changed === originalHtml) throw new Error('SEO canonical seed did not match');
@@ -133,4 +138,48 @@ it.each([{ width: 1280, height: 800 }, { width: 390, height: 844 }])('retains th
     expect(await page.locator('link[rel="canonical"]').getAttribute('href')).toBe(canonical);
     expect(errors).toEqual([]);
   } finally { await context.close(); }
+});
+
+it('delivers one main heading and keeps the same examples and FAQ with or without scripts', async () => {
+  const offline = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 500 } });
+  const interactive = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  try {
+    const staticPage = await offline.newPage(); await staticPage.goto(url);
+    expect(await staticPage.locator('h1').count()).toBe(1);
+    expect(await staticPage.locator('h1').innerText()).toBe('Plinth.');
+    const guide = staticPage.locator('#about-plinth');
+    expect(await guide.innerText()).not.toMatch(/social (posts|media|networks)/i);
+    expect(await guide.locator('.guide-examples figure').count()).toBe(2);
+    expect(await guide.locator('figcaption').allTextContents()).toEqual([
+      expect.stringContaining('portfolio'), expect.stringContaining('app interface'),
+    ]);
+    expect(await guide.locator('.guide-faq h4').allTextContents()).toEqual([
+      'Is Plinth free? Do I need an account?', 'Are my screenshots uploaded?',
+      'Can I export a transparent PNG?', 'What do the 1×, 2× and 3× export sizes mean?',
+    ]);
+    const delivered = await guide.locator('.guide-examples, .guide-faq').allTextContents();
+    const page = await interactive.newPage(); await page.goto(url);
+    await page.waitForSelector('html[data-plinth-ready="1"]', { timeout: 60_000 });
+    await page.locator('#settings-open').click();
+    expect(await page.locator('h1').count()).toBe(1);
+    expect(await page.locator('#panel header h1').innerText()).toBe('Plinth.');
+    expect(await page.locator('#about-plinth .guide-examples, #about-plinth .guide-faq').allTextContents()).toEqual(delivered);
+    for (const image of await page.locator('.guide-examples img').all()) {
+      await image.scrollIntoViewIfNeeded();
+      await image.evaluate(async (img: HTMLImageElement) => { await img.decode(); });
+      expect(await image.getAttribute('alt')).toBeTruthy();
+      expect(await image.evaluate((img: HTMLImageElement) => ({ w: img.naturalWidth, h: img.naturalHeight }))).toEqual({ w: 480, h: 300 });
+    }
+    const lastAnswer = page.locator('.guide-faq p').last(); await lastAnswer.scrollIntoViewIfNeeded();
+    const bounds = await page.evaluate(() => {
+      const panel = document.querySelector('#panel')!.getBoundingClientRect();
+      const answers = document.querySelectorAll('.guide-faq p');
+      const answer = answers[answers.length - 1]!.getBoundingClientRect();
+      return { top: answer.top, bottom: answer.bottom, panelTop: panel.top, panelBottom: panel.bottom };
+    });
+    expect(bounds.top).toBeGreaterThanOrEqual(bounds.panelTop - 1);
+    expect(bounds.bottom).toBeLessThanOrEqual(bounds.panelBottom + 1);
+    expect(await page.locator('#png-export').isEnabled()).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  } finally { await offline.close(); await interactive.close(); }
 });

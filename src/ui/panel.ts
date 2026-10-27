@@ -46,7 +46,10 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   let setFree = (_active: boolean): void => {};
   // Keep the server-delivered product guide available to people after startup.
   const about = root.querySelector<HTMLElement>('#about-plinth');
-  root.innerHTML = '<header><div><h1>Plinth<span class="brand-dot" aria-hidden="true">.</span></h1><p class="studio-subtitle">Screenshot studio</p></div><div class="header-actions"><button type="button" id="interface-theme" aria-label="Use dark interface" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3a9 9 0 0 0 0 18Z" fill="currentColor"/></svg></button><button type="button" id="sheet-close" aria-label="Close settings">×</button></div></header>';
+  const brand = root.querySelector<HTMLElement>('#studio-brand');
+  if (!brand) throw new Error('Missing studio heading');
+  root.innerHTML = '<header><div class="header-actions"><button type="button" id="interface-theme" aria-label="Use dark interface" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3a9 9 0 0 0 0 18Z" fill="currentColor"/></svg></button><button type="button" id="sheet-close" aria-label="Close settings">×</button></div></header>';
+  root.querySelector('header')!.prepend(brand);
   const theme = root.querySelector<HTMLButtonElement>('#interface-theme')!;
   theme.addEventListener('click', () => {
     const dark = document.body.dataset['theme'] !== 'dark';
