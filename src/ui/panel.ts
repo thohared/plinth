@@ -107,15 +107,13 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   }
   const image = section('Your image');
   const pick = document.querySelector<HTMLButtonElement>('#pick')!; pick.textContent = 'Choose image'; image.append(pick, document.querySelector('#note')!);
-  const mobileBrand = document.createElement('div'); mobileBrand.id = 'mobile-brand';
-  mobileBrand.innerHTML = 'Plinth<span class="brand-dot" aria-hidden="true">.</span><span class="mobile-subtitle">Screenshot studio</span>';
-  document.querySelector('#workspace')!.append(mobileBrand);
-  const mobileActions = document.createElement('div'); mobileActions.id = 'mobile-actions';
-  const mobilePick = document.createElement('button'); mobilePick.type = 'button'; mobilePick.id = 'mobile-pick'; mobilePick.textContent = 'Choose image';
+  const mobileBrand = document.querySelector<HTMLElement>('#mobile-brand')!;
+  const mobileActions = document.querySelector<HTMLElement>('#mobile-actions')!;
+  const mobilePick = document.querySelector<HTMLButtonElement>('#mobile-pick')!;
   mobilePick.addEventListener('click', () => { if (!mobilePick.disabled) pick.click(); }, { signal });
   const syncMobilePick = (): void => { mobilePick.disabled = pick.disabled || recovery !== 'ready'; };
   const pickObserver = new MutationObserver(syncMobilePick); pickObserver.observe(pick, { attributes: true, attributeFilter: ['disabled'] }); syncMobilePick();
-  mobileActions.append(mobilePick, opener); root.insertAdjacentElement('afterend', mobileActions);
+  opener.disabled = false;
   const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = 'PNG, JPG or WebP · Drop or paste an image. Everything stays in this tab.'; image.append(hint);
   const looks = section('Ready-made looks'); const grid = document.createElement('div'); grid.className = 'looks'; looks.append(grid);
   grid.setAttribute('role', 'group'); grid.setAttribute('aria-label', 'Ready-made looks');

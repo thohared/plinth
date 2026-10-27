@@ -1,0 +1,42 @@
+[
+  {
+    "device": "phone",
+    "scene": "soft-studio",
+    "width": 1280,
+    "height": 800,
+    "changedChannels": 0,
+    "maxDifference": 0
+  },
+  {
+    "device": "phone",
+    "scene": "dark-glass",
+    "width": 1280,
+    "height": 800,
+    "changedChannels": 0,
+    "maxDifference": 0
+  },
+  {
+    "device": "phone",
+    "scene": "warm-sunset",
+    "width": 1280,
+    "height": 800,
+    "changedChannels": 0,
+    "maxDifference": 0
+  },
+  {
+    "device": "phone",
+    "scene": "clean-white",
+    "width": 1280,
+    "height": 800,
+    "changedChannels": 0,
+    "maxDifference": 0
+  },
+  {
+    "device": "laptop",
+    "scene": "soft-studio",
+    "width": 1280,
+    "height": 800,
+    "changedChannels": 0,
+    "maxDifference": 0
+  }
+]

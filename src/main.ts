@@ -94,7 +94,7 @@ const initialHash = pg ? '' : window.location.hash;
 // Hash presence suppresses conflicting legacy query settings even when invalid.
 if (initialHash) for (const key of ['device','scene','pose','composition','background','msaa']) params.delete(key);
 const ui = !pg || params.get('ui') === '1';
-document.body.classList.add(ui ? 'editor' : 'pg');
+document.body.classList.add(ui ? 'editor' : 'pg'); // Also supports direct QA imports.
 const msaa = !pg && params.get('msaa') === '1';
 const requestedDevice = params.get('device') ?? 'phone';
 const initialDevice: DeviceId = isDeviceId(requestedDevice) ? requestedDevice : 'phone';

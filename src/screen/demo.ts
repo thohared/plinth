@@ -9,9 +9,14 @@ export const demoFit = (_device: DeviceId): FitMode => 'contain';
 
 /** Stage takes ownership only once both local images have decoded. */
 export async function loadDemoImages(base: string, cap: number): Promise<DemoImages> {
-  const portrait = await loadImage(new URL('demo.png', base).href, cap);
-  try {
-    const landscape = await loadImage(new URL('demo-landscape.png', base).href, cap);
-    return { portrait, landscape };
-  } catch (error) { portrait.bitmap.close(); throw error; }
+  const results = await Promise.allSettled(['demo.png', 'demo-landscape.png'].map(
+    path => loadImage(new URL(path, base).href, cap),
+  ));
+  const failed = results.find(result => result.status === 'rejected');
+  if (failed) {
+    for (const result of results) if (result.status === 'fulfilled') result.value.bitmap.close();
+    throw failed.reason;
+  }
+  const [portrait, landscape] = results as [PromiseFulfilledResult<DemoImage>, PromiseFulfilledResult<DemoImage>];
+  return { portrait: portrait.value, landscape: landscape.value };
 }
