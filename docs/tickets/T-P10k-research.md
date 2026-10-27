@@ -68,3 +68,22 @@ Primarni izvori: pinovani MIT Three.js iz `node_modules/three` (PMREMGenerator,
 WebGLRenderer.compileAsync i WebGLProgram); [web.dev o dugim zadacima](https://web.dev/articles/optimize-long-tasks).
 Savremeni Three.js docs indeks je otvoren, ali PMREM detalj vratio je 404;
 konkretni API ugovor proveren je u isporučenom 0.185.1 izvoru.
+
+## Dopuna pre izdvajanja početnog modula
+
+- F7 — Prva tri naizmenična para pokazuju niži TBT (mediana 2500 → 2026 ms),
+  ali bez poboljšanja skora (45 → 44): simulirani LCP ostaje oko 10.5 s,
+  dok posmatrani LCP kandidata dolazi već za 385 ms. Početna editor klasa
+  zavisi od preuzimanja/izvršavanja celog 720 kB modula. `src/main.ts:90–97`
+  može biti mali početni modul koji odmah postavlja postojeći editor/PG režim,
+  a potom dinamički učitava studio. To odvaja prikaz stvarnih, još disabled
+  komandi od preuzimanja Three.js; ne odlaže 3D do prvog klika.
+- F8 — `panel.css` rezerviše footer tek kada `createPanel` doda `#png-actions`;
+  raniji mobilni shell zato pomera canvas (CLS .046–.076 u prvoj probi).
+  Rezervisati isti prostor pre montiranja, skloniti početni disabled desktop
+  picker iz grid-a dok nije u panelu i ne prikazivati neiscrtani canvas.
+  Vidljivost se uključuje postojećim stvarnim ready markerom. Isti završni
+  raspored i prvi završeni kadar ostaju; nema placeholder slike ili DPR reza.
+
+Ove uske izmene početnog rasporeda i reda učitavanja ostaju u §4.1/§4.9;
+`TODO(spec): none`. Prva proba nije završni rezultat i ostaje dokumentovana.
