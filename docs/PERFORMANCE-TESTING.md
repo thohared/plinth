@@ -172,3 +172,10 @@ and [Chrome Performance reference](https://developer.chrome.com/docs/devtools/pe
 The Plinth specification and T-P10c define this project's acceptance, not those
 general tool references. Native-Windows portability and complete-frame measurement
 are targeted follow-up work; this documentation adds neither implementation.
+## Mobilno učitavanje, T-P10k (2026-10-27)
+
+Uporedivi Lighthouse rezultati i reprodukcija su u
+[`reports/T-P10k-lab`](../reports/T-P10k-lab/README.md): medijana 45→71,
+LCP 10.383→2.402 s, TBT 2689→1677 ms, CLS 0 na kandidatu, n=3 po build-u.
+Kandidat TBT CoV je 28.6%; to je laboratorijska proba učitavanja i nije
+fizički uređaj, produkcioni PageSpeed skor ili §6/P-19 release PASS.

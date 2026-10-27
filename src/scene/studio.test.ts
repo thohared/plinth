@@ -5,7 +5,7 @@ const fake = vi.hoisted(() => ({
   shadows: [] as Array<{ group: Group; fit: ReturnType<typeof vi.fn>; render: ReturnType<typeof vi.fn>; setParams: ReturnType<typeof vi.fn>; dispose: ReturnType<typeof vi.fn> }>,
   pipeline: { ready: Promise.resolve(), render: vi.fn(), setSize: vi.fn(), dispose: vi.fn() },
 }));
-vi.mock('./environment', () => ({ generateEnvironment: () => ({ texture: {}, dispose: vi.fn() }) }));
+vi.mock('./environment', () => ({ generateEnvironments: (_renderer: unknown, presets: unknown[]) => presets.map(() => ({ texture: {}, dispose: vi.fn() })) }));
 vi.mock('./pipeline', () => ({ createPipeline: () => fake.pipeline }));
 vi.mock('./contactShadow', () => ({
   ContactShadow: class {

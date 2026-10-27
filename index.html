@@ -41,7 +41,7 @@
     </script>
   </head>
   <body>
-    <main id="workspace"><canvas id="stage" aria-label="Plinth stage"></canvas></main>
+    <main id="workspace"><canvas id="stage" aria-label="Plinth stage"></canvas><div id="mobile-brand">Plinth<span class="brand-dot" aria-hidden="true">.</span><span class="mobile-subtitle">Screenshot studio</span></div></main>
     <aside id="panel" aria-label="Image settings">
       <div id="studio-brand"><h1>Plinth<span class="brand-dot" aria-hidden="true">.</span></h1><p class="studio-subtitle">Screenshot studio</p></div>
       <section id="about-plinth" aria-labelledby="about-plinth-title">
@@ -79,10 +79,13 @@
         <noscript><p>Enable JavaScript in a browser with WebGL 2 support to use the interactive studio.</p></noscript>
       </section>
     </aside>
-    <button id="settings-open" type="button" aria-expanded="false" aria-controls="panel">Settings</button>
+    <div id="mobile-actions">
+      <button id="mobile-pick" type="button" disabled>Choose image</button>
+      <button id="settings-open" type="button" disabled aria-expanded="false" aria-controls="panel">Settings</button>
+    </div>
     <button id="pick" type="button" disabled>Choose image</button>
     <input id="image-file" type="file" accept="image/png,image/jpeg,image/webp" hidden />
     <p id="note" role="status" aria-live="polite"></p>
-    <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="/src/startup.ts"></script>
   </body>
 </html>

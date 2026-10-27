@@ -2,7 +2,7 @@ import { checkGl, cleanupAll } from '../export/capture';
 import { ACESFilmicToneMapping, AgXToneMapping, Color, Mesh, Vector4, type WebGLRenderTarget, type WebGLRenderer } from 'three';
 import type { Stage } from '../scene';
 import { ContactShadow } from './contactShadow';
-import { generateEnvironment, type EnvironmentMap } from './environment';
+import { generateEnvironments, type EnvironmentMap } from './environment';
 import { createPipeline, type Pipeline } from './pipeline';
 import { SCENE_IDS, SCENE_PRESETS, contactShadowPreset, isSceneId, type SceneId } from './presets';
 import { defaultBackground, prepareBackground, validateBackground, type BackgroundSettings } from './background';
@@ -91,7 +91,8 @@ export function createStudio(renderer: WebGLRenderer, stage: Stage, opts: { msaa
     (settings.msaa ? msaaPipeline! : pipeline!).render();
   }
   function initialize(): Promise<void> {
-    for (const id of SCENE_IDS) envs.set(id, generateEnvironment(renderer, SCENE_PRESETS[id]));
+    const maps = generateEnvironments(renderer, SCENE_IDS.map(id => SCENE_PRESETS[id]));
+    SCENE_IDS.forEach((id, i) => envs.set(id, maps[i]!));
     shadow = new ContactShadow(); stage.scene.add(shadow.group);
     pipeline = createPipeline(renderer, stage.scene, stage.camera, { msaa: false });
     // MSAA is prepared on demand; the default retains only one finishing chain.

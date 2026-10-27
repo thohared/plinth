@@ -94,21 +94,30 @@ export interface EnvironmentMap {
   dispose(): void;
 }
 
-export function generateEnvironment(renderer: WebGLRenderer, preset: ScenePreset): EnvironmentMap {
+/** Share the filter programs and scratch targets; each output keeps its own target. */
+export function generateEnvironments(renderer: WebGLRenderer, presets: readonly ScenePreset[]): EnvironmentMap[] {
   const pmrem = new PMREMGenerator(renderer);
-  const envScene = buildEnvironmentScene(preset);
-  const target = pmrem.fromScene(envScene, preset.sigma, 0.1, 100);
-  pmrem.dispose();
-  envScene.traverse((o) => {
-    if (o instanceof Mesh) {
-      o.geometry.dispose();
-      const m = o.material as MeshBasicMaterial;
-      m.map?.dispose();
-      m.dispose();
+  const maps: EnvironmentMap[] = [];
+  try {
+    for (const preset of presets) {
+      const envScene = buildEnvironmentScene(preset);
+      try {
+        const target = pmrem.fromScene(envScene, preset.sigma, 0.1, 100);
+        maps.push({ texture: target.texture, dispose: () => target.dispose() });
+      } finally {
+        envScene.traverse((o) => {
+          if (o instanceof Mesh) {
+            o.geometry.dispose();
+            const m = o.material as MeshBasicMaterial;
+            m.map?.dispose();
+            m.dispose();
+          }
+        });
+      }
     }
-  });
-  return {
-    texture: target.texture,
-    dispose: () => target.dispose(),
-  };
+    return maps;
+  } catch (error) {
+    for (const map of maps) map.dispose();
+    throw error;
+  } finally { pmrem.dispose(); }
 }

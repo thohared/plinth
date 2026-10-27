@@ -154,6 +154,14 @@ body.editor[data-theme=dark] {
 .editor #note,.editor #settings-error { color:#6b351f; background:#fff0df; }
 .editor[data-theme=dark] #note,.editor[data-theme=dark] #settings-error { color:#ffd5b5; background:#443222; }
 #mobile-actions { display:none; }
+/* Reserve the finished layout while the studio initializes. The empty canvas
+   appears only after the first completed frame; no reduced-quality preview. */
+html:not([data-plinth-ready]) .editor #stage { visibility:hidden; }
+.editor > #pick { display:none; }
+.editor:not(:has(#png-actions))::after { content:''; grid-column:2; grid-row:2; height:184px; max-height:calc(var(--viewport-height,100dvh) * .45); }
+@media(max-width:899px) {
+  .editor:not(:has(#png-actions))::after { grid-column:1; grid-row:4; height:calc(82px + max(10px,env(safe-area-inset-bottom))); }
+}
 /* Readable product information while scripting is unavailable or still loading. */
 html:has(body:not(.editor):not(.pg)),body:not(.editor):not(.pg) { height:auto; overflow:auto; }
 body:not(.editor):not(.pg) { font:1rem/1.6 system-ui,sans-serif; }

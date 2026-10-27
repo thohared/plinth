@@ -1,0 +1,172 @@
+{
+  "baselineCommit": "017d206d30285edf877e0244d02e8e72380d10f2",
+  "baselineTree": "e35c44d93a073fcc0eaabeaaf85c9d69279d46e8",
+  "node": "24.22.1",
+  "chromium": "153.0.8010.0",
+  "lighthouse": "13.5.0",
+  "renderer": "Linux SwiftShader; not physical-device evidence",
+  "runsPerBuild": 3,
+  "summary": {
+    "base": {
+      "performance": [
+        44.0,
+        45.0,
+        45.0
+      ],
+      "first-contentful-paint": {
+        "median": 1957.318,
+        "min": 1955.44,
+        "max": 1995.982,
+        "sampleCoV": 0.011618759214320158
+      },
+      "largest-contentful-paint": {
+        "median": 10382.977,
+        "min": 10360.973,
+        "max": 10407.16,
+        "sampleCoV": 0.0022248387081273595
+      },
+      "total-blocking-time": {
+        "median": 2689,
+        "min": 2418.9999999999995,
+        "max": 3016.000000000001,
+        "sampleCoV": 0.11039629748551782
+      },
+      "cumulative-layout-shift": {
+        "median": 0.02097651215288287,
+        "min": 0.02097651215288287,
+        "max": 0.02097651215288287,
+        "sampleCoV": 0.0
+      },
+      "speed-index": {
+        "median": 2006.0908227495038,
+        "min": 1955.44,
+        "max": 2298.809311674061,
+        "sampleCoV": 0.08882630267992232
+      }
+    },
+    "candidate": {
+      "performance": [
+        71.0,
+        75.0,
+        70.0
+      ],
+      "first-contentful-paint": {
+        "median": 907.1690000000001,
+        "min": 906.3009999999999,
+        "max": 1574.02125,
+        "sampleCoV": 0.34118890242304534
+      },
+      "largest-contentful-paint": {
+        "median": 2402.4515,
+        "min": 2311.8255,
+        "max": 2479.7535,
+        "sampleCoV": 0.03505074864293185
+      },
+      "total-blocking-time": {
+        "median": 1677,
+        "min": 1104.5,
+        "max": 2008,
+        "sampleCoV": 0.2863123315204438
+      },
+      "cumulative-layout-shift": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "sampleCoV": 0
+      },
+      "speed-index": {
+        "median": 1590.5127889233331,
+        "min": 1407.9141642376069,
+        "max": 1651.5016987623692,
+        "sampleCoV": 0.08177689761006054
+      }
+    }
+  },
+  "buildFiles": {
+    "base": [
+      {
+        "path": "assets/index-CZe1_XGi.css",
+        "bytes": 14913,
+        "sha256": "e8b3744257f9ddc582c5262284a92d954f0d1980b9fc9a7eddd18d0dd1dee5f3"
+      },
+      {
+        "path": "assets/index-DC4azIJE.js",
+        "bytes": 720732,
+        "sha256": "b18615dda39f8d5f246921c9631bd0e541195b384104fee4dfa13914aae137a6"
+      },
+      {
+        "path": "index.html",
+        "bytes": 6538,
+        "sha256": "47e2a43865525abc9edfb13fea41d4a6c6ab2149e1e787c02bfd3211209d4297"
+      }
+    ],
+    "candidate": [
+      {
+        "path": "assets/index-B-H8mo0g.js",
+        "bytes": 2180,
+        "sha256": "449ba1ce04afaa1754168256be98af1ac635a1ef92de22f1b9a065d24d327efe"
+      },
+      {
+        "path": "assets/index-CwAQgRIq.css",
+        "bytes": 15268,
+        "sha256": "193aa744bc955bc441092c994d08b9d0b0823b966ca6cf654647b72532164dca"
+      },
+      {
+        "path": "assets/main-ClfwQgOH.js",
+        "bytes": 720007,
+        "sha256": "91d6c146575f4b479026969079753f8ba9ce849f27d2f5117afb765b7f76992f"
+      },
+      {
+        "path": "index.html",
+        "bytes": 6806,
+        "sha256": "2f4e5f78301129e25015e1e79abfb1633b69122adf4a80b66997b27e903c4f8f"
+      }
+    ]
+  },
+  "candidateSourceFiles": [
+    {
+      "path": "index.html",
+      "sha256": "5f242a8f0aa852cb6ed7d262b43d32c8da4eadddedf5f3f160e132f5dccd70f7"
+    },
+    {
+      "path": "src/startup.ts",
+      "sha256": "39d04fbb194e453f64cae0567cb87eda13b2f83922ec961d05c1080bdc800c9f"
+    },
+    {
+      "path": "src/main.ts",
+      "sha256": "28aac865d1d0fa32d9330aeb0c3bb8274a0154e57fd8f4806278c4dac96ec02e"
+    },
+    {
+      "path": "src/scene/environment.ts",
+      "sha256": "ea3389da4a7ac35fee0ec4c0ec90a45c295064464cf7baf28f1cadce69adf526"
+    },
+    {
+      "path": "src/scene/studio.ts",
+      "sha256": "fa47fbfa8c9fb6b6677f762cc167fda10f53e114fcc4d36ec9e6675cb58705f2"
+    },
+    {
+      "path": "src/screen/demo.ts",
+      "sha256": "42206305135c91dd1a513872a6512936b9bf92703a8ad0d7e0ae9f093104a16a"
+    },
+    {
+      "path": "src/ui/panel.ts",
+      "sha256": "6e2e246f44f6f72a11f1723c2003e82ec03be32036ed83246bc20e8259111ead"
+    },
+    {
+      "path": "src/ui/panel.css",
+      "sha256": "cf4789652318e0eb9f9eece7f33b67925018314fa916abc4e20feb9cf59a926f"
+    },
+    {
+      "path": "package.json",
+      "sha256": "412623b1ced547a4656733a1c1eb3d560dede50ad9305104cfcf0bd44d62b89f"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "ac156f96f6ed562d15fa18553148f27f1cbe69532d96169971edf6acedbeb411"
+    },
+    {
+      "path": "vite.config.ts",
+      "sha256": "0f87b96b81be6836bd8ec57c605b4b8013105d06be0f8fa307f5b75d444fe59e"
+    }
+  ]
+}
