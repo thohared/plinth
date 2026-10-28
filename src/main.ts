@@ -284,7 +284,7 @@ async function boot(): Promise<void> {
   if (ui && params.get('sheet') === 'open') panel!.setOpen(true);
   if (!pg) {
     const snapshot = (): string => encodeHash(snapshotState(store.get(),stage.isTransitioning()));
-    navigation = createNavigation({target:window,snapshot,available:() => recoveryState === 'ready',
+    navigation = createNavigation({target:window,snapshot,canonicalize:hash => encodeHash(decodeHash(hash)),available:() => recoveryState === 'ready',
       addressNotice:message => panel?.showAddressNotice(message),
       invalidate:() => sharing?.invalidate(),notice:message => panel?.showShare({message}),
       apply(hash) {

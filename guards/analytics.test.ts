@@ -91,7 +91,7 @@ async function journey(page: Page) {
   await page.locator('#copy-link').click();
   await page.waitForFunction(() => document.querySelector('#share-status')?.textContent === 'Link copied');
   const link = await page.evaluate(() => navigator.clipboard.readText());
-  expect(link).toMatch(/^https:\/\/plinth-phi\.vercel\.app\/#s=/);
+  expect(link).toMatch(/^https:\/\/plinth-phi\.vercel\.app\/#v2\/laptop(?:\?|$)/);
   expect(link).not.toContain('PRIVATE');
   await page.locator('#png-export').click();
   await page.locator('#png-download').waitFor({ state: 'visible', timeout: 60_000 });

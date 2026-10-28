@@ -1,10 +1,10 @@
 import {it,expect,vi,afterEach} from 'vitest';
 import {createNavigation} from './navigation';
 afterEach(()=>vi.useRealTimers());
-function setup(initial='') {
+function setup(initial='', canonicalize?: (hash:string)=>string) {
   const target=Object.assign(new EventTarget(),{location:{hash:initial,pathname:'/',search:'?token=secret'},history:{replaceState:vi.fn((_a:unknown,_b:string,url:string)=>{target.location.hash=url.slice(1);target.location.search='';})}});
   let available=true;const apply=vi.fn(),notice=vi.fn(),invalidate=vi.fn(),snapshot=vi.fn(()=> '#s=current');
-  const nav=createNavigation({target:target as unknown as Window,apply,notice,invalidate,snapshot,available:()=>available});
+  const nav=createNavigation({target:target as unknown as Window,apply,notice,invalidate,snapshot,available:()=>available,...(canonicalize?{canonicalize}:{})});
   return {target,apply,notice,invalidate,snapshot,nav,availability:(v:boolean)=>{available=v;},navigate:(hash:string)=>{target.location.hash=hash;target.dispatchEvent(new Event('hashchange'));target.dispatchEvent(new Event('popstate'));}};
 }
 it('coalesces edits at 250ms, deduplicates input and cancels stale writes on navigation',()=>{
@@ -28,4 +28,21 @@ it('rejects animation-only synchronization after bad navigation but permits expl
 it('animation synchronization preserves a pending copy; explicit edits and navigation invalidate it',()=>{
  vi.useFakeTimers();const x=setup();x.nav.changed(false);vi.advanceTimersByTime(250);expect(x.invalidate).not.toHaveBeenCalled();expect(x.target.location.hash).toBe('#s=current');
  x.nav.changed();expect(x.invalidate).toHaveBeenCalledTimes(1);x.navigate('#s=incoming');expect(x.invalidate).toHaveBeenCalledTimes(2);x.nav.dispose();
+});
+it('canonicalizes only successful restores without a feedback loop or new history entry',()=>{
+ const canonicalize=vi.fn(()=> '#v2/phone');const x=setup('#s=legacy',canonicalize);
+ x.nav.initial();expect(x.apply).toHaveBeenCalledWith('#s=legacy');
+ expect(x.target.history.replaceState).toHaveBeenLastCalledWith(null,'','/#v2/phone');
+ x.target.dispatchEvent(new Event('popstate'));expect(x.apply).toHaveBeenCalledTimes(1);
+ x.apply.mockImplementationOnce(()=>{throw new Error('invalid');});x.navigate('#v3/phone');
+ expect(x.target.location.hash).toBe('#v3/phone');expect(canonicalize).toHaveBeenCalledTimes(1);
+ x.navigate('');expect(x.target.location.hash).toBe('');expect(canonicalize).toHaveBeenCalledTimes(1);
+ x.availability(false);x.navigate('#s=waiting');expect(canonicalize).toHaveBeenCalledTimes(1);
+ x.availability(true);x.nav.ready();expect(x.apply).toHaveBeenLastCalledWith('#s=waiting');
+ expect(x.target.location.hash).toBe('#v2/phone');expect(canonicalize).toHaveBeenCalledTimes(2);x.nav.dispose();
+});
+it('keeps a valid legacy URL when canonical history replacement is denied',()=>{
+ const x=setup('#s=legacy',()=> '#v2/phone');x.target.history.replaceState.mockImplementation(()=>{throw new Error('denied');});
+ expect(()=>x.nav.initial()).not.toThrow();expect(x.apply).toHaveBeenCalledTimes(1);
+ expect(x.target.location.hash).toBe('#s=legacy');expect(x.notice).toHaveBeenLastCalledWith('The address could not be updated. You can still use Copy link.');x.nav.dispose();
 });

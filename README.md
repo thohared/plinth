@@ -59,6 +59,8 @@ offers a reload with a reminder to select the image again.
 
 **Copy link** shares the current angle and settings, including PNG size, without
 including your image. A recipient starts with the demo and adds their own screenshot.
+Links use readable names, such as `#v2/phone?scene=warm-sunset`, and include only
+settings that differ from fixed defaults. Custom angles retain their full precision.
 The link uses the current site address, so preview links remain preview links.
 If clipboard access is unavailable, select the displayed link and copy it manually.
 Settings edits update the address after a short idle delay; this is not cloud storage
@@ -73,7 +75,9 @@ Keyboard shortcuts work outside text fields and native selects:
 | Q / W / E / R | Front / Three-quarter / Top / Lean |
 | Shift+E | Prepare PNG at the selected size; then choose Download PNG |
 
-The panel includes keyboard help. Version 1 links are validated before use, and
+The panel includes keyboard help. Both link formats are validated before use.
+Existing version 1 links still work and become readable after loading.
+Invalid or unsupported links stay in the address so they can be recovered.
 PG capture ignores sharing and studio shortcuts. Four additional named UI captures
 show sharing/manual-copy and keyboard help on desktop and mobile.
 

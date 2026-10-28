@@ -125,8 +125,7 @@ it('T-P9d active demo cap notices follow real device changes and preserve input 
   expect(await page.locator('#note').innerText()).toBe('Image resized to 2048 × 1280 (limit 2048 px).');
   // Wait for the actual address synchronization before loading the shared URL.
   await page.waitForFunction(() => {
-   const value = location.hash.slice(3).replace(/-/g,'+').replace(/_/g,'/');
-   return value && JSON.parse(atob(value)).device === 'card';
+   return /^#v2\/card(?:\?|$)/.test(location.hash);
   });
   // Fresh shared URL selects a cached demo during initial hydration.
   await page.reload();

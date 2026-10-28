@@ -42,10 +42,11 @@ it('Free view reaches the back, reverses, persists v1, exports and resets withou
     expect(Math.abs(back.rotation[3]!)).toBeLessThan(.01);
     await drag(page,-80);expect(Math.abs((await pose(page)).rotation[3]!)).toBeGreaterThan(.1);
     const restored=await pose(page);
-    await page.waitForFunction(()=>location.hash.startsWith('#s='));
+    await page.waitForFunction(()=>location.hash.startsWith('#v2/'));
     await page.waitForFunction(({r})=>{
-      const state=JSON.parse(atob(location.hash.slice(3).replace(/-/g,'+').replace(/_/g,'/')));
-      return state.view.pose===null&&state.view.rotation.every((v:number,i:number)=>Math.abs(v-r[i]!)<1e-7);
+      const fields=new URLSearchParams(location.hash.split('?')[1] ?? '');
+      const rotation=fields.get('rotation')?.split(',').map(Number);
+      return fields.get('pose')==='custom'&&rotation?.length===4&&rotation.every((v,i)=>Math.abs(v-r[i]!)<1e-7);
     },{r:restored.rotation});
     await page.reload();await page.waitForSelector('html[data-plinth-ready="1"]',{timeout:60000});
     expect(await page.evaluate(()=>window.__plinth.getSettings().custom.framing)).toBe('rotation');
