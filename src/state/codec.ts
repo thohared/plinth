@@ -2,6 +2,7 @@ import type { DeviceId } from '../devices/presets';
 import { invariantViolations, type DeviceSpec } from '../devices/spec';
 import type { PoseId } from '../camera/poses';
 import type { Settings } from '../settings';
+import { decodeReadable, encodeReadable } from './readable';
 
 export type SharedView = { pose: PoseId } | { pose: null; rotation: [number, number, number, number]; direction: [number, number, number]; framing?: 'rotation' };
 export interface SharedState {
@@ -71,6 +72,7 @@ function base64(text: string): string {
   return btoa(Array.from(new TextEncoder().encode(text), byte => String.fromCharCode(byte)).join('')).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 }
 export function decodeHash(hash: string): SharedState {
+  if (hash.startsWith('#v')) return decodeV1(decodeReadable(hash));
   if (!hash.startsWith('#s=')) return invalid();
   const payload = hash.slice(3);
   if (payload.length > 8192 || !/^[A-Za-z0-9_-]+$/.test(payload) || payload.length % 4 === 1) return invalid();
@@ -97,7 +99,5 @@ export function snapshotState(state: Settings, transitioning: boolean): SharedSt
     fit:state.fit,pad:state.pad,padColor:state.padColor,pngScale:state.pngScale});
 }
 export function encodeHash(state: SharedState): string {
-  const payload = base64(JSON.stringify(decodeV1(state)));
-  if (payload.length > 8192) return invalid();
-  return '#s='+payload;
+  return encodeReadable(decodeV1(state));
 }

@@ -117,15 +117,15 @@ it('T-P10d every upload fills the screen while current-image Fit image and share
     await page.evaluate(()=>window.__plinth.advancePose(1));
     await page.waitForFunction(()=>{
       try {
-        const saved=JSON.parse(atob(location.hash.slice(3).replace(/-/g,'+').replace(/_/g,'/')));
-        return saved.fit==='contain'&&saved.device==='laptop';
+        const fields=new URLSearchParams(location.hash.split('?')[1] ?? '');
+        return (fields.get('fit') ?? 'contain')==='contain'&&/^#v2\/laptop(?:\?|$)/.test(location.hash);
       } catch {return false;}
     });
     const shared=page.url();
     // Force a real hash transition: P-14 retains this tab's existing upload.
     await page.locator('#control-fit').selectOption('cover');
     await page.waitForFunction(()=>{
-      try{return JSON.parse(atob(location.hash.slice(3).replace(/-/g,'+').replace(/_/g,'/'))).fit==='cover';}
+      try{return new URLSearchParams(location.hash.split('?')[1] ?? '').get('fit')==='cover';}
       catch{return false;}
     });
     expect(await page.goto(shared)).toBeNull();

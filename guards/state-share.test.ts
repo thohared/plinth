@@ -1,5 +1,6 @@
 import { beforeAll,afterAll,it,expect } from 'vitest';
 import { createServer,type ViteDevServer } from 'vite';
+import { decodeHash } from '../src/state/codec';
 import { chromium,type Browser,type Page } from 'playwright';
 let server:ViteDevServer,browser:Browser,url:string;
 beforeAll(async()=>{server=await createServer({logLevel:'silent',server:{port:4191,strictPort:false,hmr:false}});await server.listen();url=server.resolvedUrls!.local[0]!;browser=await chromium.launch({...(process.env['PLINTH_CHROMIUM_PATH']?{executablePath:process.env['PLINTH_CHROMIUM_PATH']}:{}),args:['--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});});
@@ -23,7 +24,7 @@ const seed=process.env['PLINTH_STATE_SEED'];if(!seed)return;
  await page.route('**/src/state/codec.ts',async route=>{const response=await route.fetch();const source=await response.text();let body=source;
  if(seed==='validation')body=body.replace('value > max','false');
  if(seed==='target')body=body.replace('state.pose !== null && !transitioning','state.pose !== null');
- if(seed==='privacy')body=body.replace('JSON.stringify(decodeV1(state))','JSON.stringify({ ...decodeV1(state), image: "private-pixels-sentinel" })');
+ if(seed==='privacy')body=body.replace('encodeReadable(decodeV1(state))',"encodeReadable(decodeV1(state)) + '&image=private-pixels-sentinel'");
  expect(body).not.toBe(source);await route.fulfill({response,body});});}
 it('T-P9 fresh literal restore wins over queries, retains MSAA and never replays pose',async()=>{
  const page=await browser.newPage();try{await ready(page,'?device=card&scene=clean-white&composition=clean-browser'+hash(literal()));
@@ -47,7 +48,7 @@ it('T-P9 copy snapshots interrupted display, preserves sender transition and str
  await page.evaluate(async()=>{const c=document.createElement('canvas');c.width=37;c.height=19;await window.__plinth.setImage(new File([await new Promise<Blob>(r=>c.toBlob(b=>r(b!)))],'private-name-sentinel.png',{type:'image/png'}));});
  const before=await page.evaluate(()=>{window.__plinth.setPose('lean');window.__plinth.advancePose(.2);const s=window.__plinth.getSettings();const result={r:s.custom.rotation.toArray(),d:s.custom.direction.toArray()};document.querySelector<HTMLButtonElement>('#copy-link')!.click();return result;});
  await page.waitForFunction(()=>document.querySelector('#share-status')!.textContent==='Link copied');
- const link=await page.evaluate(()=>navigator.clipboard.readText());expect(link).not.toContain('?');const state=JSON.parse(Buffer.from(new URL(link).hash.slice(3),'base64url').toString());
+ const link=await page.evaluate(()=>navigator.clipboard.readText());expect(new URL(link).search).toBe('');const state=decodeHash(new URL(link).hash);
  expect(state.view).toEqual({pose:null,rotation:before.r,direction:before.d});expect(JSON.stringify(state)).not.toMatch(/private|image|filename|metadata|blob:/);
  expect(await page.evaluate(()=>window.__plinth.advancePose(0))).toBe(true);
  const recipient=await context.newPage();await recipient.goto(link);await recipient.waitForSelector('html[data-plinth-ready="1"]',{timeout:60000});
@@ -68,7 +69,7 @@ it('T-P9 manual fallback is reachable on mobile and History denial leaves a curr
  const page=await browser.newPage({viewport:{width:400,height:700}});try{
  await page.addInitScript(()=>{Object.defineProperty(navigator,'clipboard',{value:undefined});history.replaceState=()=>{throw new Error('blocked');};});await ready(page);await page.locator('#settings-open').click();
  await page.evaluate(()=>window.__plinth.applySettings({pad:.2}));await page.locator('#copy-link').click();expect(await page.locator('#share-status').innerText()).toBe('Copy this link manually');
- const link=await page.locator('#share-url').inputValue();expect(JSON.parse(Buffer.from(new URL(link).hash.slice(3),'base64url').toString()).pad).toBe(.2);
+ const link=await page.locator('#share-url').inputValue();expect(decodeHash(new URL(link).hash).pad).toBe(.2);
  expect(await page.locator('#share-url').evaluate(el=>document.activeElement===el)).toBe(true);
  await page.setViewportSize({width:400,height:350});await page.waitForFunction(()=>document.body.style.height==='350px');await page.locator('#share-url').focus();const box=(await page.locator('#share-url').boundingBox())!;expect(box.y).toBeGreaterThanOrEqual(0);expect(box.y+box.height).toBeLessThanOrEqual(350);
  await page.locator('#sheet-close').click();await page.setViewportSize({width:900,height:700});await page.waitForFunction(()=>document.activeElement?.id==='pick');await page.setViewportSize({width:899,height:700});await page.waitForFunction(()=>document.activeElement?.id==='settings-open');
@@ -91,7 +92,7 @@ it('T-P9 rejected navigation survives an older transition until an explicit edit
    await page.evaluate(()=>window.__plinth.advancePose(1));await page.clock.runFor(300);
    expect(await page.evaluate(()=>location.hash)).toBe(rejected);
    await page.evaluate(()=>window.__plinth.applySettings({pad:.2}));await page.clock.runFor(300);
-   expect(JSON.parse(Buffer.from((await page.evaluate(()=>location.hash)).slice(3),'base64url').toString()).pad).toBe(.2);
+   expect(decodeHash(await page.evaluate(()=>location.hash)).pad).toBe(.2);
    await page.evaluate(h=>new Promise<void>(resolve=>{addEventListener('hashchange',()=>resolve(),{once:true});location.hash=h;}),rejected);expect(await page.locator('#share-status').innerText()).toMatch(/Invalid|Unsupported/);
    await page.evaluate(()=>document.querySelector<HTMLButtonElement>('#copy-link')!.click());expect(await page.evaluate(()=>location.hash)).not.toBe(rejected);
   }finally {await page.close();}
@@ -105,7 +106,7 @@ it('T-P9 Copy link retains address failure alongside clipboard success or denial
    await page.waitForFunction(denied=>document.querySelector('#share-status')!.textContent===(denied?'Copy this link manually':'Link copied'),denied);
    expect(await page.locator('#share-address-status').innerText()).toContain('The address could not be updated');
    expect(await page.locator('#share-address-status').isVisible()).toBe(true);expect(await page.evaluate(()=>location.hash)).toBe('');
-   if(denied)expect(await page.locator('#share-url').inputValue()).toContain('#s=');
+   if(denied)expect(await page.locator('#share-url').inputValue()).toContain('#v2/');
   }finally {await page.close();}
  }
 });

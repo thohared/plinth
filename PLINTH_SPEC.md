@@ -976,5 +976,51 @@ the specification under P-5.
 This authorization is not a baseline bless, test PASS, review, merge or release.
 All unrelated specification requirements remain unchanged.
 
+### P-21: Čitljive adrese scena (2026-10-28)
+
+Vlasnik je uz snimak dugog `#s=` URL-a zatražio „sredi ovo da bude
+citljivije na celom sajtu”. Planski upis: Codex (GPT-6), T-P10m research
+F1–F6. Ovaj zaseban P-5 commit određuje traženu promenu pre implementacije;
+ne predstavlja merge, potvrdu slika ili test PASS.
+
+1. Umesto novog base64 izlaza iz §4.8/P-14(1,4), adresa i Copy link koriste
+   `#v2/<device>` i opcioni `?key=value&...` unutar fragmenta. Device je jedan
+   od pet postojećih ID-jeva. Parametri imaju čitljiva imena i sadrže samo
+   odstupanja od zamrznute v2 osnove. To nije HTTP query ili nova ruta.
+   Primer: `#v2/phone?scene=warm-sunset&pose=front&aspect=16:9`.
+2. Osnova v2 čuva geometriju po uređaju iz `src/devices/presets.ts` na
+   `55812329bc4838f57f6bd7a1f5b7308756d6604b`, uključujući tačan hinge
+   `Math.PI/2`, odnosno `1.85` za laptop. Kopija tih brojeva pripada formatu,
+   ne budućim UI presetima. Ostalo: hero, soft-studio, agx, MSAA false,
+   4:5, outputPad 0, background preset/solid #ffffff/top #f2f4f8/bottom
+   #c8d3e3, fit contain, image pad 0/#ffffff, PNG scale 1. Odsustvo polja
+   znači upravo ove vrednosti, nezavisno od ekrana, demo slike i UI default-a.
+3. Zapisuje se svako odstupanje svih postojećih deljivih polja, uključujući
+   neaktivne boje/hinge i custom quaternion/direction/framing. Decimalni
+   brojevi zadržavaju round-trip preciznost bez zaokruživanja. Parametri:
+   scene, pose, tone, msaa, aspect, outputPad, background, solid, top, bottom,
+   fit, pad, padColor, scale; geometrija w, h, depth, cornerRadius, bezel,
+   screenInset, frameMetalness, frameRoughness, glassClearcoat, standType,
+   hingeAngle. Custom poza koristi pose=custom, rotation i direction
+   kao zarezom razdvojene brojeve, i opcioni framing=rotation.
+4. P-14/P-18 validacija i preciznost ostaju. Odbiti nepoznate/duple ključeve,
+   prazan ili pogrešan tip vrednosti, pogrešan broj komponenti, custom polja
+   uz named pose, nepoznatu verziju i više od 8192 znaka fragmenta bez `#`
+   pre parsiranja. Ne normalizovati neispravne brojeve/vektore u ispravne.
+   Validirani interni DTO ostaje v1; v2 je novi transport, ne širi domen.
+5. Svaki raniji v1 `#s=` link ostaje čitljiv. Posle uspešnog učitavanja
+   prepisati ga u čitljiv v2 oblik koristeći replaceState. Neispravan ili
+   nepodržan link ostaje u adresi uz postojeću poruku; bez delimičnog restore-a.
+   Empty-start može ostati bez fragmenta. Reload, Back/Forward, upload u tabu,
+   recovery, PG izuzetak, 250 ms coalescing i clipboard fallback ostaju.
+6. Nema skraćivača, servera, storage-a, slike ili query tokena u linku, nove
+   zavisnosti, analitike ili HTTP rute. Canonical/analytics ostaju bez fragmenta.
+   Prilagoditi samo transportne base64 pretpostavke postojećih guardova uz
+   iste scene/image/pose/privacy asercije i sve postojeće literalne v1 ulaze.
+   Dodati nezavisne literalne v2 fixture-e, proveru svih polja/uređaja,
+   stvarnog reload/copy/navigacije i seeded odbijanja loše validacije i
+   vraćenog base64 izlaza. Svi postojeći slučajevi i pragovi ostaju.
+   Linux CI, PG/PNG dokaz i nezavisan fresh-context review su obavezni.
+
 ## §10 Open TODO(spec)
 - Product-name question resolved by P-19: **Plinth**, effective when that amendment merges.

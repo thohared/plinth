@@ -1,6 +1,7 @@
 /** Browser history ownership; replaceState never feeds back as an input event. */
 export function createNavigation(options: {
   target: Window; snapshot(): string; apply(hash: string): void;
+  canonicalize?(hash: string): string;
   available(): boolean; notice(message: string): void; addressNotice?(message: string): void; invalidate(): void;
 }) {
   const win = options.target;
@@ -13,7 +14,10 @@ export function createNavigation(options: {
     cancel(); options.invalidate();
     if (!options.available()) { pending = hash; return; }
     pending = undefined; applying = true;
-    try { options.apply(hash); rejected = false; }
+    try {
+      options.apply(hash); rejected = false;
+      if (hash && options.canonicalize) write(options.canonicalize(hash));
+    }
     catch (error) { rejected = true; options.notice(error instanceof Error ? error.message : 'Unable to load scene link.'); }
     finally { applying = false; }
   }
