@@ -1022,5 +1022,35 @@ ne predstavlja merge, potvrdu slika ili test PASS.
    vraćenog base64 izlaza. Svi postojeći slučajevi i pragovi ostaju.
    Linux CI, PG/PNG dokaz i nezavisan fresh-context review su obavezni.
 
+### P-22: Trenutna adresa izabranog pogleda (2026-10-30)
+
+Vlasnik traži da se novi URL pojavi odmah kada izabere drugi pogled, npr.
+Dark studio, bez zadržavanja stare adrese tokom prelaza. Planski upis:
+Codex (GPT-6), T-P10n research F1–F6; zaseban P-5 commit pre implementacije.
+
+1. Uski izuzetak od P-14(4)/P-21(5): posle uspešno prihvaćenog izbora
+   ready-made look-a, uređaja, scene, imenovanog ugla ili Reset look/view,
+   automatski upisati novi fragment u istom UI događaju, preko replaceState.
+   Ne čekati idle timer ili završetak animacije. Ne upisivati neuspešne izbore.
+2. Automatska adresa tokom imenovanog prelaza predstavlja izabranu ciljnu pozu
+   i sva trenutno prihvaćena podešavanja. Koristi isti v2 encoder. Ne prikazuje
+   privremeni custom quaternion između starog i konačnog linka, niti menjanje
+   URL-a po frejmu. Sam vizuelni prelaz ostaje neizmenjen. Ako je pogled custom,
+   zapisuje se njegova puna prikazana rotacija/direction/framing kao do sada.
+3. Ovo je izuzetak od P-14(2) samo za automatsku adresu. Eksplicitni Copy link
+   i dalje odmah snima stvarno prikazanu pozu, uključujući prekinuti prelaz;
+   ne završava animaciju i ne preusmerava PNG na ciljnu pozu. Reload automatske
+   adrese odmah obnavlja izabrani pogled. Kopirani link obnavlja kopirani kadar.
+4. Drag i ostale učestale promene podešavanja zadržavaju 250 ms coalescing.
+   Trenutni izbor poništava zastareli odloženi upis. Završetak animacije ne
+   poništava tekući clipboard zahtev. Očuvati validaciju, v1 kompatibilnost,
+   hash/history navigaciju, query sanitizaciju, recovery, PG izuzetak, disposal
+   i prikaz History/clipboard grešaka. Bez servera, storage-a ili slike u URL-u.
+5. Dokaz mora zabeležiti URL u istom stvarnom click/change događaju, pre rAF-a
+   ili tajmera, za desktop/mobile. Proveriti named cilj tokom aktivnog prelaza,
+   stabilnost adrese i reload, te seed-ove odlaganja i pogrešne custom poze.
+   Sačuvati sve postojeće guardove/pragove. Linux CI, PG/PNG i nezavisan review
+   ostaju obavezni. Ovo ne odobrava merge, fixture bless ili release PASS.
+
 ## §10 Open TODO(spec)
 - Product-name question resolved by P-19: **Plinth**, effective when that amendment merges.
