@@ -29,12 +29,23 @@
       {
         "@context": "https://schema.org",
         "@type": "WebApplication",
+        "@id": "https://plinth-phi.vercel.app/#app",
         "name": "Plinth",
         "url": "https://plinth-phi.vercel.app/",
+        "inLanguage": "en",
+        "mainEntityOfPage": "https://plinth-phi.vercel.app/",
         "description": "Free 3D mockup generator for screenshots. Create phone, tablet, laptop, browser window and card mockups, then export PNG without an account.",
         "applicationCategory": "DesignApplication",
         "operatingSystem": "Any",
         "browserRequirements": "Requires JavaScript and WebGL 2.",
+        "screenshot": "https://plinth-phi.vercel.app/compositions/studio-phone.png",
+        "featureList": [
+          "Phone, tablet, laptop, browser window and card mockups",
+          "PNG, JPG and WebP screenshot input",
+          "PNG export with solid, gradient or transparent backgrounds",
+          "Scene links share settings without uploaded images",
+          "Free to use without an account"
+        ],
         "isAccessibleForFree": true,
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
       }
@@ -54,6 +65,42 @@
           <li>Choose an export size, prepare the PNG, then select Download PNG.</li>
         </ol>
         <p>Scene links share the settings, never your uploaded image.</p>
+        <section id="plinth-facts" aria-labelledby="plinth-facts-title">
+          <h3 id="plinth-facts-title">Plinth at a glance</h3>
+          <dl class="guide-facts">
+            <dt>Mockups</dt><dd>Phone, tablet, laptop, browser window and card mockups</dd>
+            <dt>Images</dt><dd>PNG, JPG and WebP screenshot input</dd>
+            <dt>Download</dt><dd>PNG export with solid, gradient or transparent backgrounds</dd>
+            <dt>Sharing</dt><dd>Scene links share settings without uploaded images</dd>
+            <dt>Access</dt><dd>Free to use without an account</dd>
+          </dl>
+          <h3>Which mockup should I choose?</h3>
+          <p>Use a phone or tablet for an app screen, a laptop or browser window for a website, or a card to show an image on its own. The devices are generic models.</p>
+          <h3>How do I keep the whole screenshot visible?</h3>
+          <p>Choose Fit image to show the whole screenshot. Fill screen fills the device screen and may crop the edges. New images start with Fill screen.</p>
+        </section>
+        <section id="png-sizes" aria-labelledby="png-sizes-title">
+          <h3 id="png-sizes-title">What size PNG can I download?</h3>
+          <table class="guide-sizes">
+            <caption>PNG dimensions at 1×, in pixels</caption>
+            <thead><tr><th scope="col">Shape</th><th scope="col">Width × height</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">1:1</th><td>1080 × 1080</td></tr>
+              <tr><th scope="row">4:5</th><td>1080 × 1350</td></tr>
+              <tr><th scope="row">16:9</th><td>1920 × 1080</td></tr>
+              <tr><th scope="row">9:16</th><td>1080 × 1920</td></tr>
+              <tr><th scope="row">3:1</th><td>1920 × 640</td></tr>
+            </tbody>
+          </table>
+          <p>At 2× or 3×, both dimensions are multiplied by that number. For example, 16:9 at 2× is 3840 × 2160 pixels. Available sizes depend on your device's graphics limits; a larger size is not supported on every device.</p>
+          <p>Plinth downloads still PNG images. It does not export video.</p>
+        </section>
+        <section id="scene-sharing" aria-labelledby="scene-sharing-title">
+          <h3 id="scene-sharing-title">What does a shared scene link include?</h3>
+          <p>A scene link includes the device, pose, lighting, background and output settings. When someone opens it, they see the demo image and can add their own screenshot. To share your finished mockup, download and send the PNG.</p>
+          <h3>What browser does Plinth need?</h3>
+          <p>The interactive studio requires JavaScript and WebGL 2. It has desktop and mobile layouts; the export sizes available depend on the browser and graphics hardware.</p>
+        </section>
         <div class="guide-examples">
           <h3>Mockup examples</h3>
           <figure>

@@ -3,6 +3,30 @@
 T-P10h, 2026-10-26. Autor: Codex (GPT-6).
 Kanonski sajt: https://plinth-phi.vercel.app/
 
+## T-P10o: GEO / LLMO / AEO, 30. oktobar 2026.
+
+Vodič dobija pregled mogućnosti, odgovore o izboru modela, crop/fit ponašanju,
+deljenju bez slike i browser zahtevima, uz tačnu tabelu svih pet PNG dimenzija.
+Tekst postoji u početnom HTML-u i ostaje u editoru. Postojeći WebApplication
+dobija stabilan `@id`, jezik, primer slike i featureList jednak vidljivim
+činjenicama. Nema novih stranica, skripti, bot-only sadržaja ili trackera.
+
+`/llms.txt` je opcioni činjenični pregled sa javnim linkovima. Format je predlog,
+ne standard koji svi servisi koriste. Google izričito navodi da ovaj fajl ne
+koristi za AI vidljivost/rang. Koristan HTML i tačne informacije su glavna
+isporuka; nema obećanja citata, rangiranja ili novih poseta. Postojeći robots
+već dopušta search crawlere; pravila za trening botove nisu menjana.
+
+Ovo je status implementacije, ne potvrda produkcione objave. Posle odobrenog
+merge-a proveriti HTTP 200 i text/plain za llms.txt, početni HTML i JSON-LD,
+pa zabeležiti datum. Porediti stvarne search rezultate i, gde su dostupni,
+AI citation izveštaje kroz iste periode. Citati nisu isto što i klikovi.
+Ovaj ticket ne čita privatne izveštaje i ne dodaje Analytics događaje.
+Bing sitemap ostaje odložen; društvene mreže ostaju van vodiča.
+
+Primarni izvori, obuhvat i provere: [research](tickets/T-P10o-research.md),
+[ticket](tickets/T-P10o.md). Stariji datirani statusi ispod ostaju istorija.
+
 ## Aktuelno stanje — 27. oktobar 2026.
 
 - PR #49 je spojen kao `de73a9d334f55ce71fa7030ad2df9d792a16ac2a` i objavljen.
