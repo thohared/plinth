@@ -94,6 +94,8 @@ for (const theme of ['light', 'dark']) it(`T-P9e review: final settings control 
     // F17's clearance and cap must also leave room for a whole touch target
     // in a short mobile viewport, including when keyboard focus scrolls it.
     await page.setViewportSize({ width: 400, height: 400 });
+    // Measure one layout after the app's resize handler has applied its height.
+    await page.waitForFunction(() => document.body.style.height === '400px');
     await assertReachable();
     await page.locator('#pick').focus();
     await help.focus();
