@@ -36,17 +36,18 @@ export function createNavigation(options: {
   win.addEventListener('hashchange',navigate); win.addEventListener('popstate',navigate);
   return {
     initial() { if (last) restore(last); },
-    changed(explicit = true) {
+    changed(explicit = true, immediate = false) {
       if (disposed || applying || !options.available() || (rejected && !explicit)) return;
       if (explicit) rejected = false;
       cancel();
       // Animation settles the address, but does not supersede a pending copy click.
       if (explicit) options.invalidate();
-      timer = setTimeout(() => {
+      const synchronize = (): void => {
         timer = undefined;
         if (disposed || !options.available()) return;
         try { write(options.snapshot()); } catch (error) { options.notice(error instanceof Error ? error.message : 'Unable to share this scene.'); }
-      },250);
+      };
+      if (immediate) synchronize(); else timer = setTimeout(synchronize,250);
     },
     copied(hash: string) { rejected = false; cancel(); write(hash); },
     ready() { if (!disposed && pending !== undefined && options.available()) restore(pending); },

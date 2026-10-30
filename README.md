@@ -63,8 +63,10 @@ Links use readable names, such as `#v2/phone?scene=warm-sunset`, and include onl
 settings that differ from fixed defaults. Custom angles retain their full precision.
 The link uses the current site address, so preview links remain preview links.
 If clipboard access is unavailable, select the displayed link and copy it manually.
-Settings edits update the address after a short idle delay; this is not cloud storage
-or undo history. Invalid links preserve the current scene; opening an invalid link
+Choosing a look, device, lighting scene or angle updates the address immediately.
+During an animated change, the address opens the selected view; Copy link captures
+the frame currently displayed. Dragging and other edits update after a short idle
+delay. This is not cloud storage or undo history. Invalid links preserve the current scene; opening an invalid link
 in a new tab uses the default scene and explains the error.
 
 Keyboard shortcuts work outside text fields and native selects:

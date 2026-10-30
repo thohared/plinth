@@ -46,3 +46,30 @@ it('keeps a valid legacy URL when canonical history replacement is denied',()=>{
  expect(()=>x.nav.initial()).not.toThrow();expect(x.apply).toHaveBeenCalledTimes(1);
  expect(x.target.location.hash).toBe('#s=legacy');expect(x.notice).toHaveBeenLastCalledWith('The address could not be updated. You can still use Copy link.');x.nav.dispose();
 });
+it('writes an accepted selection synchronously and cancels older coalesced writes',()=>{
+ vi.useFakeTimers();const x=setup();x.nav.changed();vi.advanceTimersByTime(200);
+ x.snapshot.mockReturnValue('#v2/laptop?scene=dark-glass');x.nav.changed(true,true);
+ expect(x.target.location.hash).toBe('#v2/laptop?scene=dark-glass');
+ expect(x.snapshot).toHaveBeenCalledTimes(1);expect(vi.getTimerCount()).toBe(0);
+ x.nav.changed(false);vi.advanceTimersByTime(250);
+ expect(x.target.history.replaceState).toHaveBeenCalledTimes(1);
+ expect(x.invalidate).toHaveBeenCalledTimes(2);x.nav.dispose();
+});
+it('gates immediate selections during restore, recovery and disposal and preserves rejected input until an edit',()=>{
+ vi.useFakeTimers();const x=setup();x.apply.mockImplementation(()=>x.nav.changed(true,true));
+ x.navigate('#v2/card');expect(x.snapshot).not.toHaveBeenCalled();
+ x.availability(false);x.nav.changed(true,true);expect(x.snapshot).not.toHaveBeenCalled();x.availability(true);
+ x.apply.mockImplementationOnce(()=>{throw new Error('invalid');});x.navigate('#v3/phone');
+ x.nav.changed(false);vi.advanceTimersByTime(300);expect(x.target.location.hash).toBe('#v3/phone');
+ x.snapshot.mockReturnValue('#v2/laptop');x.nav.changed(true,true);expect(x.target.location.hash).toBe('#v2/laptop');
+ x.nav.changed();x.nav.dispose();x.nav.changed(true,true);vi.advanceTimersByTime(300);
+ expect(x.snapshot).toHaveBeenCalledTimes(1);expect(vi.getTimerCount()).toBe(0);
+});
+it('reports immediate snapshot and History failures without throwing or blocking a current copy',()=>{
+ const x=setup();x.snapshot.mockImplementationOnce(()=>{throw new Error('invalid state');});
+ expect(()=>x.nav.changed(true,true)).not.toThrow();expect(x.notice).toHaveBeenLastCalledWith('invalid state');
+ expect(x.target.history.replaceState).not.toHaveBeenCalled();
+ x.target.history.replaceState.mockImplementationOnce(()=>{throw new Error('denied');});
+ expect(()=>x.nav.changed(true,true)).not.toThrow();expect(x.notice).toHaveBeenLastCalledWith('The address could not be updated. You can still use Copy link.');
+ x.nav.copied('#v2/card');expect(x.target.location.hash).toBe('#v2/card');x.nav.dispose();
+});

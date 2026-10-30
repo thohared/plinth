@@ -28,7 +28,7 @@ export interface SettingsStore {
   reset(): void;
   setDevice(id: DeviceId): void;
   prepareUpload(): void;
-  subscribe(listener: (state: Settings, reason?: string) => void): () => void;
+  subscribe(listener: (state: Settings, reason?: string, selection?: boolean) => void): () => void;
   dispose(): void;
 }
 function clone(value: Settings): Settings {
@@ -50,9 +50,9 @@ export function createSettingsStore(stage: Stage, studio: Studio, options: { imm
     });
   })?.id ?? null;
   state.composition = identify();
-  const listeners = new Set<(state: Settings, reason?: string) => void>();
+  const listeners = new Set<(state: Settings, reason?: string, selection?: boolean) => void>();
   let applying = false; let disposed = false;
-  const emit = (reason = 'apply'): void => { for (const listener of listeners) listener(clone(state), reason); };
+  const emit = (reason = 'apply', selection = false): void => { for (const listener of listeners) listener(clone(state), reason, selection); };
   const unsubscribe = stage.onStateChange(reason => {
     if (applying || disposed || reason === 'setAspect') return;
     const snapshot = stage.snapshot();
@@ -80,7 +80,8 @@ export function createSettingsStore(stage: Stage, studio: Studio, options: { imm
         state = { ...next, custom: stage.snapshot().custom };
       } finally { applying = false; stageCandidate.dispose(); studioCandidate?.dispose(); }
       state.composition = identify();
-      emit(composition ? 'compose' : 'apply');
+      // A committed selection is distinct from continuous edits or animation frames.
+      emit(composition ? 'compose' : 'apply', Boolean(composition) || ['device','scene','pose'].some(key => Object.hasOwn(patch,key)));
     },
     hydrate(value) {
       const data = decodeV1(value);

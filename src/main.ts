@@ -284,7 +284,9 @@ async function boot(): Promise<void> {
   if (ui && params.get('sheet') === 'open') panel!.setOpen(true);
   if (!pg) {
     const snapshot = (): string => encodeHash(snapshotState(store.get(),stage.isTransitioning()));
-    navigation = createNavigation({target:window,snapshot,canonicalize:hash => encodeHash(decodeHash(hash)),available:() => recoveryState === 'ready',
+    // The address follows the selected view; Copy link keeps the displayed frame.
+    const addressSnapshot = (): string => encodeHash(snapshotState(store.get(),false));
+    navigation = createNavigation({target:window,snapshot:addressSnapshot,canonicalize:hash => encodeHash(decodeHash(hash)),available:() => recoveryState === 'ready',
       addressNotice:message => panel?.showAddressNotice(message),
       invalidate:() => sharing?.invalidate(),notice:message => panel?.showShare({message}),
       apply(hash) {
@@ -305,9 +307,9 @@ async function boot(): Promise<void> {
       address:hash => navigation!.copied(hash),show:value => panel?.showShare(value)});
     cleanup.push(() => navigation!.dispose(),() => sharing!.dispose());
     navigation.initial();
-    cleanup.push(store.subscribe((_state,reason) => {
+    cleanup.push(store.subscribe((_state,reason,selection) => {
       if (reason === 'setImage' || (reason === 'advancePose' && stage.isTransitioning())) return;
-      navigation?.changed(reason !== 'advancePose');
+      navigation?.changed(reason !== 'advancePose',selection);
     }));
   }
   let lastPose = store.get().pose; let lastDevice = store.get().device;
