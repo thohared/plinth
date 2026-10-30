@@ -18,7 +18,7 @@ Raniji cloud CI FAIL ostaje FAIL. Ti dokazi ne zamenjuju nov standardni
 
 Novi standardni run još nije pokrenut u trenutku pakovanja. Tek posle njegovog
 prolaza zaseban publisher sme otvoriti draft PR za tačan testirani commit.
-PR CI/PG, nezavisan review i Novakova vizuelna/baseline odluka ostaju otvoreni.
+PR CI/PG, nezavisan review i Thoharedova vizuelna/baseline odluka ostaju otvoreni.
 Stariji odeljci ispod beleže prethodna stanja; navodi da P-12 nije na main-u
 ili da browser dokaz još ne postoji više nisu aktuelni.
 
@@ -243,7 +243,7 @@ odrađene kombinacije warm-up-a, bez tvrdnje o celom §6 gate-u ako nije pokrenu
 - F10 je rešen: P-11 je prihvaćen i spojen; ovaj kandidat primenjuje njegov
   ugovor, bez izmene spec-a u implementaciji.
 - F1/F2/F7/F11/F12 imaju implementacione i lokalne geometrijske testove, ali
-  vizuelna potvrda novih poza/širokih uređaja ostaje Novakova odluka iz cloud
+  vizuelna potvrda novih poza/širokih uređaja ostaje Thoharedova odluka iz cloud
   PG kontaktnog lista.
 - F13 je zatvoren za odobrenu Astra površinu; lokalni Chromium ostaje nedostupan
   i ne predstavlja lokalni CI PASS.
@@ -253,14 +253,14 @@ odrađene kombinacije warm-up-a, bez tvrdnje o celom §6 gate-u ako nije pokrenu
 ## Acceptance koji još čeka
 
 Cloud `npm run ci`, PG kandidati/kontaktni list, nezavisan fresh-context review
-i Novakova odluka o baseline slikama ostaju potrebni za završetak T-P5. Nedostajuća
-baseline slika je nedostajući dokaz poređenja, ne PASS. Samo Novak potvrđuje
+i Thoharedova odluka o baseline slikama ostaju potrebni za završetak T-P5. Nedostajuća
+baseline slika je nedostajući dokaz poređenja, ne PASS. Samo Thohared potvrđuje
 baseline slike; implementator ne objavljuje, ne spaja i ne ocenjuje svoj rad.
 
 
 ## Odobreni nastavak P-12 i korekcija snimanja, 2026-09-12
 
-Novak je u nastavnom razgovoru odobrio konkretan P-12 i ukupni T-P5 CI budžet
+Thohared je u nastavnom razgovoru odobrio konkretan P-12 i ukupni T-P5 CI budžet
 od 1200 s, bez promene limita pojedinačnih testova. Research F14–F16 je zaseban
 commit `efe6a05`; P-12 je zatim zaseban spec-only commit `43c9b85`.
 Ovaj kandidat je potom izveden iz tog P-12 stabla, uz isti odobreni write set.
@@ -284,7 +284,7 @@ Implementacija prvobitnog T-P5 paketa: GPT-5.6 Terra. Ovu korekciju snimanja i
 zapis odobrenja uradio je Codex; tačan backend identifikator nije izložen.
 Lokalno: typecheck PASS, svih 78 unit testova PASS, build PASS i provera sintakse
 capture skripte PASS. Browser CI, ispravljeni 45-image artefakt i seeded-failure
-dokaz još nisu ovim zapisom proglašeni PASS-om. F5, nezavisan review, Novakova
+dokaz još nisu ovim zapisom proglašeni PASS-om. F5, nezavisan review, Thoharedova
 vizuelna potvrda/baseline odluka i zasebno merge odobrenje ostaju obavezni.
 
 
@@ -308,5 +308,5 @@ rezultati beleže se u PR opisu po završetku; ovaj zapis ih ne proglašava unap
 
 U granu je uključen pregledani main 96204cc (PR #12 za uštede) da feature push
 više ne duplira PR provere. Izvorni cloud test 34710668416 dokazuje samo stari
-293ee82 kandidat; nije dokaz novog head-a. Novi fresh-context review i Novakova
+293ee82 kandidat; nije dokaz novog head-a. Novi fresh-context review i Thoharedova
 vizuelna/baseline odluka ostaju potrebni. Autor fixup-a: Codex.

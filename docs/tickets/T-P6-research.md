@@ -203,7 +203,7 @@ rotacija ekrana, povećan tekst i vraćanje fokusa. T-P9 ne odlaže T-P6 upotreb
 20. T-P6 ne prepisuje ili briše stare slučajeve da panel stane na sliku.
 Default PG ostaje čist i deterministički, dok posebni UI slučajevi pokazuju
 panel; nove background/aspect kompozicije imaju zasebne nazive/dokaze.
-Novak je odložio baseline commit pri T-P5 merge-u; vizuelna potvrda u razgovoru
+Thohared je odložio baseline commit pri T-P5 merge-u; vizuelna potvrda u razgovoru
 nije kreirala fixtures. Prvi bless i eventualna dopuna poređenja named slika
 moraju biti jasni zasebni koraci. Ne proglašavati svih 45 za image-diff PASS.
 
@@ -283,7 +283,7 @@ završnoj sekciji `docs/probes/T-P6-alpha-findings.md`. P-10(4) ostaje otvoren.
 
 ### Usvajanje odluka i tiket
 
-Novak je izričito odobrio odluke 1–6 predloga na da8c54c. P-13 je dodat
+Thohared je izričito odobrio odluke 1–6 predloga na da8c54c. P-13 je dodat
 u zasebnom spec-only commitu, a T-P6.md sastavljen kao poseban docs korak.
 Normativne odluke su zapisane; production acceptance i zaseban review nisu
 ovim zatvoreni. Planning paket još nije na main-u i build nije pokrenut.

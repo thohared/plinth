@@ -321,7 +321,7 @@ pogođenog obuhvata, ne izmišljena dozvola za izmenu ugovora.
 
 ### Owner-requested English interface (2026-09-13)
 
-Novak requests English for both preview and production. This copy-only follow-up includes existing panel labels, composed-look names, HTML language/accessibility labels, PNG status/errors and their literal unit expectations. The write set additionally includes `index.html`, `src/ui/compositions.ts`, `src/ui/panel.test.ts`, and the equivalent English literal in `guards/panel.test.ts` (same assertion). No rendering or export behavior changes.
+Thohared requests English for both preview and production. This copy-only follow-up includes existing panel labels, composed-look names, HTML language/accessibility labels, PNG status/errors and their literal unit expectations. The write set additionally includes `index.html`, `src/ui/compositions.ts`, `src/ui/panel.test.ts`, and the equivalent English literal in `guards/panel.test.ts` (same assertion). No rendering or export behavior changes.
 
 ### PR #19 independent review fixup — recovery GL errors
 

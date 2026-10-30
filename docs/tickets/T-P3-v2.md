@@ -7,7 +7,7 @@ order); §2.1–§2.7, §3, §4.2, §4.4.1–§4.4.6, §6 (shader warm-up), §7,
 §4.8 (state-field contract only), and §9 P-4, P-5, P-6, P-7, P-9 (touched).
 
 Author: **GPT-6 Astra**, 2026-09-08. Intended implementing tier: **Sonnet 5
-or GPT-5.6 Terra**, or the **GitHub Copilot coding agent** selected by Novak.
+or GPT-5.6 Terra**, or the **GitHub Copilot coding agent** selected by Thohared.
 Name the actual implementing model in the PR. Review is a different,
 fresh-context session; the builder does not review or merge its own PR.
 
@@ -239,7 +239,7 @@ green; twenty CI candidates and their contact sheet in one PR.
     command and attach `pg-out/contact-sheet.png`. A local render is not
     a candidate baseline. Inspect the sheet for image orientation, fit,
     browser corners, padding and material regressions. This is the
-    **first bless**, not a second five-image bless: Novak alone blesses
+    **first bless**, not a second five-image bless: Thohared alone blesses
     the CI candidates in a standalone commit with a PG-3(b) rationale.
     Keep the existing missing-baseline warning path and any present
     baseline's hard diff gate unchanged.
@@ -258,7 +258,7 @@ green; twenty CI candidates and their contact sheet in one PR.
   mounted before warm-up and `studio.ready`; existing PG determinism and
   the P-6/P-7 colour and AA guarantees remain intact.
 - Twenty CI candidates and their labelled contact sheet are attached to
-  the PR. Missing baselines are explicitly reported as awaiting Novak's
+  the PR. Missing baselines are explicitly reported as awaiting Thohared's
   first bless; green candidate generation is not a blessed PG verdict.
 - The PR description maps **every cited § clause** to implemented,
   preserved or deferred behaviour with `file:line` and the relevant
@@ -268,7 +268,7 @@ green; twenty CI candidates and their contact sheet in one PR.
   remains T-P9. Include the actual implementing model, tested commit,
   commands/results, cap observed on CI, the F1–F11 disposition, and every
   remaining `TODO(spec)` with its finding number.
-- Final §7 closure requires PG diff within threshold or Novak's bless,
+- Final §7 closure requires PG diff within threshold or Thohared's bless,
   plus the fresh-context review posted on the PR under
   `docs/tickets/REVIEW.md`. The builder supplies evidence and stops; it
   does not issue its own review verdict or merge.
@@ -303,7 +303,7 @@ blocker and stop for a separately authored ticket amendment.
 - Do not edit `PLINTH_SPEC.md`, any P-entry, this ticket, the v1 ticket or
   either research record. Do not resolve a spec gap inside a code commit.
 - Do not create, edit, replace, bless or delete anything in `fixtures/**`,
-  or alter `public/demo.png`. Only Novak performs the first PG bless.
+  or alter `public/demo.png`. Only Thohared performs the first PG bless.
 - Do not edit any other guard, including `guards/no-network.test.ts`,
   or weaken, replace, narrow, skip or relax an existing test or threshold.
 - Do not change device bodies, bezels, hinges, title bars, laptop deck,

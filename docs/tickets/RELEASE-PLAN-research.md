@@ -7,7 +7,7 @@ Authoring agent: Codex (the exact backend model identifier is not exposed
 to this session). This is planning research, not a code review or a
 T-P5 implementation research pass.
 
-Novak accepted the proposed competition-focused plan on 2026-09-11:
+Thohared accepted the proposed competition-focused plan on 2026-09-11:
 “Predji na taj plan”. This authorizes recording that plan; it does not
 authorize merging its PR, blessing fixtures, or declaring unperformed
 reviews complete.
@@ -80,7 +80,7 @@ authorize new scene presets, models, assets or batch export.
 `src/scene/studio.ts:37–54` currently serve static placements. T-P5
 research must cover world bounds, floor contact, shadow invalidation and
 all device/aspect combinations, while retaining the perspective result
-Novak accepted for tablet/browser/card. It must also reconcile the
+Thohared accepted for tablet/browser/card. It must also reconcile the
 §4.3 FOV wording with the longer-lens correction rather than undo it by
 accident. No camera implementation is authorized by this research file.
 
@@ -119,12 +119,12 @@ an approved scope change; do not label a weaker result PASS. This plan
 does not itself relax §4.7 or authorize a different Safari policy.
 
 **F10 — Evidence debt is real, despite successful merge (§2.5–§2.6, §7).**
-PR #7 is merged at the inspected base. Novak explicitly approved its
+PR #7 is merged at the inspected base. Thohared explicitly approved its
 merge after reviewing images and being told that a fresh independent
 review and standalone PG bless were missing. Neither event is created by
 that approval. Request a fresh-session audit of the merged change as a
 post-merge audit, never an invented pre-merge approval. Prepare CI image
-evidence for Novak's first bless after T-P5, or earlier at his direction.
+evidence for Thohared's first bless after T-P5, or earlier at his direction.
 Source S7. Fixtures remain untouched by the planning/implementing agent.
 
 **F11 — The handoff and environment claims need correction.**
@@ -145,7 +145,7 @@ Start performance observations during T-P5/T-P6; retain the final gate.
 
 ## Follow-up findings — 2026-09-11
 
-Novak requested these three corrections after inspecting the proposed plan
+Thohared requested these three corrections after inspecting the proposed plan
 ("Uradi sve to"). They revise this same documentation-only planning PR;
 they do not authorize implementation, merge or a baseline bless. The
 runtime base remains `8aa37c65ca14e32fd37986cd05d2aab44aee6373`; plan

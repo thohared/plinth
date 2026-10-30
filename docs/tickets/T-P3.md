@@ -19,7 +19,7 @@ blocks. Cites: §4.1 (primary); §2.2, §2.3, §3, §4.2, §7 (touched).
 | §4.1 | image as screen texture, sRGB, `fit: contain \| cover`, `pad` | **no surface**; screen is a dark placeholder |
 | §4.1 | corners rounded in the shader by an SDF mask, not geometry | **no surface** |
 | §4.1 | empty state = demo screenshot mounted, first frame never blank | **no surface**; no demo image in the repo |
-| §3 | demo screenshot is Novak's own image, committed | **missing input** — see F6 |
+| §3 | demo screenshot is Thohared's own image, committed | **missing input** — see F6 |
 | §2.2 / §2.3 | no network, nothing leaves the tab | image stays in memory; the demo image is same-origin |
 | §7 | `?pg=1` mounts the demo image | pg mode exists, mounts nothing |
 
@@ -68,7 +68,7 @@ both are folded into the panel in T-P6.
 that applied. `TODO(spec)` candidate: §4.1 could say "min(8192, device limit)".
 
 **F6 — The demo image does not exist yet, and it is not the agent's to make.** §3:
-"the demo screenshot in the empty state is Novak's own image committed to the repo".
+"the demo screenshot in the empty state is Thohared's own image committed to the repo".
 Path fixed here: `public/demo.png`. If the file is absent when the ticket runs, the
 agent stops with `TODO(spec)` — it does not substitute a generated image.
 
