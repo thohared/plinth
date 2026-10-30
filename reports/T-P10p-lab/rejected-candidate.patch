@@ -1,0 +1,135 @@
+diff --git a/src/scene/pipeline.ts b/src/scene/pipeline.ts
+index 671b939..24a1502 100644
+--- a/src/scene/pipeline.ts
++++ b/src/scene/pipeline.ts
+@@ -17,6 +17,7 @@ import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
+ import { CopyShader } from 'three/addons/shaders/CopyShader.js';
+ import { installAlphaSmaa } from './alphaSmaa';
+ import { installSmaaEdgeSearch } from './edgeSmaa';
++import { warmupMaterials } from './warmup';
+ 
+ /**
+  * PLINTH_SPEC §4.4.5 / §4.4.6 — the render pipeline, and the one rule it
+@@ -59,6 +60,7 @@ export interface Pipeline {
+   composer: EffectComposer;
+   /** Resolves when the SMAA lookup textures are decoded (F6: else the first frame is not deterministic). */
+   ready: Promise<void>;
++  warmup(): Promise<void>;
+   setSize(width: number, height: number, pixelRatio: number): void;
+   render(): void;
+   /** Same finishing path into a caller-owned target; no encoder or download. */
+@@ -91,6 +93,7 @@ export function createPipeline(
+   const textures: Texture[] = [];
+   let disposed = false;
+   let outputCopy: ShaderPass | undefined;
++  const warmupPasses: Parameters<typeof warmupMaterials>[1][number][] = [];
+ 
+   // EffectComposer owns its targets/internal copy pass, not the passes we add.
+   function dispose(): void {
+@@ -117,6 +120,7 @@ export function createPipeline(
+       const copy = new ShaderPass(CopyShader);
+       copy.material.toneMapped = false;
+       addPass(copy);
++      warmupPasses.push({ material: copy.material, target: null });
+     } else {
+       const smaa = new SMAAPass();
+       // Capture image handlers before attachment, which can itself throw.
+@@ -125,6 +129,15 @@ export function createPipeline(
+       addPass(smaa);
+       installAlphaSmaa(smaa);
+       installSmaaEdgeSearch(smaa);
++      // Runtime r185 uses underscored fields; the bundled declaration still
++      // describes the older names (as in the existing alpha/edge adapters).
++      const passes = smaa as unknown as {
++        _materialEdges: import('three').ShaderMaterial; _materialWeights: import('three').ShaderMaterial;
++        _materialBlend: import('three').ShaderMaterial; _edgesRT: WebGLRenderTarget; _weightsRT: WebGLRenderTarget;
++      };
++      warmupPasses.push({ material: passes._materialEdges, target: passes._edgesRT },
++        { material: passes._materialWeights, target: passes._weightsRT },
++        { material: passes._materialBlend, target: null });
+       // Start each decode through a promise so a synchronous throw cannot leave
+       // an earlier decode rejection unobserved.
+       ready = Promise.all(textures.map((t) =>
+@@ -141,6 +154,10 @@ export function createPipeline(
+     return {
+       composer: activeComposer,
+       ready,
++      async warmup() {
++        await ready;
++        if (!disposed) await warmupMaterials(renderer, warmupPasses, () => disposed);
++      },
+       setSize(width, height, pixelRatio) {
+         if (disposed) return;
+         activeComposer.setPixelRatio(pixelRatio);
+diff --git a/src/scene/studio.test.ts b/src/scene/studio.test.ts
+index adc2ce8..7ee2caa 100644
+--- a/src/scene/studio.test.ts
++++ b/src/scene/studio.test.ts
+@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
+ 
+ const fake = vi.hoisted(() => ({
+   shadows: [] as Array<{ group: Group; fit: ReturnType<typeof vi.fn>; render: ReturnType<typeof vi.fn>; setParams: ReturnType<typeof vi.fn>; dispose: ReturnType<typeof vi.fn> }>,
+-  pipeline: { ready: Promise.resolve(), render: vi.fn(), setSize: vi.fn(), dispose: vi.fn() },
++  pipeline: { ready: Promise.resolve(), warmup: vi.fn().mockResolvedValue(undefined), render: vi.fn(), setSize: vi.fn(), dispose: vi.fn() },
+ }));
+ vi.mock('./environment', () => ({ generateEnvironments: (_renderer: unknown, presets: unknown[]) => presets.map(() => ({ texture: {}, dispose: vi.fn() })) }));
+ vi.mock('./pipeline', () => ({ createPipeline: () => fake.pipeline }));
+diff --git a/src/scene/studio.ts b/src/scene/studio.ts
+index 39f5a3f..51b1cec 100644
+--- a/src/scene/studio.ts
++++ b/src/scene/studio.ts
+@@ -108,7 +108,13 @@ export function createStudio(renderer: WebGLRenderer, stage: Stage, opts: { msaa
+         }
+       } finally { if (!disposed) stage.scene.environment = envs.get(settings.scene)!.texture; }
+     })();
+-    return Promise.all([pipeline.ready, warm]).then(() => undefined);
++    const preparedPipeline = pipeline;
++    const preparedMsaa = msaaPipeline;
++    return Promise.all([pipeline.ready, warm]).then(async () => {
++      if (disposed) return;
++      await preparedPipeline.warmup();
++      if (!disposed) await preparedMsaa?.warmup();
++    });
+   }
+   try {
+     const ready = initialize().catch(error => { dispose(); throw error; });
+diff --git a/src/scene/warmup.ts b/src/scene/warmup.ts
+new file mode 100644
+index 0000000..8edad8d
+--- /dev/null
++++ b/src/scene/warmup.ts
+@@ -0,0 +1,34 @@
++import { Mesh, OrthographicCamera, PlaneGeometry, Scene, Vector4, type Material, type WebGLRenderer, type WebGLRenderTarget } from 'three';
++
++/** Compile the same fullscreen materials in their actual output context. */
++export async function warmupMaterials(renderer: WebGLRenderer,
++  passes: readonly { material: Material; target: WebGLRenderTarget | null }[],
++  cancelled: () => boolean): Promise<void> {
++  const geometry = new PlaneGeometry(2, 2);
++  const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
++  try {
++    const pending = passes.map(async pass => {
++      if (cancelled()) return;
++      const scene = new Scene();
++      scene.add(new Mesh(geometry, pass.material));
++      const target = renderer.getRenderTarget();
++      const viewport = renderer.getViewport(new Vector4());
++      const scissor = renderer.getScissor(new Vector4());
++      const scissorTest = renderer.getScissorTest();
++      try {
++        renderer.setRenderTarget(pass.target);
++        return renderer.compileAsync(scene, camera);
++      } finally {
++        // compileAsync selects the variant synchronously. Never hold shared
++        // renderer state while its completion poll yields to other work.
++        renderer.setRenderTarget(target);
++        renderer.setViewport(viewport); renderer.setScissor(scissor);
++        renderer.setScissorTest(scissorTest);
++      }
++    });
++    // Start the independent programs together; wait for all completions even
++    // when one fails so temporary geometry never outlives its owner.
++    const results = await Promise.allSettled(pending);
++    for (const result of results) if (result.status === 'rejected') throw result.reason;
++  } finally { geometry.dispose(); }
++}

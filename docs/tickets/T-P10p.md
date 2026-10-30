@@ -3,6 +3,12 @@
 Autor/izvođač: Codex (GPT-6), 2026-10-30. Research: [T-P10p-research.md](T-P10p-research.md), F1–F5.
 Odredbe: §2/§4.1/§4.4–4.6/§4.8–4.9/§6–§7, P-5/P-6/P-7/P-13/P-14/P-19/P-20.
 
+**Status: eksperiment odbačen, nema implementacionog PR-a ili promene produkcije.**
+Kriterijum merljive koristi nije ispunjen. Sačuvani su patch i uporediva
+merenja u [izveštaju](../../reports/T-P10p-lab/README.md); ostatak ovog ticketa
+je plan probe, ne potvrda prihvatanja. Puni CI/PG/PNG i nezavisan merge review
+nisu pokrenuti za odbačeni kandidat. Aplikacioni fajlovi vraćeni su na bazu.
+
 ## Isporuka
 
 Pripremiti iste završne SMAA/copy shadere asinhrono pre prvog kadra (F2/F3).

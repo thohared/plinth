@@ -1,0 +1,116 @@
+[
+  {
+    "kind": "base",
+    "trial": 1,
+    "tasks": [
+      {
+        "start": 177.59999999776483,
+        "duration": 368
+      },
+      {
+        "start": 595.6999999992549,
+        "duration": 346
+      },
+      {
+        "start": 995.0999999977648,
+        "duration": 299
+      }
+    ],
+    "ready": 1293.0999999977648
+  },
+  {
+    "kind": "candidate",
+    "trial": 1,
+    "tasks": [
+      {
+        "start": 120.30000000074506,
+        "duration": 433
+      },
+      {
+        "start": 609.3000000007451,
+        "duration": 410
+      },
+      {
+        "start": 8340.400000002235,
+        "duration": 268
+      }
+    ],
+    "ready": 8607
+  },
+  {
+    "kind": "base",
+    "trial": 2,
+    "tasks": [
+      {
+        "start": 181,
+        "duration": 411
+      },
+      {
+        "start": 645.5999999977648,
+        "duration": 330
+      },
+      {
+        "start": 7250.79999999702,
+        "duration": 219
+      }
+    ],
+    "ready": 7467.89999999851
+  },
+  {
+    "kind": "candidate",
+    "trial": 2,
+    "tasks": [
+      {
+        "start": 115.09999999776483,
+        "duration": 403
+      },
+      {
+        "start": 572,
+        "duration": 347
+      },
+      {
+        "start": 991,
+        "duration": 368
+      }
+    ],
+    "ready": 1357.8999999985099
+  },
+  {
+    "kind": "base",
+    "trial": 3,
+    "tasks": [
+      {
+        "start": 119.19999999925494,
+        "duration": 368
+      },
+      {
+        "start": 547,
+        "duration": 326
+      },
+      {
+        "start": 919.9000000022352,
+        "duration": 365
+      }
+    ],
+    "ready": 1284.5
+  },
+  {
+    "kind": "candidate",
+    "trial": 3,
+    "tasks": [
+      {
+        "start": 175.30000000074506,
+        "duration": 445
+      },
+      {
+        "start": 672.3999999985099,
+        "duration": 365
+      },
+      {
+        "start": 7232.800000000745,
+        "duration": 193
+      }
+    ],
+    "ready": 7422.60000000149
+  }
+]

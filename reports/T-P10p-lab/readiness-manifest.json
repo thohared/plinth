@@ -1,0 +1,31 @@
+{
+  "baseCommit": "12ff7b838c68b74652261045ab748c191b0e1a60",
+  "candidate": "experimental; not published or merged",
+  "environment": {
+    "chromium": "153.0.8010.0",
+    "renderer": "SwiftShader",
+    "viewport": [
+      412,
+      823
+    ],
+    "dpr": 1.75,
+    "cpuThrottle": 4
+  },
+  "files": {
+    "base": {
+      "dist/index.html": "c14ba1000508fe472b9fa16f44fc2c08e0e82188da156c4db7b675f3a0989c42",
+      "dist/assets/index-Bl24UKio.css": "e35132a02287bca3b73687fb0f12c40912d04143650acf47e6cf2cf068e76cdb",
+      "dist/assets/index-DcMSDmpe.js": "7c4b7983f4b65bf1c28ba27434d0fe9071fbb3bfc95e33b483d6614b5363247f",
+      "dist/assets/main-BCX73iHA.js": "57623c740eca2f1b3c665fc286f3946c7946687473e5112b816b23d67c3698e2"
+    },
+    "candidate": {
+      "dist/index.html": "51ce6312dd32452e614d76cf1b15683f3ba9d3578c2799f7a2c46123c522dedc",
+      "dist/assets/main-BfJ1L_F1.js": "35b25509768ce4ce1e0a6b6db8def11f765cfbdd72b52343e0c321d923b84307",
+      "dist/assets/index-DKJ6pxJI.js": "7584947d4fed9701c6cdcb6a4045a8bf63dd0e13a7a8d2ab61873ca0e4da31d2",
+      "dist/assets/index-Bl24UKio.css": "e35132a02287bca3b73687fb0f12c40912d04143650acf47e6cf2cf068e76cdb"
+    }
+  },
+  "candidatePatchSha256": "ac9640cecfcf2eb8624cbc780038d9fc81099cf4eaa801a29544423319f04fe9",
+  "resultsSha256": "0e4d71ba13b83a8dafc8429d2c29e30600f30b611b2bc47d0e637eabbd7d9a71",
+  "verdict": "REJECTED: no reliable improvement; production unchanged"
+}
