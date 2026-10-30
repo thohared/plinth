@@ -52,7 +52,7 @@ it('T-P6 mobile: sheet reserves space, real touch scroll/slider/orbit, focus, re
     }
     await page.locator('#settings-open').click();await page.addStyleTag({content:'html{font-size:200%}'});
     await page.locator('#control-device').focus();await page.keyboard.press('Tab');expect(await page.evaluate(()=>document.activeElement?.id)).toBe('control-pose');await page.keyboard.press('Shift+Tab');expect(await page.evaluate(()=>document.activeElement?.id)).toBe('control-device');
-    await page.locator('summary').click();await page.locator('#control-w').fill('19');await page.locator('#control-w').dispatchEvent('input');
+    await page.locator('summary[aria-controls="advanced-controls"]').click();await page.locator('#control-w').fill('19');await page.locator('#control-w').dispatchEvent('input');
     expect(await page.locator('#control-w').getAttribute('aria-invalid')).toBe('true');expect(await page.locator('#settings-error').innerText()).not.toBe('');await page.locator('#control-w').press('Escape');expect(await page.locator('#control-w').getAttribute('aria-invalid')).toBeNull();
     expect(await page.evaluate(()=>window.__plinth.getImage())).toEqual(image);expect(errors).toEqual([]);
   } finally {await context.close();}
@@ -86,7 +86,7 @@ it('T-P6 review: invalid edits remain errors until corrected or replaced by rese
   const page=await browser.newPage({viewport:{width:1280,height:800}});
   try {
     await page.goto(url);await page.waitForSelector('html[data-plinth-ready="1"]',{timeout:60000});
-    await page.locator('summary').click();
+    await page.locator('summary[aria-controls="advanced-controls"]').click();
     const width=page.locator('#control-w'),height=page.locator('#control-h'),error=page.locator('#settings-error');
     await width.fill('19');
     expect(await width.getAttribute('aria-invalid')).toBe('true');

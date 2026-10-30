@@ -20,7 +20,7 @@ for(const width of [400,1280])it(`T-P9a visible PNG access, settings separation 
   await page.screenshot({path:`${process.env['PLINTH_UI_EVIDENCE']}/export-${width}.png`});
  }
  if(width===400){
-  await page.locator('#settings-open').click();await page.locator('summary').click();
+  await page.locator('#settings-open').click();await page.locator('summary[aria-controls="advanced-controls"]').click();
   await visible(page,'#png-export');
   const panel=(await page.locator('#panel').boundingBox())!,actions=(await page.locator('#png-actions').boundingBox())!;
   expect(panel.y+panel.height).toBeLessThanOrEqual(actions.y+1);

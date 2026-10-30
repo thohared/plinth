@@ -137,6 +137,10 @@ body.editor[data-theme=dark] {
 .editor summary { font-weight:600; }
 .editor #panel-utilities { margin-top:26px; padding-top:22px; border-top:1px solid var(--line); }
 .editor #panel-utilities section { margin-bottom:20px; }
+#plinth-guide > summary { min-height:44px; padding:12px 0; cursor:pointer; font-size:.8125rem; font-weight:600; color:var(--ink); }
+#plinth-guide .guide-action { float:right; margin-left:12px; font-weight:400; color:var(--muted); }
+#plinth-guide[open] .guide-show,#plinth-guide:not([open]) .guide-hide { display:none; }
+.editor #plinth-guide { border-top:0; margin:0 0 20px; }
 .editor #about-plinth { color:var(--muted); font-size:.75rem; line-height:1.6; }
 .editor #about-plinth :is(h2,h3) { color:var(--ink); font-size:.8125rem; line-height:1.4; }
 .editor #about-plinth ol { padding-left:20px; }
