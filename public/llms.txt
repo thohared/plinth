@@ -1,0 +1,38 @@
+# Plinth
+
+> Plinth is a free browser-based 3D mockup generator for screenshots. No account is required. The canonical site is https://plinth-phi.vercel.app/.
+
+## Capabilities
+
+- Phone, tablet, laptop, browser window and card mockups
+- PNG, JPG and WebP screenshot input
+- PNG export with solid, gradient or transparent backgrounds
+- Scene links share settings without uploaded images
+- Free to use without an account
+
+The models are generic devices. Fit image shows the whole screenshot; Fill screen may crop the edges and is the default for new images. Screenshots stay in the browser. Shared scene links open with the demo image; they do not transfer the user's screenshot. Share a downloaded PNG to share a finished mockup.
+
+## Export sizes
+
+At 1×, dimensions in pixels are:
+
+| Shape | Width × height |
+| --- | --- |
+| 1:1 | 1080 × 1080 |
+| 4:5 | 1080 × 1350 |
+| 16:9 | 1920 × 1080 |
+| 9:16 | 1080 × 1920 |
+| 3:1 | 1920 × 640 |
+
+At 2× or 3×, multiply both dimensions by that number. For example, 16:9 at 2× is 3840 × 2160 pixels. Available sizes depend on the browser and graphics hardware. Not every device supports every size. Plinth exports still PNG images, not video.
+
+## Requirements
+
+The interactive studio requires JavaScript and WebGL 2. It has desktop and mobile layouts.
+
+## Links
+
+- [Plinth studio and guide](https://plinth-phi.vercel.app/): The application, examples, export dimensions and answers to common questions.
+- [Source repository](https://github.com/thohared/plinth): Public source code and project documentation.
+
+This optional summary follows the llms.txt proposal. It does not replace the visible website or guarantee inclusion in search or AI answers.

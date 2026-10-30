@@ -141,6 +141,13 @@ body.editor[data-theme=dark] {
 .editor #about-plinth :is(h2,h3) { color:var(--ink); font-size:.8125rem; line-height:1.4; }
 .editor #about-plinth ol { padding-left:20px; }
 .editor #about-plinth li + li { margin-top:8px; }
+#about-plinth .guide-facts { margin:12px 0 20px; }
+#about-plinth .guide-facts dt { margin-top:10px; font-weight:600; color:var(--ink); }
+#about-plinth .guide-facts dd { margin:2px 0 0; }
+#about-plinth .guide-sizes { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
+#about-plinth .guide-sizes caption { text-align:left; margin-bottom:8px; }
+#about-plinth .guide-sizes :is(th,td) { padding:6px 8px; text-align:left; border-bottom:1px solid var(--line); }
+#about-plinth .guide-sizes th { font-weight:600; color:var(--ink); }
 #about-plinth figure { margin:16px 0 20px; }
 #about-plinth figure img { display:block; width:100%; height:auto; border-radius:6px; }
 #about-plinth figcaption { margin-top:8px; }
