@@ -27,6 +27,14 @@ P-10(1)/P-19: korisno i istinito uputstvo, PNG tok ostaje dostupan.
   njegov identitet u editoru, overflow, utility komande i pravi upload/PNG tok.
   Zadržati sve asercije i postojeći SEO negative-seed anchor. Ručno proveriti
   touch, Enter/Space, no-JS i stanje sklapanja pre/posle inicijalizacije.
+- F5 — CI na `0175a6c` otkrio je zastarelu pretpostavku da panel ima samo
+  jedan `summary`. Lokalna reprodukcija postojećeg invalid-edits testa pada
+  na Playwright strict-mode proveri, pre asercija o unosu. Četiri klika u
+  `panel.test.ts` (dva), `shortcuts.test.ts` i `png-access.test.ts` otvaraju
+  Advanced settings pa pristupaju `#control-w`. Njihov tačan cilj je postojeći
+  `summary[aria-controls="advanced-controls"]`. Precizirati samo te lokatore;
+  svi slučajevi, korisnički koraci, asercije, pragovi i seed-ovi ostaju isti.
+  Ovo ispravlja identitet kontrole, bez sužavanja pokrića guardova.
 
 ## 3. Granice
 
