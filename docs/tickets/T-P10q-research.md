@@ -35,6 +35,19 @@ P-10(1)/P-19: korisno i istinito uputstvo, PNG tok ostaje dostupan.
   `summary[aria-controls="advanced-controls"]`. Precizirati samo te lokatore;
   svi slučajevi, korisnički koraci, asercije, pragovi i seed-ovi ostaju isti.
   Ovo ispravlja identitet kontrole, bez sužavanja pokrića guardova.
+- F6 — CI na `e0de705` prolazi 133/134 guard provere, ali stari
+  `review-polish.test.ts` light slučaj čita help bottom `608.359375` i feedback
+  top `229` posle promene viewport-a sa 400×800 na 400×400. `resize` u
+  `src/main.ts` asinhrono upisuje `body.style.height`; tri zasebna bounding-box
+  poziva mogu obuhvatiti dve geometrije. Isti izvorni kod i test su na main-u.
+  Bounded lokalna proba na main-u `12ff7b8`, posle pravog PNG preuzimanja,
+  ponavlja pet 800→400 promena i iste scroll/bounds pozive: dva puta reprodukuje
+  baš `608.359375 > 229`. Posle čekanja na `body.style.height === '400px'`
+  svih pet daje `208.359375 <= 229`. Kandidat prolazi svih pet neposrednih i
+  pet stabilizovanih merenja. Linux, Node 24, Chromium 153, SwiftShader;
+  nema mock-a, sleep-a, promene callback-a ili tvrdnje o fizičkom uređaju.
+  Sačuvati sve asercije i čekati taj postojeći signal završene promene visine
+  pre scroll/bounds provere. `panel.test.ts` već koristi isti signal pri resize-u.
 
 ## 3. Granice
 
