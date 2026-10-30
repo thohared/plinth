@@ -12,7 +12,7 @@ it('T-P9 all keyboard actions, typed/select/IME/modifier negatives and actual re
  await page.goto(url);await page.waitForSelector('html[data-plinth-ready="1"]',{timeout:60000});
  for(const [key,id] of [['2','tablet'],['3','laptop'],['4','browser'],['5','card'],['1','phone']]){await page.keyboard.press(key!);expect(await page.evaluate(()=>window.__plinth.getDevice())).toBe(id);}
  for(const [key,id] of [['q','front'],['w','hero'],['e','top'],['r','lean']]){await page.keyboard.press(key!);expect(await page.evaluate(()=>window.__plinth.getPose())).toBe(id);}
- await page.locator('summary').click();await page.locator('#control-w').focus();await page.keyboard.press('2');expect(await page.evaluate(()=>window.__plinth.getDevice())).toBe('phone');
+ await page.locator('summary[aria-controls="advanced-controls"]').click();await page.locator('#control-w').focus();await page.keyboard.press('2');expect(await page.evaluate(()=>window.__plinth.getDevice())).toBe('phone');
  await page.locator('#control-device').focus();await page.keyboard.press('q');expect(await page.evaluate(()=>window.__plinth.getPose())).toBe('lean');
  await page.evaluate(()=>{const e=document.createElement('div');e.contentEditable='true';e.id='editable';document.body.append(e);e.focus();});await page.keyboard.press('3');expect(await page.evaluate(()=>window.__plinth.getDevice())).toBe('phone');
  await page.evaluate(()=>{document.querySelector('#editable')!.remove();for(const options of [{isComposing:true},{repeat:true},{ctrlKey:true},{metaKey:true},{altKey:true}])window.dispatchEvent(new KeyboardEvent('keydown',{key:'2',bubbles:true,cancelable:true,...options}));});expect(await page.evaluate(()=>window.__plinth.getDevice())).toBe('phone');
