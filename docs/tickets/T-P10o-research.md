@@ -59,3 +59,12 @@ Fizički GPU/performance i Safari release kriterijumi ostaju odvojeni.
 [schema]: https://schema.org/WebApplication
 [openai]: https://developers.openai.com/api/docs/bots
 [llms]: https://llmstxt.org/
+
+## Nalaz nezavisnog pregleda pre objave
+
+Predlog formata rezerviše H2 odeljke za liste Markdown linkova; detalji proizvoda
+idu pre njih, bez dodatnih heading-a. Referentni parser pokušava da svaku
+nepraznu liniju H2 odeljka pročita kao link. Prvobitni H2 naslovi za mogućnosti
+i tabelu zato nisu kompatibilni. Zameniti ih podebljanim oznakama pre jedinog
+H2 odeljka sa linkovima; kvalifikaciju o opcionom formatu takođe staviti pre
+linkova. Aditivni guard proverava ovu granicu, uz seed vraćenog H2 naslova.

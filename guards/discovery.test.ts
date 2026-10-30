@@ -18,11 +18,12 @@ beforeAll(async () => {
   await build({ logLevel: 'silent', build: { outDir, emptyOutDir: true } });
   const seed = process.env['PLINTH_DISCOVERY_SEED'];
   if (seed) {
-    if (!['dimensions', 'schema', 'llms'].includes(seed)) throw new Error('Unknown discovery seed');
-    const path = join(outDir, seed === 'llms' ? 'llms.txt' : 'index.html');
+    if (!['dimensions', 'schema', 'llms', 'format'].includes(seed)) throw new Error('Unknown discovery seed');
+    const path = join(outDir, ['llms', 'format'].includes(seed) ? 'llms.txt' : 'index.html');
     const source = await readFile(path, 'utf8');
     const changed = seed === 'dimensions' ? source.replace('1920 × 640', '3240 × 1080')
       : seed === 'schema' ? source.replace('"PNG, JPG and WebP screenshot input"', '"PNG, JPG and SVG screenshot input"')
+      : seed === 'format' ? source.replace('**Capabilities**', '## Capabilities')
       : source.replace('- PNG, JPG and WebP screenshot input', '- PNG, JPG and SVG screenshot input');
     if (changed === source) throw new Error('Discovery seed did not match');
     await writeFile(path, changed);
@@ -83,8 +84,18 @@ it('serves a plain-text optional summary consistent with visible facts and dimen
     expect(response.status()).toBe(200);
     expect(response.headers()['content-type']).toMatch(/text\/plain/);
     const text = await response.text();
+    // The llms.txt proposal reserves H2 sections for lists of linked files.
+    // Ordinary project facts belong before them, or reference parsers can fail.
+    const [intro, ...fileLists] = text.split(/^## /m);
+    expect(intro).toMatch(/^# Plinth\n\n> /);
+    expect(fileLists.length).toBeGreaterThan(0);
+    for (const list of fileLists) {
+      const [, ...lines] = list.trim().split('\n').filter(line => line.trim());
+      expect(lines.length).toBeGreaterThan(0);
+      for (const line of lines) expect(line).toMatch(/^- \[[^\]]+\]\(https:\/\/[^\s)]+\)(?:: .+)?$/);
+    }
     expect(text).toContain(`The canonical site is ${await page.locator('link[rel="canonical"]').getAttribute('href')}`);
-    for (const fact of await page.locator('.guide-facts dd').allTextContents()) expect(text).toContain(`- ${fact}\n`);
+    for (const fact of await page.locator('.guide-facts dd').allTextContents()) expect(intro).toContain(`- ${fact}\n`);
     for (const [shape, pixels] of sizes) expect(text).toContain(`| ${shape} | ${pixels} |`);
     expect(text).toMatch(/do not transfer the user's screenshot/);
     expect(text).toMatch(/JavaScript and WebGL 2/);

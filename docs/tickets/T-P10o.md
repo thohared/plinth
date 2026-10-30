@@ -27,7 +27,7 @@ renderera ili aplikacionog state-a. `TODO(spec): none` u ovom obuhvatu.
 
 - Literalne P-13 dimenzije, javne činjenice dostupne bez JS-a, featureList
   jednak vidljivom pregledu; llms činjenično usklađen sa HTML-om i canonical-om.
-- Namerno pogrešna dimenzija, JSON-LD tvrdnja i llms tvrdnja u privremenom
+- Namerno pogrešna dimenzija, JSON-LD tvrdnja, llms tvrdnja i llms H2 format u privremenom
   buildu obaraju odgovarajući novi test; restore i pozitivan prolaz.
 - Postojeći SEO guardovi ostaju i prolaze; novi pregled/tabela ostaju čitljivi
   bez horizontalnog overflow-a u desktop/mobile, light/dark prikazu.
