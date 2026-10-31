@@ -5,10 +5,14 @@ export interface PoseControllerTarget {
   orbit(deltaAzimuth: number, deltaElevation: number): void;
   freeRotate?(horizontal: number, vertical: number): boolean;
   getOrbit?(): { azimuth: number; elevation: number };
+  beginEdit?(): void;
+  edit?(action: () => void): void;
+  endEdit?(): void;
 }
 
 export interface PoseController {
   start(): void;
+  endGesture(): void;
   dispose(): void;
 }
 
@@ -36,6 +40,7 @@ export function createPoseController(canvas: HTMLCanvasElement, target: PoseCont
   let raf: number | null = null;
   let previousTimestamp: number | null = null;
   let disposed = false;
+  let editing = false;
 
   const cancel = (): void => {
     if (raf !== null) cancelAnimationFrame(raf);
@@ -71,21 +76,29 @@ export function createPoseController(canvas: HTMLCanvasElement, target: PoseCont
     x = event.clientX;
     y = event.clientY;
     if (dx === 0 && dy === 0) return;
-    if (target.freeRotate?.(dx / PIXELS_PER_RADIAN, dy / PIXELS_PER_RADIAN)) { redraw(); return; }
-    const orbit = target.getOrbit?.();
-    const azimuth = dx / PIXELS_PER_RADIAN, elevation = -dy / PIXELS_PER_RADIAN;
-    target.orbit(orbit ? easedOrbitDelta(orbit.azimuth, azimuth, -AZIMUTH_LIMIT, AZIMUTH_LIMIT) : azimuth,
-      orbit ? easedOrbitDelta(orbit.elevation, elevation, ELEVATION_MIN, ELEVATION_MAX) : elevation);
-    redraw();
+    if (!editing) { target.beginEdit?.(); editing = true; }
+    const edit = (): void => {
+      if (target.freeRotate?.(dx / PIXELS_PER_RADIAN, dy / PIXELS_PER_RADIAN)) { redraw(); return; }
+      const orbit = target.getOrbit?.();
+      const azimuth = dx / PIXELS_PER_RADIAN, elevation = -dy / PIXELS_PER_RADIAN;
+      target.orbit(orbit ? easedOrbitDelta(orbit.azimuth, azimuth, -AZIMUTH_LIMIT, AZIMUTH_LIMIT) : azimuth,
+        orbit ? easedOrbitDelta(orbit.elevation, elevation, ELEVATION_MIN, ELEVATION_MAX) : elevation);
+      redraw();
+    };
+    if (target.edit) target.edit(edit); else edit();
+  };
+  const endGesture = (): void => {
+    const old = pointer; pointer = null;
+    if (old !== null && canvas.hasPointerCapture(old)) canvas.releasePointerCapture(old);
+    if (editing) { editing = false; target.endEdit?.(); }
   };
   const release = (event: PointerEvent): void => {
     if (event.pointerId !== pointer) return;
-    if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
-    pointer = null;
+    endGesture();
   };
   const visibility = (): void => {
     previousTimestamp = null;
-    if (document.hidden) cancel();
+    if (document.hidden) { endGesture(); cancel(); }
     else schedule();
   };
   canvas.addEventListener('pointerdown', down);
@@ -95,6 +108,7 @@ export function createPoseController(canvas: HTMLCanvasElement, target: PoseCont
   canvas.addEventListener('lostpointercapture', release);
   document.addEventListener('visibilitychange', visibility);
   return {
+    endGesture,
     start() { previousTimestamp = null; schedule(); },
     dispose() {
       if (disposed) return;

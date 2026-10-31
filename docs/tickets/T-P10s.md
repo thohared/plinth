@@ -17,7 +17,7 @@ only after successful restoration. No persistence, image copies or dependencies.
 
 Write set: src/state/history.ts and its tests; src/main.ts; src/ui/panel.ts;
 src/ui/shortcuts.ts and its tests; src/camera/controller.ts and its tests;
-src/styles.css if target sizing requires it; additive guards/undo-redo.test.ts;
+src/ui/panel.css if target sizing requires it; additive guards/undo-redo.test.ts;
 this ticket/research. Do not modify spec, fixtures, existing guard assertions,
 workflows or unrelated release documentation.
 
@@ -29,3 +29,20 @@ editing. Seed history/gesture/restore defects and confirm failure. Run npm run c
 build and existing PG/PNG gates; inspect visual evidence. Fresh-context review
 posted on PR is mandatory before requesting owner merge. Linux/SwiftShader
 results do not claim physical-device performance or Safari acceptance.
+
+## Builder evidence
+
+- Linux Node 24, temporary Chromium/SwiftShader browser (no dependency changes).
+- Typecheck, all 287 unit tests and production build pass. Build retains the
+  existing chunk-size warning; no performance or target-device claim.
+- Five additive browser tests pass: desktop/mobile real upload→edit→Undo→Redo→
+  downloaded PNG (1920×640, transparent corner), grouped keyboard slider and
+  free rotation, active-drag cancellation, exact interrupted camera frame,
+  numeric blur, failed and successful upload/navigation, upload/export gates,
+  seeded restoration failure with unchanged URL and disabled traversal.
+- Seed `PLINTH_HISTORY_SEED=undo` freezes the cursor and fails the desktop
+  repeated Undo assertion. Seed `group` commits each pointer event and fails
+  the single-drag Undo assertion. Neither seed modifies source on disk.
+- Desktop/mobile screenshots inspected: controls retain existing two-column,
+  44px-target styling; mobile Settings remains scrollable above PNG controls.
+- Full npm run ci and remote CI/PG/PNG plus independent review are pending.
