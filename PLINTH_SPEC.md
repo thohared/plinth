@@ -1158,5 +1158,58 @@ not implementation, visual approval or a test PASS.
    and owner-only baselines. Local CI/build, cloud CI/PG/PNG and an independent
    fresh-context review remain required; no physical performance/Safari claim.
 
+### P-25: Free view controls without dragging (proposal, 2026-10-31)
+
+Owner requested the fourth suggested improvement, non-drag Free view controls
+and keyboard access. Codex planning amendment; T-P10u research F1–F6.
+Effective after owner approval and merge. This standalone P-5 commit defines
+behavior only; implementation follows in a separate ticket.
+
+1. Beside Free view/Reset view, provide a labeled group of four native buttons:
+   Turn left, Turn right, Turn up, Turn down. Each has a minimum 44px target
+   and visible focus on desktop/mobile. Keep them visible but disabled when
+   Free view is off; explain that Free view enables them. Enabling the mode
+   itself still changes no pose. Existing canvas dragging remains available.
+2. One activation immediately rotates the device by 5 degrees around the
+   same camera-relative axis as the corresponding screen-space drag:
+   left/right use horizontal -/+5 degrees, up/down use vertical -/+5 degrees.
+   Reuse the normalized quaternion composition and exact floor correction of
+   P-16, plus P-18 rotation-invariant framing. Start from the actual displayed
+   view, interrupting an active named transition. Do not alter camera direction,
+   image mapping, geometry, output padding or PNG dimensions. The first step
+   may reserve rotation space once as P-18 permits; subsequent steps must not
+   pump camera distance for unchanged geometry/aspect/padding/direction.
+3. Tab reaches each native button; Enter/Space uses its native click action.
+   While focus is on any enabled rotation button, unmodified arrow keys invoke
+   the corresponding direction. This is local to the group, never a global
+   arrow shortcut. Ignore repeat, composing/defaultPrevented events and all
+   Ctrl/Meta/Alt/Shift combinations; preserve arrows in editable fields and
+   page scrolling outside the group. Prevent default only for a handled arrow.
+   Do not synthesize a second click or add press-and-hold timers. Pointer/touch
+   activation and each non-repeating key activation are one discrete step.
+4. Each successful step is one P-23 Undo/Redo entry; finish active pointer/panel
+   gestures before it and capture the actual view. Rejected or no-op actions
+   create no entry. Undo/Redo and named/reset actions retain their existing
+   mode-exit behavior. Disable new actions during upload, PNG export or
+   unavailable recovery, and in PG mode; recheck these gates in handlers.
+   End pending interaction on blur/disposal without a delayed rotation.
+5. Store the resulting pose in the existing custom quaternion/direction/framing
+   fields. No input-mode field, new wire schema or persistence. Rotation uses
+   existing 250ms URL coalescing; explicit Copy snapshots immediately, and
+   history traversal retains its immediate update. Copy/reload, recovery and
+   PNG must agree with the displayed view. Preserve P-24 crop when implemented.
+   Advertise these keys only alongside the shipped controls. No dependencies,
+   network, analytics, zoom/pan, motion export or new rendering policy.
+6. Implementation requires independent literal axis/quaternion expectations,
+   inverse steps, all five devices, stable framing after the initial step,
+   transition interruption, editable/focus/modifier/repeat/IME/defaultPrevented
+   boundaries, disabled busy/PG states, single native activation, history and
+   listener disposal. Exercise real desktop/mobile button and keyboard journeys
+   through Copy/reload and downloaded PNG. Seed reversed axes, double activation,
+   shortcut leakage and missing history; the relevant guards must fail.
+   Preserve all existing cases, thresholds and owner-only fixtures. Linux CI,
+   build, cloud CI/PG/PNG, inspected images and independent fresh-context review
+   remain required. Planning is not runtime, Safari or performance PASS.
+
 ## §10 Open TODO(spec)
 - Product-name question resolved by P-19: **Plinth**, effective when that amendment merges.
