@@ -1052,5 +1052,51 @@ Codex (GPT-6), T-P10n research F1–F6; zaseban P-5 commit pre implementacije.
    Sačuvati sve postojeće guardove/pragove. Linux CI, PG/PNG i nezavisan review
    ostaju obavezni. Ovo ne odobrava merge, fixture bless ili release PASS.
 
+### P-23: In-memory Undo/Redo for studio settings (proposal, 2026-10-31)
+
+Owner requested the second suggested improvement, Undo/Redo. Codex (GPT-6)
+planning amendment based on T-P10s research F1–F6. Effective after owner
+approval and merge; this standalone specification commit is not implementation.
+
+1. Add visible Undo and Redo buttons, minimum44px targets, in desktop and
+mobile Settings. Disable unavailable actions. Keep at most50 completed user
+edits in tab memory; no storage, backend, image copies or new URL format.
+New successful edits after Undo clear the redo stack; rejected/no-op edits
+do not create entries. Reset look and Reset view are undoable.
+2. History includes existing validated scene/device/material/image-fit/output
+settings and full custom pose/framing. A selector/button action is one entry;
+one pointer drag or continuous slider gesture is one entry, not one per event
+or frame. Numeric/text edits commit on change/blur; invalid intermediate input
+does not create history. Keyboard slider repeats form one gesture until keyup.
+Theme, help, Settings visibility, Free view input mode, upload bytes, clipboard,
+export progress, resize, animation frames and recovery events are excluded.
+3. Capture the actual view before an edit, including an interrupted transition.
+After a named selection, the entry's result is its selected named target.
+Undo/Redo restores a validated snapshot immediately without replaying animation;
+custom snapshots retain quaternion/direction/framing. End active gestures
+before traversal, exit Free view input mode, preserve the currently loaded image.
+Do not advance the history cursor if restore fails; use existing recovery/error
+handling and never claim successful partial application.
+4. Initially history is empty after startup/shared-link restoration. Successful
+external hash/history navigation establishes a fresh baseline; invalid navigation
+does not clear history. Each successfully accepted upload establishes a new
+baseline after existing Fill screen behavior; failed uploads leave history intact.
+Disable traversal while uploading, exporting or graphics recovery is unavailable.
+Reload starts fresh history from the restored scene; images remain excluded.
+5. Narrow exception to P-14(5): outside editable controls, Ctrl/Meta+Z invokes
+Undo, Ctrl/Meta+Shift+Z invokes Redo, and Ctrl+Y also invokes Redo.
+Preserve native text/form undo, IME, Alt, defaultPrevented and repeat behavior;
+prevent defaults only when an available action is handled. Advertise only shipped
+shortcuts. Buttons provide equivalent touch and keyboard operation.
+6. Narrow addition to P-22: successful Undo/Redo updates the existing readable
+scene URL in the same action and cancels stale queued writes. Preserve Copy link,
+browser navigation, v1/v2 compatibility, validation, image privacy and PNG fidelity.
+7. Implementation requires its own ticket/research, independent literal history
+expectations, grouped-drag/slider and branching tests, upload/nav/error boundaries,
+editable-field shortcut tests, actual mobile/desktop Undo→Redo→PNG journeys and
+seeded failures. Preserve all existing guards/thresholds and owner-only baselines.
+CI/PG/PNG and independent fresh-context review remain required. No performance,
+Safari or release PASS is implied.
+
 ## §10 Open TODO(spec)
 - Product-name question resolved by P-19: **Plinth**, effective when that amendment merges.
