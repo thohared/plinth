@@ -13,7 +13,7 @@ it.each(DEVICE_IDS)('%s keeps a fixed rotation center distance through full turn
     const localCenter = pivot.worldToLocal(geometryWorldBounds(stage.getRig().group).getCenter(new Vector3()));
     for (const aspect of [9/16, 4/5, 1, 16/9, 3]) {
       stage.setAspect(aspect);
-      for (const [dx,dy] of [[Math.PI/12,0],[0,Math.PI/12],[Math.PI/15,Math.PI/20]]) {
+      for (const [dx,dy] of [[Math.PI/12,0],[0,Math.PI/12],[Math.PI/15,Math.PI/20],[Math.PI/36,0],[0,-Math.PI/36]]) {
         const distances: number[] = [];
         stage.rotate(dx!,dy!);
         const orientation = stage.camera.quaternion.clone();
