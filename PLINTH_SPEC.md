@@ -1182,9 +1182,13 @@ behavior only; implementation follows in a separate ticket.
 3. Tab reaches each native button; Enter/Space uses its native click action.
    While focus is on any enabled rotation button, unmodified arrow keys invoke
    the corresponding direction. This is local to the group, never a global
-   arrow shortcut. Ignore repeat, composing/defaultPrevented events and all
-   Ctrl/Meta/Alt/Shift combinations; preserve arrows in editable fields and
-   page scrolling outside the group. Prevent default only for a handled arrow.
+   arrow shortcut. Ignore repeated arrow, composing/defaultPrevented events and
+   Ctrl/Meta/Alt/Shift arrow combinations; preserve arrows in editable fields
+   and page scrolling outside the group. For focused enabled rotation buttons,
+   suppress repeated Enter/Space keydown defaults so holding a key cannot cause
+   repeated native activation. The initial Enter/Space uses native activation
+   exactly once; do not invoke rotation separately from its native click.
+   Prevent default only for a handled arrow or this native-repeat suppression.
    Do not synthesize a second click or add press-and-hold timers. Pointer/touch
    activation and each non-repeating key activation are one discrete step.
 4. Each successful step is one P-23 Undo/Redo entry; finish active pointer/panel
