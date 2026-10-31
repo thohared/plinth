@@ -39,11 +39,13 @@ export function deviceEditError(spec: DeviceSpec): string | undefined {
   const violation = invariantViolations(spec)[0];
   return violation ? messages[violation] ?? 'Check the device dimensions.' : undefined;
 }
-export function createPanel(root: HTMLElement, store: SettingsStore, layoutChanged: () => void, exporter?: DownloadController, share?: () => void, freeView?: (active: boolean) => void, history?: EditHistory) {
+export function createPanel(root: HTMLElement, store: SettingsStore, layoutChanged: () => void, exporter?: DownloadController, share?: () => void, freeView?: (active: boolean) => void, history?: EditHistory, rotation?: { available(): boolean; step(horizontal: number, vertical: number): void }) {
   const abort = new AbortController(); const signal = abort.signal;
   const refreshers: ((state: Settings) => void)[] = [];
   let recovery: RecoveryState = 'ready';
   let free = false;
+  let refreshRotation = (): void => {};
+  let rotationUnsubscribe = (): void => {};
   let setFree = (_active: boolean): void => {};
   // Keep the server-delivered product guide available to people after startup.
   const about = root.querySelector<HTMLElement>('#plinth-guide');
@@ -165,16 +167,40 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   const view = section('Device and framing');
   select(view, 'device', 'Device', DEVICE_IDS, s => s.device, value => store.setDevice(value as Settings['device']));
   select(view, 'pose', 'Angle', [...POSE_IDS, 'custom'], s => s.pose ?? 'custom', value => { store.apply({ pose: value as Settings['pose'] }); setFree(false); });
-  if (freeView) {
+  {
     const actions = document.createElement('div'); actions.className = 'view-actions';
     const turn = document.createElement('button'); turn.type = 'button'; turn.id = 'free-view'; turn.textContent = 'Free view'; turn.setAttribute('aria-pressed', 'false');
     const resetView = document.createElement('button'); resetView.type = 'button'; resetView.id = 'reset-view'; resetView.textContent = 'Reset view';
     const hint = document.createElement('p'); hint.className = 'hint'; hint.id = 'view-hint';
     turn.setAttribute('aria-describedby', hint.id);
-    setFree = active => { free = active; freeView(active); turn.setAttribute('aria-pressed', String(active)); hint.textContent = active ? 'Drag the preview to turn the device. Every side is available.' : 'Turn on Free view to see the back and underside.'; };
+    const steps = document.createElement('div'); steps.className = 'view-actions'; steps.setAttribute('role', 'group'); steps.setAttribute('aria-label', 'Turn device');
+    const buttons: HTMLButtonElement[] = [];
+    const enabled = () => free && recovery === 'ready' && Boolean(rotation?.available());
+    const deltas: Record<string, [number, number]> = { ArrowLeft: [-Math.PI / 36, 0], ArrowRight: [Math.PI / 36, 0], ArrowUp: [0, -Math.PI / 36], ArrowDown: [0, Math.PI / 36] };
+    const step = (button: HTMLButtonElement, key: string): boolean => {
+      if (!enabled()) return false;
+      endEdit();
+      attempt(button, () => rotation!.step(...deltas[key]!));
+      return true;
+    };
+    for (const [direction, key] of [['left', 'ArrowLeft'], ['right', 'ArrowRight'], ['up', 'ArrowUp'], ['down', 'ArrowDown']] as const) {
+      const button = document.createElement('button'); button.type = 'button'; button.id = `turn-${direction}`; button.textContent = `Turn ${direction}`;
+      button.addEventListener('click', () => { step(button, key); }, {signal});
+      button.addEventListener('keydown', event => {
+        if (document.activeElement !== button || !enabled() || event.defaultPrevented || event.isComposing) return;
+        if (event.repeat && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); return; }
+        if (event.repeat || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+        if (deltas[event.key] && step(button, event.key)) event.preventDefault();
+      }, {signal});
+      buttons.push(button); steps.append(button);
+    }
+    refreshRotation = () => { for (const button of buttons) button.disabled = !enabled(); };
+    rotationUnsubscribe = history?.subscribe(refreshRotation) ?? (() => {});
+    turn.disabled = !freeView;
+    setFree = active => { free = active; freeView?.(active); refreshRotation(); turn.setAttribute('aria-pressed', String(active)); hint.textContent = active ? 'Drag the preview or use the turn buttons. Arrow keys work while a turn button is focused.' : 'Turn on Free view to enable the turn buttons and see every side.'; };
     turn.addEventListener('click', () => setFree(!free), { signal });
     resetView.addEventListener('click', () => attemptEdit(resetView, () => { store.apply({ pose: 'hero' }); setFree(false); }), { signal });
-    actions.append(turn, resetView); view.append(actions, hint); setFree(false);
+    actions.append(turn, resetView); view.append(actions, steps, hint); setFree(false);
   }
   select(view, 'aspect', 'Aspect ratio', ASPECT_IDS, s => s.aspect, value => store.apply({ aspect: value as Settings['aspect'] }));
   numeric(view, 'outputPad', 'Space around device', 0, 25, 1, s => s.outputPad * 100, value => store.apply({ outputPad: value / 100 }));
@@ -304,8 +330,8 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
       recovery = value;
       syncMobilePick();
       for (const element of root.children) if (element instanceof HTMLElement && element !== png && element.tagName !== 'HEADER') element.inert = value !== 'ready';
-      refreshExport();
+      refreshExport(); refreshRotation();
     },
-    dispose() { historyUnsubscribe(); exportUnsubscribe(); unsubscribe(); abort.abort(); pickObserver.disconnect(); mobileBrand.remove(); mobileActions.replaceWith(opener); png?.remove(); delete document.body.dataset['theme']; }
+    dispose() { rotationUnsubscribe(); historyUnsubscribe(); exportUnsubscribe(); unsubscribe(); abort.abort(); pickObserver.disconnect(); mobileBrand.remove(); mobileActions.replaceWith(opener); png?.remove(); delete document.body.dataset['theme']; }
   };
 }

@@ -303,7 +303,14 @@ async function boot(): Promise<void> {
     });
     cleanup.push(() => history!.dispose(), exporter.subscribe(() => history?.refresh()));
   }
-  if (ui) { panel = createPanel(document.querySelector<HTMLElement>('#panel')!, store, resize, exporter, pg ? undefined : () => { void sharing?.copy(); }, pg ? undefined : active => { freeView = active; }, history); cleanup.push(() => panel!.dispose()); }
+  if (ui) { panel = createPanel(document.querySelector<HTMLElement>('#panel')!, store, resize, exporter, pg ? undefined : () => { void sharing?.copy(); }, pg ? undefined : active => { freeView = active; }, history, {
+    available: () => !pg && !disposed && uploads === 0 && !exporter.get().busy && recoveryState === 'ready',
+    step(horizontal, vertical) {
+      if (pg || disposed || !freeView || uploads !== 0 || exporter.get().busy || recoveryState !== 'ready') return;
+      controller?.endGesture(); panel?.endEdit();
+      history!.run(() => { stage.rotate(horizontal, vertical); render(); });
+    },
+  }); cleanup.push(() => panel!.dispose()); }
   if (ui) {
     const workspaceObserver = new ResizeObserver(() => resize());
     workspaceObserver.observe(document.querySelector('#workspace')!);
