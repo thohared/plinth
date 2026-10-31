@@ -1098,5 +1098,65 @@ seeded failures. Preserve all existing guards/thresholds and owner-only baseline
 CI/PG/PNG and independent fresh-context review remain required. No performance,
 Safari or release PASS is implied.
 
+### P-24: Screenshot zoom and crop position (proposal, 2026-10-31)
+
+Owner requested the third suggested improvement: positioning the screenshot
+inside its device screen. Planning amendment by Codex, T-P10t research F1–F6.
+Effective after owner approval and merge. This specification-only commit is
+not implementation, visual approval or a test PASS.
+
+1. In Screen image, add Zoom (100–300%, step 1%), Horizontal position and
+   Vertical position (-100–100%, step 1%), plus Reset crop. Use labeled
+   keyboard/touch controls with minimum 44px targets and visible values on
+   desktop/mobile. These controls operate only in Fill screen (cover); Fit
+   image (contain) keeps showing the entire centered picture and disables
+   crop controls with an explanation. Switching fit retains crop settings.
+   Canvas gestures retain their camera/device behavior; no new drag mode.
+2. Crop state is `{zoom, x, y}`: finite zoom in [1,3], x/y in [-1,1],
+   default `{zoom:1,x:0,y:0}`. First calculate the existing padded inner
+   screen rectangle. For cover, multiply its existing uniform cover scale
+   by zoom. For the resulting picture dimensions W/H and inner dimensions
+   Iw/Ih, its center offset in screen coordinates (+X right, +Y up) is
+   `(-x*(W-Iw)/2, y*(H-Ih)/2)`. Thus x=-1/1 reveals the source's left/right
+   edge; y=-1/1 reveals its top/bottom edge. Zero centers it. With no overflow
+   on an axis its position has no visible effect; keep the stored value.
+   Clip to the existing inner rectangle and rounded screen mask. Do not
+   expose empty bands inside the inner rectangle, stretch the image, alter
+   padding or resample/replace uploaded pixels. Contain ignores crop values.
+3. Device, geometry, look, scene, pose, output aspect, resize and export
+   preserve crop settings. Reset crop changes only these three values to
+   defaults. Reset look also resets crop; Reset view preserves it. Every
+   successfully accepted new upload starts with centered 100% Fill screen
+   and establishes the P-23 history baseline. Failed, rejected or superseded
+   uploads preserve the prior crop/image/history; recovery retains recoverable
+   CPU state. Initial shared-link loading applies the saved crop to the demo;
+   it is not a new user upload. In-tab navigation preserves the user image.
+4. Narrow exception to P-14(1)/P-21(3–4): permit an optional `crop` object
+   in the internal/legacy v1 DTO with exactly zoom/x/y. Absence means defaults;
+   presence requires all three finite in-range numbers. Reject null, partial,
+   unknown/prototype keys and invalid values before application. Existing v1
+   links remain valid. Readable v2 adds only `imageZoom`, `imageX`, `imageY`;
+   defaults are 1/0/0 and are omitted on output. Preserve precise non-default
+   values, including inactive contain values. All other fixed v2 defaults,
+   duplicate/unknown-key rejection and length limits stay unchanged. Links
+   contain settings only, never image bytes, filenames or image dimensions.
+5. Crop participates in P-23 Undo/Redo as ordinary settings, with one entry
+   per continuous slider gesture or Reset crop action. No-op/invalid edits
+   create no entry. Successful history restore updates the readable URL
+   immediately; crop input otherwise uses existing 250ms coalescing. Copy link
+   snapshots current values immediately. Preview, recovery and PNG use the
+   same image mapping without changing camera framing, color/alpha, texture
+   quality or PNG dimensions. No dependency, persistence or network additions.
+6. Implementation follows in its own research-backed ticket. Acceptance must
+   include independent literal fit/UV expectations for portrait/landscape,
+   equal-aspect, zoom endpoints, padding and source corners; all five devices;
+   contain preservation; reset/device/look/upload/navigation boundaries;
+   old v1/v2 fixtures and malformed crop links; grouped Undo/Redo; actual
+   desktop/mobile upload→crop→Copy/reload→PNG journeys with an asymmetric
+   image. Seed reversed axes, ignored zoom and dropped serialization and
+   require failure. Preserve all existing guards, PG/PNG cases and thresholds,
+   and owner-only baselines. Local CI/build, cloud CI/PG/PNG and an independent
+   fresh-context review remain required; no physical performance/Safari claim.
+
 ## §10 Open TODO(spec)
 - Product-name question resolved by P-19: **Plinth**, effective when that amendment merges.
