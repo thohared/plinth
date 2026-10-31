@@ -248,3 +248,11 @@ body:not(.editor):not(.pg) #panel { max-width:640px; margin:auto; }
 .view-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
 .view-actions button { min-height:44px; }
 .view-actions button[aria-pressed="true"] { border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); }
+
+/* A failed boot keeps help and a manual retry usable without the editor. */
+html:has(.startup-failed),body.startup-failed { height:auto; min-height:100%; overflow:auto; }
+body.startup-failed { display:block; }
+.startup-failed > :not(#startup-error) { display:none!important; }
+#startup-error { max-width:640px; margin:auto; padding:24px; overflow-wrap:anywhere; }
+#startup-error h1 { margin-bottom:16px; }
+#startup-error > button { margin:8px 0 24px; min-height:44px; }

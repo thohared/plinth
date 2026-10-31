@@ -22,6 +22,7 @@ import { createSettingsStore, type Settings, type SettingsPatch, type SettingsSt
 import { fitOutput, type OutputAspect } from './output';
 import { createPanel } from './ui/panel';
 import { COMPOSITIONS, type CompositionId } from './ui/compositions';
+import { showStartupFailure } from './ui/startupFailure';
 import { hostDefaultAspect } from './ui/defaults';
 import { directionToOrbit } from './camera/poses';
 import type { FitMode, ImageState } from './screen/types';
@@ -133,7 +134,9 @@ async function boot(): Promise<void> {
 
   // §4.4.6: never `antialias: true` on the context (vault dead-end on ANGLE-D3D11).
   // SMAA on the composer is the default; MSAA lives on the render target.
-  const renderer = new WebGLRenderer({ canvas, antialias: false, alpha: true });
+  let renderer: WebGLRenderer;
+  try { renderer = new WebGLRenderer({ canvas, antialias: false, alpha: true }); }
+  catch { earlyInput.abort(); showStartupFailure('graphics'); return; }
   const abort = new AbortController();
   const signal = abort.signal;
   const cleanup: (() => void)[] = [() => renderer.dispose(), () => abort.abort(), () => earlyInput.abort()];
@@ -445,8 +448,8 @@ async function boot(): Promise<void> {
   } catch (error) { dispose(); throw error; }
 }
 
-void boot().catch((error: unknown) => {
+void boot().catch(() => {
   earlyInput.abort();
-  showNote(error instanceof Error ? error.message : 'The stage could not start.');
+  showStartupFailure('startup');
 });
 
