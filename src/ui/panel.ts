@@ -1,4 +1,5 @@
 import type { ShareMessage } from '../state/share';
+import type { EditHistory } from '../state/history';
 import { DEVICE_IDS } from '../devices/presets';
 import { invariantViolations, type DeviceSpec } from '../devices/spec';
 import { POSE_IDS } from '../camera/poses';
@@ -38,7 +39,7 @@ export function deviceEditError(spec: DeviceSpec): string | undefined {
   const violation = invariantViolations(spec)[0];
   return violation ? messages[violation] ?? 'Check the device dimensions.' : undefined;
 }
-export function createPanel(root: HTMLElement, store: SettingsStore, layoutChanged: () => void, exporter?: DownloadController, share?: () => void, freeView?: (active: boolean) => void) {
+export function createPanel(root: HTMLElement, store: SettingsStore, layoutChanged: () => void, exporter?: DownloadController, share?: () => void, freeView?: (active: boolean) => void, history?: EditHistory) {
   const abort = new AbortController(); const signal = abort.signal;
   const refreshers: ((state: Settings) => void)[] = [];
   let recovery: RecoveryState = 'ready';
@@ -61,6 +62,30 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   const opener = document.querySelector<HTMLButtonElement>('#settings-open')!;
   const error = document.createElement('p'); error.id = 'settings-error'; error.setAttribute('role', 'status'); error.setAttribute('aria-live', 'polite');
   const errors = new Map<HTMLElement, string>();
+  let editing: HTMLElement | undefined;
+  let pointerEdit = false, keyEdit = false;
+  function endEdit(): void { editing = undefined; pointerEdit = false; keyEdit = false; history?.end(); }
+  function attemptEdit(control: HTMLElement, action: () => void, continuous = false): void {
+    attempt(control, () => {
+      if ((editing && editing !== control) || !continuous) endEdit();
+      if (continuous) { editing = control; history?.begin(); }
+      if (history) history.run(action); else action();
+    });
+  }
+  function continuous(input: HTMLInputElement): void {
+    input.addEventListener('pointerdown', () => { if (editing !== input) endEdit(); pointerEdit = true; }, {signal});
+    input.addEventListener('keydown', event => {
+      if (input.type === 'range' && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown'].includes(event.key)) {
+        if (editing && editing !== input) endEdit(); keyEdit = true;
+      }
+    }, {signal});
+    input.addEventListener('change', () => { if (!pointerEdit && !keyEdit) endEdit(); }, {signal});
+    input.addEventListener('blur', endEdit, {signal});
+  }
+  window.addEventListener('pointerup', () => { if (pointerEdit) endEdit(); }, {signal});
+  window.addEventListener('pointercancel', () => { if (pointerEdit) endEdit(); }, {signal});
+  window.addEventListener('keyup', () => { if (keyEdit) endEdit(); }, {signal});
+  window.addEventListener('blur', endEdit, {signal});
   function clearError(control?: HTMLElement): void {
     for (const field of control ? [control] : [...errors.keys()]) {
       errors.delete(field); field.removeAttribute('aria-invalid'); field.removeAttribute('aria-describedby');
@@ -85,24 +110,26 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
     const id = `control-${key}`; label(parent, title, id);
     const input = document.createElement('select'); input.id = id;
     for (const value of values) { const option = document.createElement('option'); option.value = value; option.textContent = names[value] ?? value; if (value === 'custom') option.disabled = true; input.append(option); }
-    input.addEventListener('change', () => attempt(input, () => write(input.value)), { signal });
+    input.addEventListener('change', () => attemptEdit(input, () => write(input.value)), { signal });
     parent.append(input); refreshers.push(state => { input.value = read(state); }); return input;
   }
   function numeric(parent: HTMLElement, key: string, title: string, min: number, max: number, step: number, read: (state: Settings) => number, write: (value: number) => void, type = 'range', suffix = '%') {
     const id = `control-${key}`; const l = label(parent, title, id); const output = document.createElement('output'); output.htmlFor = id; l.append(output);
     const input = document.createElement('input'); input.type = type; input.id = id; input.min = String(min); input.max = String(max); input.step = String(step);
-    input.addEventListener('input', () => attempt(input, () => {
+    continuous(input);
+    input.addEventListener('input', () => attemptEdit(input, () => {
       const value = input.valueAsNumber;
       if (!validNumericEdit(value, min, max, step)) throw new Error(`${title}: ${min}–${max} ${suffix}, step ${step}.`);
       write(value);
-    }), { signal });
+    }, true), { signal });
     input.addEventListener('keydown', event => { if (event.key === 'Escape' && input.hasAttribute('aria-invalid')) { event.stopPropagation(); input.value = String(read(store.get())); clearError(input); } }, { signal });
     refreshers.push(state => { const value = read(state); if (!input.hasAttribute('aria-invalid')) input.value = String(value); output.value = `${Math.round(value * 100) / 100}${suffix}`; });
     parent.append(input); return input;
   }
   function colour(parent: HTMLElement, key: string, title: string, read: (state: Settings) => string, write: (value: string) => void) {
     const id = `control-${key}`; label(parent, title, id); const input = document.createElement('input'); input.id = id; input.type = 'color';
-    input.addEventListener('input', () => attempt(input, () => write(input.value)), { signal });
+    continuous(input);
+    input.addEventListener('input', () => attemptEdit(input, () => write(input.value), true), { signal });
     refreshers.push(state => { input.value = read(state); }); parent.append(input); return input;
   }
   const image = section('Your image');
@@ -116,12 +143,23 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   opener.disabled = false;
   const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = 'PNG, JPG or WebP · Drop or paste an image. Everything stays in this tab.'; image.append(hint);
   const looks = section('Ready-made looks'); const grid = document.createElement('div'); grid.className = 'looks'; looks.append(grid);
+  let historyUnsubscribe = (): void => {};
+  if (history) {
+    const actions = document.createElement('div'); actions.className = 'view-actions'; actions.setAttribute('role', 'group'); actions.setAttribute('aria-label', 'Edit history');
+    const undo = document.createElement('button'), redo = document.createElement('button');
+    undo.type = redo.type = 'button'; undo.id = 'undo'; redo.id = 'redo'; undo.textContent = 'Undo'; redo.textContent = 'Redo';
+    undo.addEventListener('click', () => attempt(undo, () => { history.undo(); }), {signal});
+    redo.addEventListener('click', () => attempt(redo, () => { history.redo(); }), {signal});
+    const refreshHistory = () => { const value = history.get(); undo.disabled = !value.undo; redo.disabled = !value.redo; };
+    historyUnsubscribe = history.subscribe(refreshHistory); refreshHistory();
+    actions.append(undo, redo); looks.before(actions);
+  }
   grid.setAttribute('role', 'group'); grid.setAttribute('aria-label', 'Ready-made looks');
   for (const row of COMPOSITIONS) {
     const button = document.createElement('button'); button.type = 'button'; button.dataset.composition = row.id;
     const img = document.createElement('img'); img.src = `compositions/${row.id}.png`; img.alt = ''; img.width = 480; img.height = 300;
     const caption = document.createElement('span'); caption.textContent = row.name; button.append(img, caption);
-    button.addEventListener('click', () => attempt(button, () => { store.compose(row.id); setFree(false); }), { signal }); grid.append(button);
+    button.addEventListener('click', () => attemptEdit(button, () => { store.compose(row.id); setFree(false); }), { signal }); grid.append(button);
     refreshers.push(state => button.setAttribute('aria-pressed', String(state.composition === row.id)));
   }
   const view = section('Device and framing');
@@ -135,7 +173,7 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
     turn.setAttribute('aria-describedby', hint.id);
     setFree = active => { free = active; freeView(active); turn.setAttribute('aria-pressed', String(active)); hint.textContent = active ? 'Drag the preview to turn the device. Every side is available.' : 'Turn on Free view to see the back and underside.'; };
     turn.addEventListener('click', () => setFree(!free), { signal });
-    resetView.addEventListener('click', () => attempt(resetView, () => { store.apply({ pose: 'hero' }); setFree(false); }), { signal });
+    resetView.addEventListener('click', () => attemptEdit(resetView, () => { store.apply({ pose: 'hero' }); setFree(false); }), { signal });
     actions.append(turn, resetView); view.append(actions, hint); setFree(false);
   }
   select(view, 'aspect', 'Aspect ratio', ASPECT_IDS, s => s.aspect, value => store.apply({ aspect: value as Settings['aspect'] }));
@@ -176,7 +214,7 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
     const link = document.createElement('a'); link.id = 'png-download'; link.textContent = 'Download PNG'; link.hidden = true;
     const reload = document.createElement('button'); reload.id = 'png-reload'; reload.type = 'button'; reload.textContent = 'Reload page'; reload.hidden = true;
     reload.addEventListener('click', () => window.location.reload(), { signal });
-    scale.addEventListener('change', () => attempt(scale, () => store.apply({pngScale:Number(scale.value) as ExportScale})), {signal});
+    scale.addEventListener('change', () => attemptEdit(scale, () => store.apply({pngScale:Number(scale.value) as ExportScale})), {signal});
     button.addEventListener('click', () => { if (recovery === 'ready') void exporter.run(store.get().pngScale).catch(() => {}); }, { signal });
     link.addEventListener('click', () => { status.textContent = 'Download started. Check your downloads.'; }, { signal });
     const feedback = document.createElement('div'); feedback.id = 'png-feedback';
@@ -217,6 +255,7 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
     const toggle = document.createElement('button'); toggle.type = 'button'; toggle.id = 'shortcut-help'; toggle.textContent = 'Show keyboard shortcuts'; toggle.setAttribute('aria-expanded','false'); toggle.setAttribute('aria-controls','shortcut-keys');
     const content = document.createElement('p'); content.id = 'shortcut-keys'; content.hidden = true;
     content.textContent = '1–5: Phone, Tablet, Laptop, Browser, Card. Q/W/E/R: Front, Three-quarter, Top, Lean. Shift+E: Prepare PNG at the selected size, then choose Download PNG. Shortcuts stay inactive while typing.';
+    if (history) content.textContent += ' Ctrl/⌘+Z: Undo. Ctrl/⌘+Shift+Z or Ctrl+Y: Redo.';
     toggle.addEventListener('click', () => { content.hidden = !content.hidden; toggle.setAttribute('aria-expanded',String(!content.hidden)); }, {signal});
     help.append(toggle,content);
   }
@@ -229,8 +268,8 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
   refreshers.push(state => { hinge.disabled = state.spec.standType !== 'hinge'; });
   select(advanced, 'tone', 'Tone mapping', ['agx', 'aces'], s => s.tone, value => store.apply({ tone: value as Settings['tone'] }));
   const msaaLabel = label(advanced, 'MSAA preview smoothing', 'control-msaa'); const msaa = document.createElement('input'); msaa.id = 'control-msaa'; msaa.type = 'checkbox'; msaaLabel.prepend(msaa);
-  msaa.addEventListener('change', () => attempt(msaa, () => store.apply({ msaa: msaa.checked })), { signal }); refreshers.push(s => { msaa.checked = s.msaa; });
-  const reset = document.createElement('button'); reset.type = 'button'; reset.id = 'reset'; reset.textContent = 'Reset look'; reset.addEventListener('click', () => attempt(reset, () => { store.reset(); setFree(false); }), { signal }); root.append(reset, error, utilities);
+  msaa.addEventListener('change', () => attemptEdit(msaa, () => store.apply({ msaa: msaa.checked })), { signal }); refreshers.push(s => { msaa.checked = s.msaa; });
+  const reset = document.createElement('button'); reset.type = 'button'; reset.id = 'reset'; reset.textContent = 'Reset look'; reset.addEventListener('click', () => attemptEdit(reset, () => { store.reset(); setFree(false); }), { signal }); root.append(reset, error, utilities);
   // Keep the final utility control reachable at the bottom of the scroll area.
   if (about) utilities.prepend(about);
   let previousPose = store.get().pose;
@@ -260,13 +299,13 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
     else if (media.matches && !document.body.classList.contains('sheet-open') && root.contains(active)) opener.focus();
   };
   media.addEventListener('change',adjustFocus,{signal});
-  return { setOpen, showShare, showAddressNotice, exitFreeView: () => setFree(false),
+  return { setOpen, showShare, showAddressNotice, endEdit, exitFreeView: () => setFree(false),
     setRecovery(value: RecoveryState) {
       recovery = value;
       syncMobilePick();
       for (const element of root.children) if (element instanceof HTMLElement && element !== png && element.tagName !== 'HEADER') element.inert = value !== 'ready';
       refreshExport();
     },
-    dispose() { exportUnsubscribe(); unsubscribe(); abort.abort(); pickObserver.disconnect(); mobileBrand.remove(); mobileActions.replaceWith(opener); png?.remove(); delete document.body.dataset['theme']; }
+    dispose() { historyUnsubscribe(); exportUnsubscribe(); unsubscribe(); abort.abort(); pickObserver.disconnect(); mobileBrand.remove(); mobileActions.replaceWith(opener); png?.remove(); delete document.body.dataset['theme']; }
   };
 }
