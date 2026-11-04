@@ -175,12 +175,12 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
     turn.setAttribute('aria-describedby', hint.id);
     const steps = document.createElement('div'); steps.className = 'view-actions'; steps.setAttribute('role', 'group'); steps.setAttribute('aria-label', 'Turn device');
     const buttons: HTMLButtonElement[] = [];
-    const enabled = () => free && recovery === 'ready' && Boolean(rotation?.available());
-    const deltas: Record<string, [number, number]> = { ArrowLeft: [-Math.PI / 36, 0], ArrowRight: [Math.PI / 36, 0], ArrowUp: [0, -Math.PI / 36], ArrowDown: [0, Math.PI / 36] };
+    const enabled = () => recovery === 'ready' && Boolean(rotation?.available());
+    const deltas: Record<string, [number, number]> = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] };
     const step = (button: HTMLButtonElement, key: string): boolean => {
       if (!enabled()) return false;
       endEdit();
-      attempt(button, () => rotation!.step(...deltas[key]!));
+      attempt(button, () => { rotation!.step(...deltas[key]!); setFree(false); });
       return true;
     };
     for (const [direction, key] of [['left', 'ArrowLeft'], ['right', 'ArrowRight'], ['up', 'ArrowUp'], ['down', 'ArrowDown']] as const) {
@@ -197,7 +197,7 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
     refreshRotation = () => { for (const button of buttons) button.disabled = !enabled(); };
     rotationUnsubscribe = history?.subscribe(refreshRotation) ?? (() => {});
     turn.disabled = !freeView;
-    setFree = active => { free = active; freeView?.(active); refreshRotation(); turn.setAttribute('aria-pressed', String(active)); hint.textContent = active ? 'Drag the preview or use the turn buttons. Arrow keys work while a turn button is focused.' : 'Turn on Free view to enable the turn buttons and see every side.'; };
+    setFree = active => { free = active; freeView?.(active); refreshRotation(); turn.setAttribute('aria-pressed', String(active)); hint.textContent = active ? 'Drag to rotate freely. Turn buttons return to a limited viewing angle.' : 'Turn buttons select the furthest viewing angle. Arrow keys work while a turn button is focused.'; };
     turn.addEventListener('click', () => setFree(!free), { signal });
     resetView.addEventListener('click', () => attemptEdit(resetView, () => { store.apply({ pose: 'hero' }); setFree(false); }), { signal });
     actions.append(turn, resetView); view.append(actions, steps, hint); setFree(false);

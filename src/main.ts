@@ -306,9 +306,22 @@ async function boot(): Promise<void> {
   if (ui) { panel = createPanel(document.querySelector<HTMLElement>('#panel')!, store, resize, exporter, pg ? undefined : () => { void sharing?.copy(); }, pg ? undefined : active => { freeView = active; }, history, {
     available: () => !pg && !disposed && uploads === 0 && !exporter.get().busy && recoveryState === 'ready',
     step(horizontal, vertical) {
-      if (pg || disposed || !freeView || uploads !== 0 || exporter.get().busy || recoveryState !== 'ready') return;
+      if (pg || disposed || uploads !== 0 || exporter.get().busy || recoveryState !== 'ready') return;
       controller?.endGesture(); panel?.endEdit();
-      history!.run(() => { stage.rotate(horizontal, vertical); render(); });
+      const current = directionToOrbit(stage.snapshot().custom.direction);
+      const targetAzimuth = horizontal === 0 ? current.azimuth : horizontal * 75 * Math.PI / 180;
+      const targetElevation = vertical === 0 ? current.elevation : (vertical > 0 ? 85 : 5) * Math.PI / 180;
+      const da = targetAzimuth - current.azimuth, de = targetElevation - current.elevation;
+      if (Math.abs(da) < 1e-12 && Math.abs(de) < 1e-12) {
+        if (stage.isTransitioning()) {
+          restoringEdit = true;
+          try { store.hydrate(snapshotState(store.get(), true)); render(); }
+          finally { restoringEdit = false; }
+          navigation?.changed();
+        }
+        return;
+      }
+      history!.run(() => { stage.orbit(da, de); render(); });
     },
   }); cleanup.push(() => panel!.dispose()); }
   if (ui) {
