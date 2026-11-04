@@ -14,14 +14,16 @@ async function open(page:Page,device='phone') {
   if(seed)await page.route('**/src/ui/panel.ts',async route=>{
     const response=await route.fetch(),source=await response.text();
     const body=seed==='axis'?source.replace('ArrowRight: [1, 0]','ArrowRight: [-1, 0]'):
+      seed==='double'?source.replace('rotation.step(...deltas[key]);','rotation.step(...deltas[key]); rotation.step(...deltas[key]);'):
       seed==='gate'?source.replace("const enabled = () => recovery","const enabled = () => free && recovery"):
       seed==='leak'?source.replace('button.addEventListener("keydown",','window.addEventListener("keydown",').replace('document.activeElement !== button ||',''):
       source;
     if(!['history','rotation'].includes(seed))expect(body).not.toBe(source);await route.fulfill({response,body});
   });
-  if(seed==='history'||seed==='rotation')await page.route('**/src/main.ts',async route=>{
+  await page.route('**/src/main.ts',async route=>{
     const response=await route.fetch(),source=await response.text();
-    const body=seed==='rotation'?source.replace('stage.orbit(da, de);','stage.rotate(da, de);'):source.replace(/history\.run\(\(\) => \{\s*stage\.orbit\(da, de\);\s*render\(\);\s*\}\);/, 'stage.orbit(da, de); render();');
+    const instrumented=source.replace('step(horizontal, vertical) {','step(horizontal, vertical) { window.endpointCalls = (window.endpointCalls || 0) + 1;');
+    const body=seed==='rotation'?instrumented.replace('stage.orbit(da, de);','stage.rotate(da, de);'):seed==='history'?instrumented.replace(/history\.run\(\(\) => \{\s*stage\.orbit\(da, de\);\s*render\(\);\s*\}\);/, 'stage.orbit(da, de); render();'):instrumented;
     expect(body).not.toBe(source);await route.fulfill({response,body});
   });
   await page.goto('about:blank');
@@ -32,6 +34,7 @@ async function open(page:Page,device='phone') {
 }
 const quaternion=(page:Page)=>page.evaluate(()=>window.__plinth.getSettings().custom.rotation.toArray());
 const direction=(page:Page)=>page.evaluate(()=>window.__plinth.getSettings().custom.direction.toArray());
+const calls=(page:Page)=>page.evaluate(()=>(window as unknown as {endpointCalls:number}).endpointCalls);
 const orbit=(azimuth:number,elevation:number)=>{const a=azimuth*Math.PI/180,e=elevation*Math.PI/180;return [Math.sin(a)*Math.cos(e),Math.sin(e),Math.cos(a)*Math.cos(e)];};
 async function at(page:Page,a:number,e:number){close(await direction(page),orbit(a,e));close(await quaternion(page),[0,0,0,1]);}
 function close(actual:number[],expected:number[]) {actual.forEach((n,i)=>expect(n).toBeCloseTo(expected[i]!,10));}
@@ -47,14 +50,14 @@ it.each([1280,390])('P-26 real buttons, native keys, history, Copy/reload and PN
     await open(page);expect(await page.locator('#turn-right').isEnabled()).toBe(true);
     await page.locator('#image-file').setInputFiles('public/demo.png');await page.waitForFunction(()=>window.__plinth.getImage()?.identity==='user');
     const image=await page.evaluate(()=>window.__plinth.getImage());
-    await page.locator('#turn-right').click();await at(page,75,5);
+    await page.locator('#turn-right').click();await at(page,75,5);expect(await calls(page)).toBe(1);
     await page.locator('#turn-right').click();await at(page,75,5);
     expect(await page.locator('#undo').isEnabled()).toBe(true);await page.locator('#undo').click();await at(page,0,5);expect(await page.locator('#undo').isDisabled()).toBe(true);
     await page.locator('#redo').click();await at(page,75,5);
     expect(await page.evaluate(()=>window.__plinth.getImage())).toEqual(image);
     await page.locator('#free-view').click();await page.locator('#turn-left').click();await at(page,-75,5);expect(await page.locator('#free-view').getAttribute('aria-pressed')).toBe('false');
-    await page.locator('#turn-up').focus();await page.keyboard.down('Enter');await page.keyboard.down('Enter');await page.keyboard.down('Enter');await page.keyboard.up('Enter');await at(page,-75,85);
-    await page.locator('#turn-down').focus();await page.keyboard.down(' ');await page.keyboard.down(' ');await page.keyboard.up(' ');await at(page,-75,5);
+    const enterCount=await calls(page);await page.locator('#turn-up').focus();await page.keyboard.down('Enter');await page.keyboard.down('Enter');await page.keyboard.down('Enter');await page.keyboard.up('Enter');await at(page,-75,85);expect(await calls(page)).toBe(enterCount+1);
+    const spaceCount=await calls(page);await page.locator('#turn-down').focus();await page.keyboard.down(' ');await page.keyboard.down(' ');await page.keyboard.up(' ');await at(page,-75,5);expect(await calls(page)).toBe(spaceCount+1);
     await page.locator('#turn-right').focus();await page.keyboard.press('Enter');await page.keyboard.press('Enter');await at(page,75,5);
     await page.locator('#turn-left').focus();await page.keyboard.press(' ');await page.keyboard.press(' ');await at(page,-75,5);
     await page.locator('#turn-right').focus();await page.keyboard.down(' ');await page.locator('#copy-link').focus();await page.keyboard.up(' ');await at(page,-75,5);
@@ -78,7 +81,7 @@ it.each([1280,390])('P-26 real buttons, native keys, history, Copy/reload and PN
     const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#png-download').click()]);
     const png=PNG.sync.read(await readFile((await download.path())!));expect([png.width,png.height]).toEqual([1920,640]);expect(png.data.equals(originalPng.data)).toBe(true);
     if(process.env['PLINTH_STEPS_EVIDENCE']) {await mkdir(process.env['PLINTH_STEPS_EVIDENCE'],{recursive:true});await page.locator('#turn-right').scrollIntoViewIfNeeded();await page.screenshot({path:`${process.env['PLINTH_STEPS_EVIDENCE']}/steps-${width}.png`});}
-    expect(await page.locator('#turn-right').isEnabled()).toBe(true);const saved=await direction(page);await page.evaluate(()=>window.__plinth.dispose());await page.locator('#turn-right').dispatchEvent('click');await page.locator('#turn-right').dispatchEvent('keydown',{key:'ArrowRight'});close(await direction(page),saved);
+    expect(await page.locator('#turn-right').isEnabled()).toBe(true);const saved=await direction(page);await page.evaluate(()=>window.__plinth.dispose());await page.locator('#turn-left').dispatchEvent('click');await page.locator('#turn-left').dispatchEvent('keydown',{key:'ArrowLeft'});close(await direction(page),saved);
   }finally{await page.close();}
 },180000);
 it('P-26 literal endpoints on all five devices',async()=>{
@@ -138,4 +141,16 @@ it('P-26 rejected orbit does not add history or change the pose',async()=>{
     await open(page);const before=await direction(page);await page.locator('#free-view').click();await page.locator('#turn-right').click();
     close(await direction(page),before);expect(await page.locator('#undo').isDisabled()).toBe(true);expect(await page.locator('#settings-error').innerText()).toContain('Seeded rejected orbit');
   }finally{await page.close();}
+},180000);
+
+it('P-26 same endpoint freezes a named transition without a phantom edit',async()=>{
+ const page=await browser.newPage();try{
+  await page.clock.install({time:'2026-01-01T00:00:00Z'});await open(page);await page.clock.pauseAt('2026-01-02T00:00:00Z');
+  await page.locator('#turn-right').click();await at(page,75,5);
+  await page.locator('#control-pose').selectOption('lean');
+  await page.locator('#turn-right').click();await at(page,75,5);
+  expect(await page.evaluate(()=>window.__plinth.advancePose(1))).toBe(false);await at(page,75,5);
+  await page.locator('#undo').click();await at(page,75,5);
+  await page.locator('#undo').click();await at(page,0,5);expect(await page.locator('#undo').isDisabled()).toBe(true);
+ }finally{await page.close();}
 },180000);

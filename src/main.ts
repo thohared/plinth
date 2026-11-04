@@ -312,7 +312,10 @@ async function boot(): Promise<void> {
       const targetAzimuth = horizontal === 0 ? current.azimuth : horizontal * 75 * Math.PI / 180;
       const targetElevation = vertical === 0 ? current.elevation : (vertical > 0 ? 85 : 5) * Math.PI / 180;
       const da = targetAzimuth - current.azimuth, de = targetElevation - current.elevation;
-      if (Math.abs(da) < 1e-12 && Math.abs(de) < 1e-12) return;
+      if (Math.abs(da) < 1e-12 && Math.abs(de) < 1e-12) {
+        if (stage.isTransitioning()) { store.hydrate(snapshotState(store.get(), true)); render(); }
+        return;
+      }
       history!.run(() => { stage.orbit(da, de); render(); });
     },
   }); cleanup.push(() => panel!.dispose()); }
