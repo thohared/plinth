@@ -1215,5 +1215,49 @@ behavior only; implementation follows in a separate ticket.
    build, cloud CI/PG/PNG, inspected images and independent fresh-context review
    remain required. Planning is not runtime, Safari or performance PASS.
 
+### P-26: Turn buttons select constrained view endpoints (2026-11-04)
+
+Owner correction to P-25, confirmed after reviewing the shipped controls:
+one activation selects the farthest allowed ordinary viewing angle in that
+direction, without requiring Free view. Research: T-P10w F1–F5, Codex.
+This standalone planning amendment becomes effective on merge; runtime work
+and independent acceptance follow separately.
+
+1. Replace P-25's 5° device-rotation actions and Free-view prerequisite.
+   Turn left selects camera azimuth -75°, Turn right +75°, Turn up elevation
+   85°, Turn down 5°, matching the existing ordinary orbit limits. Change only
+   the selected orbit coordinate; preserve the other coordinate and the actual
+   displayed device quaternion. Interrupt an active transition at its displayed
+   state and apply the endpoint immediately. Do not accumulate 5° steps.
+2. Buttons work with Free view off. A handled endpoint selection exits Free view;
+   ordinary dragging subsequently remains ordinary orbit. Free view itself
+   remains available as the separate existing unrestricted rotation tool.
+   Use ordinary orbit framing, preserving an existing framing policy where
+   applicable; do not introduce rotation-space reservation just for this action.
+   No new zoom, pan, image crop, quaternion rotation or geometry change. Aspect,
+   padding and existing fit-to-frame behavior remain in force; no promise of
+   identical projected size across different viewing angles is introduced.
+3. Preserve P-25's four native buttons, 44px targets, focus visibility and local
+   arrow-key mapping. Enter/Space activates natively once; repeat, modifier,
+   IME/defaultPrevented and editable-field boundaries remain unchanged.
+   Replace the helper text so it describes endpoint selection, not a Free-view
+   prerequisite. Disable actions while upload/export/recovery/PG prevents edits;
+   validate these gates again in the handler. Reset view remains unchanged.
+4. Each changed endpoint is one P-23 Undo/Redo edit, including an interrupted
+   transition's actual prior view. Finish pending gestures first. Repeated
+   selection of the same endpoint creates no history entry. Free-view mode is
+   still excluded from history. Preserve current image and settings, existing
+   custom pose/framing serialization, URL coalescing, Copy/reload, recovery and
+   PNG agreement. No new schema, dependencies, persistence or network activity.
+5. Implementation must verify literal -75/+75/5/85 degree endpoints on all five
+   devices, unchanged other axis/device quaternion, transition interruption,
+   endpoint idempotence, mode exit, busy/PG and keyboard boundaries, Undo/Redo,
+   actual desktop/mobile actions and Copy/reload/downloaded PNG agreement.
+   Seed wrong endpoint/sign, retained Free-view gate and unintended device
+   rotation; corresponding tests must fail. Only assertions specifically
+   superseded by this amendment may be replaced with the new contract; preserve
+   equivalent coverage and all unrelated tests/thresholds/owner-only fixtures.
+   Linux CI/build, cloud CI/PG/PNG and independent review remain required.
+
 ## §10 Open TODO(spec)
 - Product-name question resolved by P-19: **Plinth**, effective when that amendment merges.
