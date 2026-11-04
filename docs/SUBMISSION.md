@@ -1,7 +1,9 @@
 # Plinth: submission draft
 
 Status: PREPARED COPY, NOT SUBMITTED. Product language: English.
-Application snapshot: `8577219ff16358820770fdd658931feda44b4c06`, 2026-09-30.
+Historical prepared-copy snapshot: `8577219ff16358820770fdd658931feda44b4c06`, 2026-09-30.
+This copy does not establish a current entry window or submission. Current
+implementation status is in [HANDOFF.md](HANDOFF.md).
 Required release evidence remains tracked in [RELEASE-CHECKLIST.md](RELEASE-CHECKLIST.md).
 
 - Product: Plinth

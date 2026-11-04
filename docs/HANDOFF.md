@@ -1,28 +1,42 @@
 # Plinth — handoff brief for any model (Claude or ChatGPT)
 
-## Current entry point: 2026-09-30
+## Current entry point: 2026-11-04
 
-Fetched application main: `8577219ff16358820770fdd658931feda44b4c06`, PR #42
-merged and deployed. Start with [RELEASE-CHECKLIST.md](RELEASE-CHECKLIST.md),
-[PERFORMANCE-TESTING.md](PERFORMANCE-TESTING.md) and
-[SUBMISSION.md](SUBMISSION.md), then the current specification and ticket.
+Verified main: `459a0ac8aa607cc4d7e587f6e78d75a9856736b4` (merged PR #61).
+This is a dated source snapshot, not a new deployment or release certification.
+Start with [RELEASE-CHECKLIST.md](RELEASE-CHECKLIST.md),
+[PERFORMANCE-TESTING.md](PERFORMANCE-TESTING.md), then the assigned ticket.
+[SUBMISSION.md](SUBMISSION.md) remains historical prepared copy.
 
-Plinth currently exports PNG with five devices, four lighting presets,
-responsive controls, scene links and manual Free view. Every newly accepted
-screenshot starts at Fill screen; current-image manual fitting still works.
-P-19 is the active PNG competition contract. Motion preview/video export are
-deferred. T-P10c's diagnostic collector and T-P10d's upload fix are reviewed and
-merged. Full-frame performance evidence, physical desktop/phone measurements,
-actual Safari verification and the real walkthrough remain open. The recorded
-physical preflight collected 0/5 runs because it ran in a cloud container.
-Post-merge CI 36769509852 subsequently failed the T-P10d shared-state/upload
-browser assertion (106 guards passed, one failed); the checklist records the
-unresolved result. Earlier successful runs do not close that later failure.
+Plinth exports PNG with five generic devices, four lighting presets/looks,
+responsive controls, readable scene links and manual Free view. Each accepted
+upload starts at Fill screen. Startup recovery (#57) and Undo/Redo (#59) are
+merged. The guide and search/discovery work (#48–56) are also on main.
+P-19 keeps motion preview/video deferred.
 
-Do not restart the old T-P5 sequence or treat the historical statements below
-as current implementation status. Fetch and verify current head/checks before
-new work. All research, single-writer, independent-review, baseline ownership,
-Linux-default and no-paid-API rules remain in force. The owner submits the entry.
+| Improvement | State at this snapshot |
+| --- | --- |
+| Startup error / Reload | Implemented, PR #57 merged. |
+| Undo/Redo | Implemented, PR #59 merged under P-23. |
+| Screenshot zoom / position | P-24 merged in PR #60; runtime implementation pending. |
+| Free view buttons / keys | P-25 merged in PR #61; implementation [PR #62](https://github.com/thohared/plinth/pull/62) open at `f82c03bede6fa00ad1a99a8a54a8d5cf8074cced`, independently reviewed, awaiting owner merge. |
+| Documentation / stale intake | T-P10v, this documentation change. |
+
+PR #42's historical post-merge CI failure remains a failed run. The subsequent
+synchronization correction was accepted and merged in PR #44; the checklist
+links its completed CI/PG/PNG and independent review. Do not reopen that
+resolved investigation from the old handoff. Issue #23's superseded intake is
+mapped to merged work and remaining obligations in the checklist.
+
+Full-frame performance evidence, physical desktop/phone measurements, actual
+Safari verification and a real walkthrough remain pending. The recorded physical
+preflight collected 0/5 runs in a cloud container. No submission is established
+by this update; September competition dates are historical, not a current plan.
+
+Fetch and verify current head/checks before work. Do not restart the historical
+T-P5 sequence below. Research, single-writer, independent-review, owner-only
+baseline, Linux-default and no-paid-API rules remain in force. The owner decides
+merges and any submission.
 
 ## Historical September 11 handoff
 
