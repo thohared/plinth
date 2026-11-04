@@ -173,7 +173,9 @@ Pointer rotation slows near the legal view limits; it does not rotate under the 
 ### Viewing every side
 
 In **Device and framing**, turn on **Free view**, then drag the preview with one
-finger or the mouse. It turns the model continuously to reveal cameras, charging
+finger or the mouse, or use **Turn left/right/up/down** for 5° steps. Arrow
+keys also turn the device while a turn button is focused; Enter/Space activate
+the focused button. Each step supports Undo/Redo. Dragging turns the model continuously to reveal cameras, charging
 ports, speakers and the laptop underside. **Reset view** returns to Three-quarter;
 selecting a named angle or a ready-made look also leaves Free view. The resulting
 custom orientation is included in scene links and PNGs; the interaction toggle
