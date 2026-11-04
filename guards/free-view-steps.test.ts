@@ -148,7 +148,12 @@ it('P-26 same endpoint freezes a named transition without a phantom edit',async(
   await page.clock.install({time:'2026-01-01T00:00:00Z'});await open(page);await page.clock.pauseAt('2026-01-02T00:00:00Z');
   await page.locator('#turn-right').click();await at(page,75,5);
   await page.locator('#control-pose').selectOption('lean');
+  const namedHash=await page.evaluate(()=>location.hash);
   await page.locator('#turn-right').click();await at(page,75,5);
+  expect(await page.evaluate(()=>location.hash)).toBe(namedHash);
+  await page.clock.runFor(249);expect(await page.evaluate(()=>location.hash)).toBe(namedHash);
+  // The already-scheduled controller frame can restart the ordinary debounce.
+  await page.clock.runFor(100);expect(await page.evaluate(()=>location.hash)).toContain('pose=custom');
   expect(await page.evaluate(()=>window.__plinth.advancePose(1))).toBe(false);await at(page,75,5);
   await page.locator('#undo').click();await at(page,75,5);
   await page.locator('#undo').click();await at(page,0,5);expect(await page.locator('#undo').isDisabled()).toBe(true);

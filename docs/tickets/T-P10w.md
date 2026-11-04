@@ -48,3 +48,13 @@ rotation wrong direction, history unavailable Undo, leak wrong slider value,
 double callback count 2 instead of 1. They are not browser/setup failures.
 These Chromium143 focused results supplement, not replace, normal pinned-browser
 cloud CI/PG/PNG and final independent review. Full local CI is not claimed.
+
+Second review found the freeze path's hydrate selection notification wrote the
+URL immediately. Suppress that internal notification with the existing
+restoringEdit guard and explicitly schedule normal navigation.changed(). The
+expanded paused-clock case checks no synchronous write, unchanged hash through
+249ms and custom hash after349ms (the already-scheduled controller frame can
+restart the normal250ms debounce). It passes in9.49s; the initial exact250ms
+expectation failed on that existing controller reschedule, not a stale pose.
+Typecheck/build pass. Earlier seven-case/six-seed evidence predates only this
+narrow coalescing fix; final pinned cloud acceptance remains required.
