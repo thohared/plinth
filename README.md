@@ -172,14 +172,18 @@ Pointer rotation slows near the legal view limits; it does not rotate under the 
 
 ### Viewing every side
 
-In **Device and framing**, turn on **Free view**, then drag the preview with one
-finger or the mouse, or use **Turn left/right/up/down** for 5° steps. Arrow
-keys also turn the device while a turn button is focused; Enter/Space activate
-the focused button. Each step supports Undo/Redo. Dragging turns the model continuously to reveal cameras, charging
-ports, speakers and the laptop underside. **Reset view** returns to Three-quarter;
-selecting a named angle or a ready-made look also leaves Free view. The resulting
-custom orientation is included in scene links and PNGs; the interaction toggle
-itself is not saved. All details are generic procedural geometry and work offline.
+In **Device and framing**, **Turn left/right/up/down** selects the furthest
+ordinary viewing angle in one click, without enabling Free view. Arrow keys
+work while a turn button is focused; Enter/Space activates the focused button.
+Each changed angle supports Undo/Redo. Selecting the same limit again does not
+add another edit.
+
+For continuous device rotation, turn on **Free view** and drag the preview with
+one finger or the mouse. This reveals cameras, charging ports, speakers and the
+laptop underside. Turn buttons leave Free view. **Reset view** returns to
+Three-quarter; named angles and ready-made looks also leave Free view. Custom
+views are included in scene links and PNGs; the input mode itself is not saved.
+All details are generic procedural geometry and work offline.
 
 ## Release and performance evidence
 
