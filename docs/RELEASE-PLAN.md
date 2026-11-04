@@ -1,6 +1,17 @@
 # Plinth: Build Games release plan
 
-## Current PNG release plan (2026-09-30)
+## Current routing (2026-11-04)
+
+Source main is `459a0ac8aa607cc4d7e587f6e78d75a9856736b4`. Use
+[HANDOFF.md](HANDOFF.md) for current implementation status and
+[RELEASE-CHECKLIST.md](RELEASE-CHECKLIST.md) for evidence and remaining work.
+PR #44 closed the historical upload-guard investigation. Startup recovery and
+Undo/Redo are merged; crop is planned only and Free view PR #62 remains open.
+The September plans below are dated records, not live scheduling or eligibility
+claims. Their outstanding performance/Safari/media obligations are preserved
+in the current checklist. P-19 still governs the PNG scope.
+
+## PNG release plan recorded 2026-09-30 (historical snapshot)
 
 Owner approved the six-part PNG scope/performance proposal on 2026-09-30
 at 01:25 Europe/Belgrade. P-19 was independently reviewed and merged in

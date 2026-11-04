@@ -2,16 +2,14 @@
 
 Every ticket on the §8 ladder leaves three artefacts, all in the repo, none only in a chat:
 
-Current release direction (2026-09-11):
-[`../RELEASE-PLAN.md`](../RELEASE-PLAN.md), recorded in PLINTH_SPEC P-10.
-Supporting findings: [`RELEASE-PLAN-research.md`](RELEASE-PLAN-research.md).
-T-P3 v2 is merged; the next deliverable is a separate T-P5 research pass.
-The remaining order is T-P5 → T-P6 → T-P7 → T-P9 core → required T-P8a
-motion → conditional T-P8b video export → T-P10 → T-P11. T-P8a/T-P8b
-replace the combined T-P8, each with its own research, ticket, PR and
-fresh review. Complete P-10(7)'s environment gate before T-P5 implementation;
-read-only research may proceed first. See P-10 for the ownership split; these links
-do not replace individual ticket research, acceptance or fresh review.
+Current routing (2026-11-04): start with [the current handoff](../HANDOFF.md)
+and [release evidence / remaining work](../RELEASE-CHECKLIST.md). P-19 supersedes
+P-10's mandatory motion dependency for the PNG competition release. T-P5 through
+PNG/state/panel work are already merged; do not restart the old ladder.
+P-24 crop is specification-only; P-25 implementation is in open PR #62.
+Fetch main and inspect live PR status before selecting a new ticket.
+[RELEASE-PLAN.md](../RELEASE-PLAN.md) retains the dated release history; it does
+not replace ticket research, acceptance or fresh review.
 
 | Artefact | Where | Who writes it |
 |---|---|---|

@@ -53,3 +53,14 @@ Focused command: `npm run guards -- guards/live-feedback.test.ts -t 'T-P10d ever
 Negative variants prefix `PLINTH_LIVE_SEED=upload-wait`, `upload` or
 `upload-shared` respectively. Expected failures must cite actual assertion lines.
 Existing full CI runs preserve the nine cases in this file and all other guards.
+
+## Closure recorded 2026-11-04
+
+The local limitations above are historical and remain accurate for that attempt.
+[PR #44](https://github.com/thohared/plinth/pull/44) subsequently merged at
+`bab8b1161598dafdfc89e6afed088705b97a3e32`, following
+[independent MERGE review 5372593442](https://github.com/thohared/plinth/pull/44#pullrequestreview-5372593442).
+Completed exact-source CI/PG/PNG and focused positive/negative evidence are
+indexed in [the release checklist](../RELEASE-CHECKLIST.md#pr-44-closes-the-upload-guard-investigation).
+The original post-merge failure and focused aggregator failure remain failures;
+this closes the synchronization investigation, not physical release acceptance.
