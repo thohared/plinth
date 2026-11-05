@@ -308,10 +308,25 @@ async function boot(): Promise<void> {
     step(horizontal, vertical) {
       if (pg || disposed || uploads !== 0 || exporter.get().busy || recoveryState !== 'ready') return;
       controller?.endGesture(); panel?.endEdit();
+      if (vertical !== 0) {
+        const state = snapshotState(store.get(), stage.isTransitioning());
+        if (vertical < 0) {
+          state.view = { pose: 'front' };
+        } else {
+          const elevation = (state.device === 'laptop' ? 65 : 85) * Math.PI / 180;
+          state.view = { pose: null, rotation: [0, 0, 0, 1], direction: [0, Math.sin(elevation), Math.cos(elevation)] };
+        }
+        history!.run(() => {
+          restoringEdit = true;
+          try { store.hydrate(state); render(); }
+          finally { restoringEdit = false; }
+          navigation?.changed(true, vertical < 0);
+        });
+        return;
+      }
       const current = directionToOrbit(stage.snapshot().custom.direction);
-      const targetAzimuth = horizontal === 0 ? current.azimuth : horizontal * 75 * Math.PI / 180;
-      const targetElevation = vertical === 0 ? current.elevation : (vertical > 0 ? 85 : 5) * Math.PI / 180;
-      const da = targetAzimuth - current.azimuth, de = targetElevation - current.elevation;
+      const targetAzimuth = horizontal * 75 * Math.PI / 180;
+      const da = targetAzimuth - current.azimuth, de = 0;
       if (Math.abs(da) < 1e-12 && Math.abs(de) < 1e-12) {
         if (stage.isTransitioning()) {
           restoringEdit = true;

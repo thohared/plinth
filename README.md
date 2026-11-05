@@ -172,8 +172,8 @@ Pointer rotation slows near the legal view limits; it does not rotate under the 
 
 ### Viewing every side
 
-In **Device and framing**, **Turn left/right/up/down** selects the furthest
-ordinary viewing angle in one click, without enabling Free view. Arrow keys
+In **Device and framing**, **Turn left/right** selects a side angle. **Turn up** looks down from the center,
+with the device level. **Front view** selects the straight-on front pose. Arrow keys
 work while a turn button is focused; Enter/Space activates the focused button.
 Each changed angle supports Undo/Redo. Selecting the same limit again does not
 add another edit.
