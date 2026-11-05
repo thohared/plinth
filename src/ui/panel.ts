@@ -184,7 +184,7 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
       return true;
     };
     for (const [direction, key] of [['left', 'ArrowLeft'], ['right', 'ArrowRight'], ['up', 'ArrowUp'], ['down', 'ArrowDown']] as const) {
-      const button = document.createElement('button'); button.type = 'button'; button.id = `turn-${direction}`; button.textContent = `Turn ${direction}`;
+      const button = document.createElement('button'); button.type = 'button'; button.id = `turn-${direction}`; button.textContent = direction === 'down' ? 'Front view' : `Turn ${direction}`;
       button.addEventListener('click', () => { step(button, key); }, {signal});
       button.addEventListener('keydown', event => {
         if (document.activeElement !== button || !enabled() || event.defaultPrevented || event.isComposing) return;
@@ -197,7 +197,7 @@ export function createPanel(root: HTMLElement, store: SettingsStore, layoutChang
     refreshRotation = () => { for (const button of buttons) button.disabled = !enabled(); };
     rotationUnsubscribe = history?.subscribe(refreshRotation) ?? (() => {});
     turn.disabled = !freeView;
-    setFree = active => { free = active; freeView?.(active); refreshRotation(); turn.setAttribute('aria-pressed', String(active)); hint.textContent = active ? 'Drag to rotate freely. Turn buttons return to a limited viewing angle.' : 'Turn buttons select the furthest viewing angle. Arrow keys work while a turn button is focused.'; };
+    setFree = active => { free = active; freeView?.(active); refreshRotation(); turn.setAttribute('aria-pressed', String(active)); hint.textContent = active ? 'Drag to rotate freely. Turn buttons return to a limited viewing angle.' : 'Choose a side, upper or front view. Arrow keys work while a turn button is focused.'; };
     turn.addEventListener('click', () => setFree(!free), { signal });
     resetView.addEventListener('click', () => attemptEdit(resetView, () => { store.apply({ pose: 'hero' }); setFree(false); }), { signal });
     actions.append(turn, resetView); view.append(actions, steps, hint); setFree(false);

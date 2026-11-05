@@ -1259,5 +1259,16 @@ and independent acceptance follow separately.
    equivalent coverage and all unrelated tests/thresholds/owner-only fixtures.
    Linux CI/build, cloud CI/PG/PNG and independent review remain required.
 
+### P-27: Aligned upper view and Front view
+
+Owner correction to P-26. Turn up centers azimuth at zero and levels the device
+to its neutral rotation. Use 65° elevation for laptop to show both screen and
+keyboard, and 85° for the upright slab devices. This is a centered custom view.
+Replace Turn down with Front view, selecting the existing named front pose.
+ArrowUp and ArrowDown invoke the respective actions within the focused group.
+Apply immediately from any displayed pose. Preserve history, input gates,
+uploads, share/reload and PNG agreement. Horizontal buttons retain P-26.
+Research: T-P10x F1–F4. Verify all five devices and a prior custom rotation.
+
 ## §10 Open TODO(spec)
 - Product-name question resolved by P-19: **Plinth**, effective when that amendment merges.

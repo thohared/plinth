@@ -56,8 +56,8 @@ it.each([1280,390])('P-26 real buttons, native keys, history, Copy/reload and PN
     await page.locator('#redo').click();await at(page,75,5);
     expect(await page.evaluate(()=>window.__plinth.getImage())).toEqual(image);
     await page.locator('#free-view').click();await page.locator('#turn-left').click();await at(page,-75,5);expect(await page.locator('#free-view').getAttribute('aria-pressed')).toBe('false');
-    const enterCount=await calls(page);await page.locator('#turn-up').focus();await page.keyboard.down('Enter');await page.keyboard.down('Enter');await page.keyboard.down('Enter');await page.keyboard.up('Enter');await at(page,-75,85);expect(await calls(page)).toBe(enterCount+1);
-    const spaceCount=await calls(page);await page.locator('#turn-down').focus();await page.keyboard.down(' ');await page.keyboard.down(' ');await page.keyboard.up(' ');await at(page,-75,5);expect(await calls(page)).toBe(spaceCount+1);
+    const enterCount=await calls(page);await page.locator('#turn-up').focus();await page.keyboard.down('Enter');await page.keyboard.down('Enter');await page.keyboard.down('Enter');await page.keyboard.up('Enter');await at(page,0,85);expect(await calls(page)).toBe(enterCount+1);
+    const spaceCount=await calls(page);await page.locator('#turn-down').focus();await page.keyboard.down(' ');await page.keyboard.down(' ');await page.keyboard.up(' ');await at(page,0,5);expect(await calls(page)).toBe(spaceCount+1);
     await page.locator('#turn-right').focus();await page.keyboard.press('Enter');await page.keyboard.press('Enter');await at(page,75,5);
     await page.locator('#turn-left').focus();await page.keyboard.press(' ');await page.keyboard.press(' ');await at(page,-75,5);
     await page.locator('#turn-right').focus();await page.keyboard.down(' ');await page.locator('#copy-link').focus();await page.keyboard.up(' ');await at(page,-75,5);
@@ -89,9 +89,15 @@ it('P-26 literal endpoints on all five devices',async()=>{
   try{for(const device of ['phone','tablet','laptop','browser','card']){
     await open(page,device);
     await page.locator('#turn-right').click();await at(page,75,5);
-    await page.locator('#turn-up').click();await at(page,75,85);
-    await page.locator('#turn-left').click();await at(page,-75,85);
-    await page.locator('#turn-down').click();await at(page,-75,5);
+    const elevation = device === 'laptop' ? 65 : 85;
+    await page.locator('#free-view').click();
+    const box=(await page.locator('#stage').boundingBox())!;
+    await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x+box.width/2+40,box.y+box.height/2+15);await page.mouse.up();
+    expect(await quaternion(page)).not.toEqual([0,0,0,1]);
+    await page.locator('#turn-up').click();await at(page,0,elevation);
+    await page.locator('#turn-left').click();await at(page,-75,elevation);
+    await page.getByRole('button',{name:'Front view',exact:true}).click();await at(page,0,5);
+    expect(await page.locator('#control-pose').inputValue()).toBe('front');
     expect(await page.evaluate(()=>window.__plinth.getSettings().custom.framing)).not.toBe('rotation');
   }}finally{await page.close();}
 },180000);
