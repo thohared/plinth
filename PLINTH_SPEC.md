@@ -1270,5 +1270,99 @@ Apply immediately from any displayed pose. Preserve history, input gates,
 uploads, share/reload and PNG agreement. Horizontal buttons retain P-26.
 Research: T-P10x F1–F4. Verify all five devices and a prior custom rotation.
 
+### P-28: Lokalna screenshot ekstenzija (predlog, 2026-11-06)
+
+Vlasnik je zatražio početak Plinth ekstenzije posle istraživanja tržišta.
+Planski upis Codex (GPT-6); T-P10y research F1–F8. Ova dopuna je poseban
+P-5 commit. Postaje važeća posle vlasnikovog odobrenja i merge-a.
+Runtime implementacija, stvarna provera paketa i Store objava slede odvojeno.
+
+1. Dodati Manifest V3 ekstenziju za desktop Chrome. Eksplicitni klik na
+   ikonicu snima vidljivi deo aktivne HTTP(S) stranice i otvara novu karticu
+   sa lokalno upakovanim Plinth editorom i tom slikom. Koristiti isti izvor
+   editora/renderer-a i postojeće uređaje, scene i PNG 1×/2×/3×. Nema naloga,
+   backend-a, plaćenog API-ja, video snimanja, full-page/region capture-a,
+   responsive emulacije, automatskog praćenja stranica ili nove galerije.
+   Ponavljanje nakon završenog prenosa otvara novi editor; postojeća obrada
+   se ne prepisuje. Dok je jedan prenos pending, novi klik jasno prikazuje busy.
+
+2. Dozvole su samo activeTab, storage i alarms. Nema host_permissions,
+   optional_host_permissions, tabs, scripting, debugger, cookies, history,
+   downloads, clipboardRead, unlimitedStorage, content scripts ili
+   externally_connectable. Browser/Store/internal, file, data i extension
+   stranice i incognito su van početnog podržanog ulaza; odbiti ih jasno.
+   Identitet izvornog taba/prozora i navigaciju proveriti pre, tokom i nakon
+   capture-a, pre stvaranja editora. Odbaciti rezultat pri promeni cilja;
+   ne snimati drugi tab kao zamenu. Izvorni DOM se ne čita niti menja.
+
+3. Uski izuzetak od §2.3: jedan pending screenshot sme privremeno biti u
+   memorijskom chrome.storage.session prostoru, samo trusted kontekstima
+   iste ekstenzije. Nema persistent local/sync/IndexedDB skladištenja slike.
+   Ukupan UTF-8 JSON zapis je najviše 8 MiB, sa PNG podacima i minimalnim
+   request ID/editor tab ID/expiry/status metapodacima. Izvorni URL/title,
+   istorija, lozinke ili izvučeni tekst se ne čuvaju. PNG sadržaj može
+   prikazivati osetljiv tekst koji korisnik već vidi, što pomoć objašnjava.
+   Prevelik capture ili storage greška daju jasan neuspeh, bez tihog
+   smanjivanja slike radi kvote ili dodatnih dozvola. Minimalni podržani
+   Chrome je 120; proveriti sve korišćene API-je i stvarnu kvotu.
+
+4. Pending capture se vezuje za jednokratni request i tačan novootvoreni
+   editor tab. Worker prihvata zahtev samo od top-frame upakovane editor
+   stranice te ekstenzije sa odgovarajućim sender.id/tab.id/URL-om i request
+   identitetom. Nema proizvoljne destinacije, web postMessage mosta ili javnog
+   resursa sa slikom. TTL za claim/import je 120 s; proveriti rok i vlasništvo
+   pri svakoj poruci. ACK se šalje samo za uspešno prihvaćen konkretan upload.
+   ACK/error/close brišu pending zapis. Alarm pokreće expiry čišćenje;
+   worker startup i svaka operacija takođe čiste istekle zapise. Alarm može
+   kasniti pri sleep-u, pa fizičko brisanje tačno u 120. sekundi nije obećano.
+   Browser restart/extension reload brišu session po Chrome ugovoru.
+   Prekinuti, istekli, superseded ili ponovljeni zahtevi ne daju lažni uspeh,
+   replay ili automatsko novo snimanje; prikazati uputstvo za ponovni klik.
+
+5. Editor prvo završava postojeći startup, pa kroz zajednički upload put
+   dekodira capture kao novi PNG. P-9 validacija/cap i napomena o downscale-u
+   ostaju. Uspešan unos bira Fill screen i prazni history kao ostali upload-i.
+   Noviji ručni unos ima prednost nad zakasnelim capture-om. Result mora
+   razlikovati accepted/superseded/error za konkretni request; samo resolved
+   Promise<void> nije ACK. Greška čuva postojeću sliku/settings gde postoje,
+   uz postojeći recovery tok; nikad ne predstavlja demo kao uspešan capture.
+   Očuvati sve default-e, boju, alpha, izvoz, poze, Undo/Redo i P-24 kada je
+   implementiran. Reload posle potrošenog transfera ne vraća screenshot.
+
+6. §2.2/P-20: extension build nema analytics, telemetry, CDN, remote kod,
+   mrežni upload ili remote image loader. Svi assets/kod su u paketu iz istog
+   repo izvora. CSP dozvoljava samo upakovane skriptove; nema unsafe-eval,
+   inline JS ili sandbox za zaobilaženje. Dozvoliti samo neophodne lokalne
+   blob/data slike. Sačuvati P-20 ponašanje običnog web build-a. Privacy copy
+   objašnjava privremeni lokalni capture prenos i da slike ne idu na server.
+
+7. Uski izuzetak od P-14(4): Copy link u upakovanom editoru pravi javni
+   https://plinth-phi.vercel.app/ link sa postojećim validiranim v2 settings
+   fragmentom. Prenosi samo podešavanja, nikada sliku, request ID ili interni
+   extension URL. Automatski lokalni URL zadržava postojeće scene stanje;
+   transfer metapodaci ne ulaze u scene codec. Web/preview Copy link ostaje
+   na trenutnom origin/path-u. Otvaranje kopiranog javnog linka je obična
+   web poseta po P-20; korisnik tamo sam dodaje sliku.
+
+8. Implementacija mora imati zaseban research-backed ticket, additive
+   guardove, unit i stvarni loaded-extension test: klik na poznati HTTP
+   fixture -> screenshot -> editor -> downloaded PNG, sa nezavisnom
+   proverom asimetričnih piksela. Proveriti source tab/window race, navigation,
+   dupli klik, worker restart, timeout/late alarm, quota/storage/API greške,
+   wrong sender/tab/frame, replay, korisnikov noviji upload, startup/GPU
+   failure, cleanup i odsustvo slike/URL-a u mreži, logovima i share linku.
+   Seed-ovati pogrešnog primaoca, lažni ACK i image-bearing URL.
+   Proveriti packaged CSP/assets i offline editor posle instalacije.
+   Web CI/build i postojeći PG/PNG slučajevi/pragovi ostaju; nezavisni review
+   nad tačnim head-om i owner-only fixtures. Docs plan nije runtime PASS.
+
+9. Kod ostaje u thohared/plinth, extension/ plus minimalni zajednički adapteri
+   i posebna build/package skripta. Nema ručno održavanog drugog editora,
+   promene zavisnosti bez licence ili novih Actions workflow-a u ovom planu.
+   Najpre testabilan unpacked paket; Store tekst, ikone i stvarni screenshots
+   zatim. Store nalog, taksa/uslovi, upload, listing i javna objava su zaseban
+   vlasnikov korak. Ne tvrditi instalacije, visoku poziciju ili market volume
+   bez dokaza. Ova dopuna ne odobrava merge implementacije ili javnu objavu.
+
 ## §10 Open TODO(spec)
 - Product-name question resolved by P-19: **Plinth**, effective when that amendment merges.
