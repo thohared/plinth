@@ -75,7 +75,8 @@ Predviđen ograničen write set:
 ## Trenutni dokazi i ograničenja
 
 - GitHub connector čitanje/pisanje i pinovano stablo dostupni.
-- Lokalni GitHub transport nije potvrđen; gateway traži lokalni credential.
+- GitHub git ls-remote je uspešno vratio base SHA; Git read je potvrđen.
+  Lokalni Git push nije potvrđen; gateway traži lokalni credential.
 - Dokumenti su pregledani prema aktuelnom izvoru i primarnim Chrome izvorima.
 - Runtime/build/PG/PNG nisu pokretani za docs-only plan; nema runtime izmena.
 - Unpacked paket, Store nalog/listing/upload i javna objava: još nisu urađeni.

@@ -77,9 +77,10 @@ F7. Privacy copy mora razlikovati privremeni lokalni prenos source tab ->
 extension session -> editor od post-mount slike koja ostaje u editoru.
 P-20 nije dozvola za extension analytics. Nema novih događaja praćenja.
 
-F8. Pristup GitHub connector-u radi; običan GitHub Git transport ne daje
-upotrebljiv rezultat u ovom okruženju, a gateway traži lokalne kredencijale.
-Nije potvrđen npm/Chromium build environment i nema tvrdnje da je gate prošao.
+F8. Pristup GitHub connector-u radi. GitHub git ls-remote je posle dužeg
+čekanja uspešno vratio inspected main SHA; Git read pristup je potvrđen.
+Gateway traži lokalne kredencijale. Nisu potvrđeni lokalni Git push ni
+npm/Chromium build environment i nema tvrdnje da je gate prošao.
 Planski PR je docs/spec-only. Implementacija zahteva nov environment preflight,
 real loaded-extension capture test i nezavisan review. Nema automatskog merge-a.
 
