@@ -1,34 +1,22 @@
-# T-P10z: complete the site checklist
+# T-P10z: static site icons and 404 page only
 
-Author: Codex. Research F1–F5 in T-P10z-research.md; §2, §4.1, §4.9,
-§8 T-P10, P-2/P-9/P-13/P-14/P-20. Owner excludes a separate privacy page.
+Owner clarified 2026-11-07: all application behavior stays unchanged. Add only
+favicon variants and a custom 404 page. No privacy page, loading feedback,
+CTA changes or application/test changes.
 
-Deliver a script-free custom 404 with same-tab root link, noindex and unique
-metadata. Keep missing paths as 404, not redirects to a successful editor page.
-Add 16/32/48 ICO, 32 PNG and 180 Apple touch icon from the original SVG,
-with matching head links. No PWA/install promise or extra dependency at runtime.
-Show Loading image while the current upload decodes. Preserve latest-wins,
-error/downscale notices and the previously accepted image on failure.
-Verify startup/upload/export statuses and CTA bounds at desktop/mobile sizes.
-No unrelated renderer/state/privacy/analytics/extension changes.
+Scope: index.html icon links; public/favicon.ico (16/32/48),
+public/favicon-32x32.png, public/apple-touch-icon.png (180), public/404.html.
+Artwork is derived from the existing unmodified favicon.svg.
+404 is script-free with unique metadata, noindex and a same-tab root link.
+No redirects, catch-all editor rewrite, analytics or new runtime dependency.
 
-Acceptance: npm run ci, build, focused negative probes, asset dimensions and
-original-artwork check, static 404 mobile/desktop accessibility and root link,
-independent fresh review. Vercel missing-path HTTP status needs preview/live
-hosting verification; Vite preview alone does not prove it. Preserve PG/PNG
-cases and thresholds; no baseline edits. Publish only after owner merge.
+Research: T-P10z-research.md; §8 T-P10, P-2, §2/P-20.
+The earlier loading and CTA additions are fully reverted to base, including
+all modified guards and lifecycle tests. Their failed CI is historical evidence,
+not a pass for this narrowed candidate. New exact-head checks and independent
+review remain required. No merge or production publication yet.
 
-## Validation in this environment
-
-- Typecheck, 288 unit tests, production build and git diff --check PASS.
-- Original SVG converted with CairoSVG; PNG dimensions 32/180 and ICO entries
-  16/32/48 verified with Pillow. No project dependency/pin changed.
-- Full npm run ci attempted: browser-dependent guards cannot launch here.
-  Pinned Chromium download returned invalid archives. A separately downloaded
-  Chrome 157 also fails: socket() Operation not permitted in process_singleton.
-  This is an environment block, not a browser-test PASS. No assertions skipped
-  or thresholds weakened to bypass it. Cloud CI/PG/PNG and preview routing,
-  visual CTA/404 checks remain pending. Keep PR draft until evidence passes.
-- Existing upload race test now asserts the exact two pending notices plus one
-  terminal notice; image ownership assertions are unchanged. Added stale-error
-  test proves an older failure cannot clear the latest pending message.
+Hosted nested missing-path HTTP 404 for the unchanged page was verified on
+preview deployment dpl_JWxpfhXXXkcNiUdFFmV7DKkfoFg8. Original PNG/ICO artwork
+provenance and dimensions were independently verified. Local browser launch
+is blocked by socket permissions; do not claim a local browser pass.

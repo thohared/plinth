@@ -1,30 +1,18 @@
-# T-P10z research: site checklist
+# T-P10z research: static site checklist
 
 Author: Codex. Base: 1717bd6a4c4d9ff96f33506277f3d6feafdc050f.
-Owner request 2026-11-07: complete the checklist except a separate privacy page.
+Owner clarification 2026-11-07 restricts scope to icons and a custom 404.
 
-## Clauses and existing surfaces
+- F1: §8 T-P10 includes metadata/favicon. index.html currently links only
+  public/favicon.svg. Derive PNG/ICO variants from this original artwork.
+- F2: P-2 hosting is Vercel. public/404.html is copied into dist by Vite;
+  Vercel serves dist/404.html for unmatched paths, retaining HTTP 404.
+  Primary source: https://vercel.com/kb/guide/custom-404-page.
+  Hosted status must be verified separately from Vite preview routing.
+- F3: §2/P-20 remain unchanged. Script-free 404 needs no analytics or backend.
+  Keep a same-tab root link, noindex, unique title/description and local icons.
+- F4: Loading/CTA observations are outside this ticket after the owner's
+  clarification. Preserve src and guards byte-for-byte against the base.
 
-- F1: §8 T-P10 covers release metadata/favicon; index.html links only
-  public/favicon.svg. Preserve that original artwork and add raster fallbacks.
-- F2: P-2 selects Vercel. No custom error document exists. A static
-  public/404.html is copied into dist by Vite. Vercel documents dist/404.html
-  as its unmatched-path fallback: https://vercel.com/kb/guide/custom-404-page.
-  No catch-all rewrite to the editor, no redirect/soft-404. Verify hosted
-  HTTP status separately; Vite preview's SPA fallback is not Vercel routing.
-- F3: §4.1/P-9 latestImageLoader in src/screen/load.ts owns request ordering
-  and completion/error notices, but emits no pending notice. Put pending text
-  there so stale requests cannot overwrite newer status. P-13 export already
-  emits Preparing PNG and panel.ts exposes busy/status; no export redesign.
-- F4: §4.9/P-14 mobile-pick and desktop pick already exist. guards/startup.test.ts
-  delays demo loading and verifies the mobile control remains stable. Add
-  explicit viewport bounds checks rather than assuming visible means in frame.
-- F5: §2/P-20 remain intact: no new backend/AI endpoint, analytics events or
-  privacy page. 404 has no scripts/analytics and does not echo the requested URL.
-
-## Gaps
-
-No new rendering/state contract is needed. Static release assets refine the
-existing T-P10/P-2 scope. Do not change the specification, fixtures, pins or
-existing test thresholds. Physical Safari/phone and live Vercel routing are
-separate from local browser and unit evidence.
+No new rendering/state contract or specification amendment is needed for
+static release assets. No privacy page, dependency, workflow or fixture edits.

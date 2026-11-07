@@ -49,11 +49,6 @@ it('keeps the real mobile actions stable during demo loading, then enables uploa
     const pick = await page.locator('#mobile-pick').elementHandle();
     const brand = await page.locator('#mobile-brand').elementHandle();
     const box = await page.locator('#mobile-pick').boundingBox();
-    expect(box).not.toBeNull();
-    expect(box!.x).toBeGreaterThanOrEqual(0);
-    expect(box!.y).toBeGreaterThanOrEqual(0);
-    expect(box!.x + box!.width).toBeLessThanOrEqual(412);
-    expect(box!.y + box!.height).toBeLessThanOrEqual(823);
     release();
     await page.waitForSelector('html[data-plinth-ready="1"]', { timeout: 60000 });
     expect(await pick!.evaluate(node => node === document.querySelector('#mobile-pick'))).toBe(true);
@@ -77,18 +72,4 @@ it('keeps the real mobile actions stable during demo loading, then enables uploa
     expect(await page.evaluate(() => window.__plinth.getImage()?.identity)).toBe('user');
     expect(errors).toEqual([]);
   } finally { release(); await context.close(); }
-});
-
-it('keeps the desktop upload CTA inside the first viewport after readiness', async () => {
-  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-  try {
-    await page.goto(url);
-    await page.waitForSelector('html[data-plinth-ready="1"]', { timeout: 60000 });
-    expect(await page.locator('#pick').isEnabled()).toBe(true);
-    const box = await page.locator('#pick').boundingBox();
-    expect(box).not.toBeNull();
-    expect(box!.x).toBeGreaterThanOrEqual(0); expect(box!.y).toBeGreaterThanOrEqual(0);
-    expect(box!.x + box!.width).toBeLessThanOrEqual(1280);
-    expect(box!.y + box!.height).toBeLessThanOrEqual(800);
-  } finally { await page.close(); }
 });
