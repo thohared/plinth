@@ -183,3 +183,33 @@ it('delivers one main heading and keeps the same examples and FAQ with or withou
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   } finally { await offline.close(); await interactive.close(); }
 });
+
+it('ships a script-free 404 with a usable studio link and complete icons', async () => {
+  for (const viewport of [{ width: 360, height: 640 }, { width: 1280, height: 800 }]) {
+    const page = await browser.newPage({ viewport, javaScriptEnabled: false });
+    try {
+      // Direct document check only: Vite preview is not Vercel routing proof.
+      await page.goto(new URL('404.html', url).href);
+      expect(await page.title()).toBe('Page not found | Plinth');
+      expect(await page.locator('meta[name="robots"]').getAttribute('content')).toBe('noindex');
+      expect(await page.locator('script').count()).toBe(0);
+      expect(await page.locator('h1').textContent()).toBe('Page not found');
+      const link = page.getByRole('link', { name: 'Open screenshot studio' });
+      expect(await link.getAttribute('href')).toBe('/');
+      expect(await link.getAttribute('target')).toBeNull();
+      const box = await link.boundingBox();
+      expect(box).not.toBeNull(); expect(box!.height).toBeGreaterThanOrEqual(44);
+      expect(box!.x).toBeGreaterThanOrEqual(0); expect(box!.y).toBeGreaterThanOrEqual(0);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+      expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
+      await link.click();
+      expect(await page.title()).toBe('Plinth: Free 3D Mockup Generator for Screenshots');
+      for (const selector of ['link[href="/favicon.ico"]', 'link[href="/favicon-32x32.png"]', 'link[rel="apple-touch-icon"]']) {
+        expect(await page.locator(selector).count()).toBe(1);
+        const response = await page.request.get(new URL((await page.locator(selector).getAttribute('href'))!, url).href);
+        expect(response.status()).toBe(200);
+        expect(response.headers()['content-type']).toMatch(/image/);
+      }
+    } finally { await page.close(); }
+  }
+});

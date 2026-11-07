@@ -71,6 +71,7 @@ export function latestImageLoader(
   let request = 0;
   return async (src: Blob | string): Promise<void> => {
     const current = ++request;
+    note('Loading image…');
     try {
       const result = await decode(src);
       if (current !== request) { result.bitmap.close(); return; }

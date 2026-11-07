@@ -113,7 +113,7 @@ describe('F5 input transactions', () => {
     expect(mount).toHaveBeenCalledExactlyOnceWith({ bitmap: second, meta });
     expect(first.close).toHaveBeenCalledTimes(1);
     expect(second.close).not.toHaveBeenCalled();
-    expect(note).toHaveBeenCalledExactlyOnceWith('');
+    expect(note.mock.calls).toEqual([['Loading image…'], ['Loading image…'], ['']]);
   });
   it('keeps the mounted image on failure and names the actual downscale cap on success', async () => {
     const stage = createStage('tablet', 'soft-studio', 1.6);
@@ -148,4 +148,20 @@ it('T-P7 retires old context image handles once, retaining CPU data for restore'
   stage.releaseGpuResources();stage.releaseGpuResources();expect(dispose).toHaveBeenCalledTimes(1);expect(image.close).not.toHaveBeenCalled();
   stage.restoreImageTexture();expect(physical(stage).emissiveMap).not.toBe(old);expect(dispose).toHaveBeenCalledTimes(1);expect(image.close).not.toHaveBeenCalled();
   stage.dispose();expect(image.close).toHaveBeenCalledTimes(1);
+});
+
+it('keeps the newest loading notice when an older image fails', async () => {
+  type Result = Awaited<ReturnType<typeof loadImage>>;
+  const pending: Array<{ resolve: (v: Result) => void; reject: (e: Error) => void }> = [];
+  const note = vi.fn(), mount = vi.fn();
+  const select = latestImageLoader(() => new Promise<Result>((resolve, reject) => pending.push({resolve, reject})), mount, note);
+  const old = select('old');
+  expect(note.mock.calls).toEqual([['Loading image…']]);
+  const fresh = select('fresh');
+  pending[0]!.reject(new Error('stale error')); await old;
+  expect(note.mock.calls).toEqual([['Loading image…'], ['Loading image…']]);
+  expect(mount).not.toHaveBeenCalled();
+  pending[1]!.resolve({ bitmap: bitmap(), meta }); await fresh;
+  expect(note.mock.calls).toEqual([['Loading image…'], ['Loading image…'], ['']]);
+  expect(mount).toHaveBeenCalledTimes(1);
 });
